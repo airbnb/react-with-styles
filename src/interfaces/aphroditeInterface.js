@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { StyleSheet, css } from 'aphrodite';
+import has from 'has';
 
 import flatten from '../util/flatten';
 
@@ -26,8 +27,8 @@ function separateStyles(stylesArray) {
     //   css(isFoo && styles.foo)
     if (style) {
       if (
-        Object.prototype.hasOwnProperty.call(style, '_name') &&
-        Object.prototype.hasOwnProperty.call(style, '_definition')
+        has(style, '_name') &&
+        has(style, '_definition')
       ) {
         // This looks like a reference to an Aphrodite style object, so that's
         // where it goes.
