@@ -1,0 +1,33 @@
+{
+  "name": "react-with-styles",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/airbnb/react-with-styles.git"
+  },
+  "keywords": [
+    "react",
+    "css",
+    "styles",
+    "aphrodite",
+    "radium",
+    "inline",
+    "styles",
+    "react",
+    "native"
+  ],
+  "author": "Joe Lencioni <joe.lencioni@airbnb.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/airbnb/react-with-styles/issues"
+  },
+  "homepage": "https://github.com/airbnb/react-with-styles#readme"
+}
