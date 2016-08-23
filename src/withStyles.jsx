@@ -80,7 +80,6 @@
 
 import React, { PropTypes } from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
-import { flushToStyleTag } from 'aphrodite/lib/inject';
 
 import ThemedStyleSheet from './ThemedStyleSheet';
 
@@ -108,17 +107,15 @@ export function withStyles(
         const props = this.props;
         const { themeName } = this.context;
 
-        // TODO we need to not depend on aphrodite directly in this component.
+        // As some components will depend on previous styles in
+        // the component tree, we provide the option of flushing the
+        // buffered styles (i.e. to a style tag) **before** the rendering
+        // cycle begins.
         //
-        // Be default, Aphrodite will buffer the styles resulting from all
-        // invocations of css and flush those styles to the style tag
-        // asynchronousely after render. For components that depdend upon all
-        // previous styles in the component tree (i.e. for calculating container
-        // width, including padding/margin), we give them the option of flushing
-        // all current buffered styles to the style tag before their rendering
-        // lifecycle begins. The flushBefore option exposes this functionality.
+        // The interfaces provide the optional "flush" method which
+        // is run in turn by ThemedStyleSheet.flush.
         if (flushBefore) {
-          flushToStyleTag();
+          ThemedStyleSheet.flush();
         }
 
         const addedProps = {

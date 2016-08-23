@@ -64,6 +64,12 @@ function resolve(...styles) {
   return styleInterface.resolve(styles);
 }
 
+function flush() {
+  if (styleInterface.flush) {
+    styleInterface.flush();
+  }
+}
+
 // Using globalCache in order to export a singleton. This file may be imported
 // in several places, which otherwise stomps over any registered themes and
 // resets to just the defaults.
@@ -76,5 +82,6 @@ export default globalCache.setIfMissingThenGet(
     create,
     get,
     resolve,
+    flush,
   })
 );
