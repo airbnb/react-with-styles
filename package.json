@@ -9,8 +9,9 @@
   "scripts": {
     "build": "npm run clean && babel src/ -d lib/",
     "clean": "rimraf lib",
+    "lint": "eslint .",
     "mocha": "mocha --compilers js:babel-register,jsx:babel-register --require airbnb-js-shims --recursive test",
-    "test": "npm run --silent mocha"
+    "test": "npm run --silent lint && npm run --silent mocha"
   },
   "repository": {
     "type": "git",
@@ -41,6 +42,11 @@
     "babel-register": "^6.11.6",
     "chai": "^3.5.0",
     "enzyme": "^2.4.1",
+    "eslint": "^3.3.1",
+    "eslint-config-airbnb": "^10.0.1",
+    "eslint-plugin-import": "^1.14.0",
+    "eslint-plugin-jsx-a11y": "^2.1.0",
+    "eslint-plugin-react": "^6.1.2",
     "mocha": "^3.0.2",
     "react": "^15.3.1",
     "react-addons-test-utils": "^15.3.1",
