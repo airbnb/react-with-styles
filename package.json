@@ -9,7 +9,8 @@
   "scripts": {
     "build": "npm run clean && babel src/ -d lib/",
     "clean": "rimraf lib",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "mocha": "mocha --compilers js:babel-register,jsx:babel-register --require airbnb-js-shims --recursive test",
+    "test": "npm run --silent mocha"
   },
   "repository": {
     "type": "git",
@@ -33,13 +34,17 @@
   },
   "homepage": "https://github.com/airbnb/react-with-styles#readme",
   "devDependencies": {
+    "airbnb-js-shims": "^1.0.1",
     "aphrodite": "^0.5.0",
     "babel-cli": "^6.11.4",
     "babel-preset-airbnb": "^2.0.0",
+    "babel-register": "^6.11.6",
     "chai": "^3.5.0",
     "enzyme": "^2.4.1",
     "mocha": "^3.0.2",
     "react": "^15.3.1",
+    "react-addons-test-utils": "^15.3.1",
+    "react-dom": "^15.3.1",
     "rimraf": "^2.5.4"
   },
   "peerDependencies": {

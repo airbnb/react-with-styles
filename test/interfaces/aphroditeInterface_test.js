@@ -1,7 +1,17 @@
 import { expect } from 'chai';
+import { StyleSheetTestUtils } from 'aphrodite';
+
 import aphroditeInterface from '../../src/interfaces/aphroditeInterface';
 
 describe('aphroditeInterface', () => {
+  beforeEach(() => {
+    StyleSheetTestUtils.suppressStyleInjection();
+  });
+
+  afterEach(() => {
+    StyleSheetTestUtils.clearBufferAndResumeStyleInjection();
+  });
+
   describe('.create()', () => {
     it('processes the styles with Aphrodite', () => {
       expect(aphroditeInterface.create({
