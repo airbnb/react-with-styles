@@ -29,5 +29,19 @@
   "bugs": {
     "url": "https://github.com/airbnb/react-with-styles/issues"
   },
-  "homepage": "https://github.com/airbnb/react-with-styles#readme"
+  "homepage": "https://github.com/airbnb/react-with-styles#readme",
+  "devDependencies": {
+    "aphrodite": "^0.5.0",
+    "chai": "^3.5.0",
+    "enzyme": "^2.4.1",
+    "mocha": "^3.0.2",
+    "react": "^15.3.1"
+  },
+  "peerDependencies": {
+    "react": ">=0.14"
+  },
+  "dependencies": {
+    "deepmerge": "^0.2.10",
+    "global-cache": "^1.2.0"
+  }
 }
