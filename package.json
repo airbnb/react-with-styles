@@ -1,0 +1,63 @@
+{
+  "name": "react-with-styles",
+  "version": "0.0.0",
+  "description": "",
+  "main": "withStyles.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "npm run clean && babel src/ -d lib/",
+    "clean": "rimraf lib",
+    "lint": "eslint .",
+    "mocha": "mocha --compilers js:babel-register,jsx:babel-register --require airbnb-js-shims --recursive test",
+    "test": "npm run --silent lint && npm run --silent mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/airbnb/react-with-styles.git"
+  },
+  "keywords": [
+    "react",
+    "css",
+    "styles",
+    "aphrodite",
+    "radium",
+    "inline",
+    "styles",
+    "react",
+    "native"
+  ],
+  "author": "Joe Lencioni <joe.lencioni@airbnb.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/airbnb/react-with-styles/issues"
+  },
+  "homepage": "https://github.com/airbnb/react-with-styles#readme",
+  "devDependencies": {
+    "airbnb-js-shims": "^1.0.1",
+    "aphrodite": "^0.5.0",
+    "babel-cli": "^6.11.4",
+    "babel-preset-airbnb": "^2.0.0",
+    "babel-register": "^6.11.6",
+    "chai": "^3.5.0",
+    "enzyme": "^2.4.1",
+    "eslint": "^3.3.1",
+    "eslint-config-airbnb": "^10.0.1",
+    "eslint-plugin-import": "^1.14.0",
+    "eslint-plugin-jsx-a11y": "^2.1.0",
+    "eslint-plugin-react": "^6.1.2",
+    "mocha": "^3.0.2",
+    "react": "^15.3.1",
+    "react-addons-test-utils": "^15.3.1",
+    "react-dom": "^15.3.1",
+    "rimraf": "^2.5.4"
+  },
+  "peerDependencies": {
+    "react": ">=0.14"
+  },
+  "dependencies": {
+    "deepmerge": "^0.2.10",
+    "global-cache": "^1.2.0"
+  }
+}
