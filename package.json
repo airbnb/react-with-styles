@@ -7,6 +7,7 @@
     "test": "test"
   },
   "scripts": {
+    "clean": "rimraf lib",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -35,7 +36,8 @@
     "chai": "^3.5.0",
     "enzyme": "^2.4.1",
     "mocha": "^3.0.2",
-    "react": "^15.3.1"
+    "react": "^15.3.1",
+    "rimraf": "^2.5.4"
   },
   "peerDependencies": {
     "react": ">=0.14"
