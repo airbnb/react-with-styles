@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "deepmerge": "^0.2.10",
-    "global-cache": "^1.2.0"
+    "global-cache": "^1.2.0",
+    "has": "^1.0.1"
   }
 }
