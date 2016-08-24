@@ -1,3 +1,7 @@
+## v0.2.1
+
+- Add scripts for building and publishing this package.
+
 ## v0.2.0
 
 - Add `ThemeProvider` as a named export from project main.
