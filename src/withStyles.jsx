@@ -81,13 +81,16 @@
 import React, { PropTypes } from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 
+import ThemeProvider from './ThemeProvider';
 import ThemedStyleSheet from './ThemedStyleSheet';
+
+// Add some named exports for convenience.
+export { ThemeProvider };
+export const css = ThemedStyleSheet.resolve;
 
 const contextTypes = {
   themeName: PropTypes.string,
 };
-
-export const css = ThemedStyleSheet.resolve;
 
 export function withStyles(
   styleFn,
