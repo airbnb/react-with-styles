@@ -2,7 +2,7 @@
   "name": "react-with-styles",
   "version": "0.1.0",
   "description": "",
-  "main": "withStyles.js",
+  "main": "lib/withStyles.js",
   "directories": {
     "test": "test"
   },
