@@ -17,6 +17,7 @@
     "prepublish": "in-publish && npm run build || not-in-publish",
     "pretest": "npm run --silent lint",
     "preversion": "npm run test && npm run check-changelog && npm run check-only-changelog-changed",
+    "tag": "git tag v$npm_package_version",
     "test": "npm run tests-only",
     "tests-only": "npm run mocha --silent test",
     "version:major": "npm --no-git-tag-version version major",
