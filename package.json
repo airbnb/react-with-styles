@@ -11,7 +11,9 @@
     "clean": "rimraf lib",
     "lint": "eslint .",
     "mocha": "mocha --compilers js:babel-register,jsx:babel-register --require airbnb-js-shims --recursive test",
-    "test": "npm run --silent lint && npm run --silent mocha"
+    "pretest": "npm run --silent lint",
+    "tests-only": "npm run mocha --silent test",
+    "test": "npm run tests-only"
   },
   "repository": {
     "type": "git",
