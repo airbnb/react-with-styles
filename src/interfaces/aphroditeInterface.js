@@ -1,5 +1,5 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { StyleSheet, css } from 'aphrodite';
+import { flushToStyleTag } from 'aphrodite/lib/inject';
 import has from 'has';
 
 import flatten from '../util/flatten';
@@ -72,5 +72,12 @@ export default {
       result.style = inlineStyles;
     }
     return result;
+  },
+
+  // Flushes all buffered styles to a style tag. Required for components
+  // that depend upon previous styles in the component tree (i.e.
+  // for calculating container width, including padding/margin).
+  flush() {
+    flushToStyleTag();
   },
 };
