@@ -18,6 +18,12 @@ Use CSS-in-JavaScript for your React components without being tightly coupled to
 [interface-aphrodite]: https://github.com/airbnb/react-with-styles-interface-aphrodite
 [interface-react-native]: https://github.com/airbnb/react-with-styles-interface-react-native
 
+## Other resources
+
+- [eslint-plugin-react-with-styles][eslint-plugin-react-with-styles]: ESLint plugin for react-with-styles.
+
+[eslint-plugin-react-with-styles]: https://github.com/airbnb/eslint-plugin-react-with-styles
+
 ## How to use
 
 Create a module that exports an object with shared theme information like colors.
