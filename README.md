@@ -10,6 +10,14 @@
 
 Use CSS-in-JavaScript for your React components without being tightly coupled to one implementation (e.g. [Aphrodite][aphrodite], [Radium][radium], or [React Native][react-native]). Easily access shared theme information (e.g. colors, fonts) when defining your styles.
 
+## Interfaces
+
+- [Aphrodite][interface-aphrodite]
+- [React Native][interface-react-native]
+
+[interface-aphrodite]: https://github.com/airbnb/react-with-styles-interface-aphrodite
+[interface-react-native]: https://github.com/airbnb/react-with-styles-interface-react-native
+
 ## How to use
 
 Create a module that exports an object with shared theme information like colors.
