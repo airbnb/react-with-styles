@@ -27,7 +27,7 @@ Register your default theme and interface. For example, if your default theme is
 
 ```js
 import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
-import aphroditeInterface from 'react-with-styles/lib/interfaces/aphroditeInterface';
+import aphroditeInterface from 'react-with-styles-interface-aphrodite';
 
 import MyDefaultTheme from './MyDefaultTheme';
 
@@ -121,7 +121,7 @@ Instructs react-with-styles how to process your styles.
 
 ```js
 import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
-import aphroditeInterface from 'react-with-styles/lib/interfaces/aphroditeInterface';
+import aphroditeInterface from 'react-with-styles-interface-aphrodite';
 
 ThemedStyleSheet.registerInterface(aphroditeInterface);
 ```
