@@ -12,7 +12,7 @@
     "check-only-changelog-changed": "(expr $(git status --porcelain 2>/dev/null| grep -v \"CHANGELOG.md\" | wc -l) >/dev/null && echo 'Only CHANGELOG.md may have uncommitted changes' && exit 1) || exit 0",
     "clean": "rimraf lib",
     "lint": "eslint .",
-    "mocha": "mocha --compilers js:babel-register,jsx:babel-register --require airbnb-js-shims --recursive test/_helpers test",
+    "mocha": "mocha --compilers js:babel-register,jsx:babel-register --require airbnb-js-shims --recursive test",
     "postversion": "git commit package.json CHANGELOG.md -m \"Version $npm_package_version\" && npm run tag && git push && git push --tags && npm publish",
     "prepublish": "in-publish && safe-publish-latest && npm run build || not-in-publish",
     "pretest": "npm run --silent lint",
@@ -72,11 +72,6 @@
   "dependencies": {
     "deepmerge": "^0.2.10",
     "global-cache": "^1.2.0",
-    "has": "^1.0.1",
     "hoist-non-react-statics": "^1.2.0"
-  },
-  "optionalDependencies": {
-    "aphrodite": "^0.5.0",
-    "react-native": "*"
   }
 }
