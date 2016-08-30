@@ -1,3 +1,8 @@
+## v1.0.0
+
+- Extract interfaces to their own repos.
+- Initial full release.
+
 ## v0.2.1
 
 - Add scripts for building and publishing this package.
