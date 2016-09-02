@@ -312,6 +312,10 @@ export default withStyles(({ color, unit }) => ({
 
 `className` and `style` props must not be used on the same elements as `css()`.
 
+## In the wild
+
+[Organizations and projects using `react-with-styles`](INTHEWILD.md).
+
 [package-url]: https://npmjs.org/package/react-with-styles
 [npm-version-svg]: http://versionbadg.es/airbnb/react-with-styles.svg
 [travis-svg]: https://travis-ci.org/airbnb/react-with-styles.svg
