@@ -141,9 +141,9 @@ ThemedStyleSheet.registerInterface(aphroditeInterface);
 ```
 
 
-## `<ThemeProvider [ name="theme name" ]>`
+## `<ThemeProvider name="theme name">`
 
-This component simply takes an optional `name` prop that matches a registered theme, and stores that value in context. This allows sub-trees of your application to change to different themes as necessary.
+This component simply takes a `name` prop that matches a registered theme, and stores that value in context. This allows sub-trees of your application to change to different themes as necessary.
 
 ```jsx
 import React from 'react';
