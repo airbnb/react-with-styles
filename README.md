@@ -37,23 +37,28 @@ export default {
 };
 ```
 
-Register your default theme and interface. For example, if your default theme is exported by `MyDefaultTheme.js`, and you want to use Aphrodite, you can set this up in your own `ThemedStyleSheet.js` file.
+Register your default theme and interface. For example, if your default theme is exported by `MyDefaultTheme.js`, and you want to use Aphrodite, you can set this up in your own `withStyles.js` file.
 
 ```js
 import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
 import aphroditeInterface from 'react-with-styles-interface-aphrodite';
+import { css, withStyles } from 'react-with-styles';
 
 import MyDefaultTheme from './MyDefaultTheme';
 
 ThemedStyleSheet.registerDefaultTheme(MyDefaultTheme);
 ThemedStyleSheet.registerInterface(aphroditeInterface);
+
+export { css, withStyles, ThemedStyleSheet };
 ```
 
-In your component, use `withStyles()` to define styles and `css()` to consume them.
+It is convenient to pass through `css` and `withStyles` from `react-with-styles` here so that everywhere you use these functions you can be assured that the default theme and interface have been registered. You could likely also set this up as an initializer that is added to the top of your bundles and then use `react-with-styles` directly in your components.
+
+In your component, from our `withStyles.js` file above, use `withStyles()` to define styles and `css()` to consume them.
 
 ```jsx
 import React, { PropTypes } from 'react';
-import { css, withStyles } from 'react-with-styles';
+import { css, withStyles } from './withStyles';
 
 function MyComponent({ styles }) {
   return (
