@@ -152,7 +152,7 @@ This component simply takes a `name` prop that matches a registered theme, and s
 
 ```jsx
 import React from 'react';
-import { ThemeProvider } from 'react-with-styles';
+import { ThemeProvider } from './withStyles';
 
 export default function App() {
   return (
@@ -180,7 +180,7 @@ The wrapped component will receive a `styles` prop containing the processed styl
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from 'react-with-styles';
+import { css, withStyles } from './withStyles';
 
 function MyComponent({ styles }) {
   return (
@@ -202,7 +202,7 @@ Or, as a decorator:
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from 'react-with-styles';
+import { css, withStyles } from './withStyles';
 
 @withStyles(({ color, unit }) => ({
   container: {
@@ -228,7 +228,7 @@ By default, `withStyles()` will pass down the styles to the wrapped component in
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from 'react-with-styles';
+import { css, withStyles } from './withStyles';
 
 function MyComponent({ withStylesStyles }) {
   return (
@@ -252,7 +252,7 @@ Likewise, the theme prop name can also be customized by setting the `themePropNa
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from 'react-with-styles';
+import { css, withStyles } from './withStyles';
 
 function MyComponent({ styles, withStylesTheme }) {
   return (
@@ -283,7 +283,7 @@ This function takes styles that were processed by `withStyles()`, plain objects,
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from 'react-with-styles';
+import { css, withStyles } from './withStyles';
 
 function MyComponent({ bold, padding, styles }) {
   return (
