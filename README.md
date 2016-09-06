@@ -152,7 +152,7 @@ This component simply takes a `name` prop that matches a registered theme, and s
 
 ```jsx
 import React from 'react';
-import { ThemeProvider } from './withStyles';
+import { ThemeProvider } from 'react-with-styles';
 
 export default function App() {
   return (
@@ -180,7 +180,7 @@ The wrapped component will receive a `styles` prop containing the processed styl
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { css, withStyles } from 'react-with-styles';
 
 function MyComponent({ styles }) {
   return (
@@ -202,7 +202,7 @@ Or, as a decorator:
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { css, withStyles } from 'react-with-styles';
 
 @withStyles(({ color, unit }) => ({
   container: {
@@ -228,7 +228,7 @@ By default, `withStyles()` will pass down the styles to the wrapped component in
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { css, withStyles } from 'react-with-styles';
 
 function MyComponent({ withStylesStyles }) {
   return (
@@ -252,7 +252,7 @@ Likewise, the theme prop name can also be customized by setting the `themePropNa
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { css, withStyles } from 'react-with-styles';
 
 function MyComponent({ styles, withStylesTheme }) {
   return (
@@ -283,7 +283,7 @@ This function takes styles that were processed by `withStyles()`, plain objects,
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { css, withStyles } from 'react-with-styles';
 
 function MyComponent({ bold, padding, styles }) {
   return (
@@ -317,6 +317,50 @@ export default withStyles(({ color, unit }) => ({
 
 `className` and `style` props must not be used on the same elements as `css()`.
 
+## Examples
+### With React Router's `Link`
+[React Router][react-router]'s [`<Link/>`][react-router-link] and [`<IndexLink/>`][react-router-index-link] components accept `activeClassName='...'` and `activeStyle={{...}}` as props. As previously stated, `css(...styles)` must spread to JSX, so simply passing `styles.thing` or even `css(styles.thing)` directly will not work. In order to mimic `activeClassName`/`activeStyles` you can use React Router's [`withRouter()`][react-router-with-router] Higher Order Component to pass `router` as prop to your component and toggle styles based on [`router.isActive(pathOrLoc, indexOnly)`](react-router-is-active). This works because `<Link />` will pass down the generated `className` from `css(..styles)` down through to the final leaf.
+
+```jsx
+import React from 'react';
+import { withRouter, Link } from 'react-router';
+import { css, withStyles } from '../withStyles';
+
+function Nav({ router, styles }) {
+  return (
+    <div {...css(styles.container)}>
+      <Link
+        to="/"
+        {...css(styles.link, router.isActive('/', true) && styles.link_bold)}
+      >
+        home
+      </Link>
+      <Link
+        to="/somewhere"
+        {...css(styles.link, router.isActive('/somewhere', true) && styles.link_bold)}
+      >
+        somewhere
+      </Link>
+    </div>
+  );
+}
+
+export default withRouter(withStyles(({ color, unit }) => ({
+  container: {
+    color: color.primary,
+    marginBottom: 2 * unit,
+  },
+
+  link: {
+    color: color.primary,
+  },
+
+  link_bold: {
+    fontWeight: 700,
+  }
+}))(Nav));
+```
+
 ## In the wild
 
 [Organizations and projects using `react-with-styles`](INTHEWILD.md).
@@ -338,3 +382,8 @@ export default withStyles(({ color, unit }) => ({
 [aphrodite]: https://github.com/khan/aphrodite
 [radium]: https://formidable.com/open-source/radium/
 [react-native]: https://facebook.github.io/react-native/
+[react-router]: https://github.com/reactjs/react-router
+[react-router-link]: https://github.com/reactjs/react-router/blob/master/docs/API.md#link
+[react-router-index-link]: https://github.com/reactjs/react-router/blob/master/docs/API.md#indexlink
+[react-router-with-router]: https://github.com/reactjs/react-router/blob/master/docs/API.md#withroutercomponent-options
+[react-router-is-active]: https://github.com/reactjs/react-router/blob/master/docs/API.md#isactivepathorloc-indexonly
