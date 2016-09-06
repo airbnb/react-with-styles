@@ -319,7 +319,7 @@ export default withStyles(({ color, unit }) => ({
 
 ## Examples
 ### With React Router's `Link`
-[React Router][react-router]'s [`<Link/>`][react-router-link] and [`<IndexLink/>`][react-router-index-link] components accept `activeClassName='...'` and `activeStyle={{...}}` as props. As previously stated, `css(...styles)` must spread to JSX. In order to mimic `activeClassName` you can use React-Router's [`withRouter()`][react-router-with-router] Higher Order Component on top of `withStyles()` like so:
+[React Router][react-router]'s [`<Link/>`][react-router-link] and [`<IndexLink/>`][react-router-index-link] components accept `activeClassName='...'` and `activeStyle={{...}}` as props. As previously stated, `css(...styles)` must spread to JSX, so simply passing `styles.thing` or even `css(styles.thing)` directly will not work. In order to mimic `activeClassName`/`activeStyles` you can use React Router's [`withRouter()`][react-router-with-router] Higher Order Component to pass `router` as prop to your component and toggle styles based on [`router.isActive(pathOrLoc, indexOnly)`](react-router-is-active). This works because `<Link />` will pass down the generated `className` from `css(..styles)` down through to the final leaf.
 
 ```jsx
 import React from 'react';
@@ -386,3 +386,4 @@ export default withRouter(withStyles(({ color, unit }) => ({
 [react-router-link]: https://github.com/reactjs/react-router/blob/master/docs/API.md#link
 [react-router-index-link]: https://github.com/reactjs/react-router/blob/master/docs/API.md#indexlink
 [react-router-with-router]: https://github.com/reactjs/react-router/blob/master/docs/API.md#withroutercomponent-options
+[react-router-is-active]: https://github.com/reactjs/react-router/blob/master/docs/API.md#isactivepathorloc-indexonly
