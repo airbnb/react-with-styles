@@ -57,7 +57,7 @@ function registerDefaultTheme(theme) {
 }
 
 function get(name = 'default') {
-  return themes[name].theme;
+  return themes[name] && themes[name].theme;
 }
 
 function resolve(...styles) {
