@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 
-import ThemedStyleSheet from '../src/ThemedStyleSheet';
+import ThemedStyleSheet, { reset } from '../src/ThemedStyleSheet';
 import { css, withStyles } from '../src/withStyles';
 
 describe('withStyles()', () => {
@@ -16,6 +16,8 @@ describe('withStyles()', () => {
   let testInterface;
 
   beforeEach(() => {
+    reset();
+
     testInterface = {
       create() {},
       resolve() {},
