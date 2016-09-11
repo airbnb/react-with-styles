@@ -13,9 +13,11 @@ Use CSS-in-JavaScript for your React components without being tightly coupled to
 ## Interfaces
 
 - [Aphrodite][interface-aphrodite]
+- [JSS][interface-jss]
 - [React Native][interface-react-native]
 
 [interface-aphrodite]: https://github.com/airbnb/react-with-styles-interface-aphrodite
+[interface-jss]: https://github.com/oliviertassinari/react-with-styles-interface-jss
 [interface-react-native]: https://github.com/airbnb/react-with-styles-interface-react-native
 
 ## Other resources
