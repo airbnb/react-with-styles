@@ -72,7 +72,7 @@
     "react": ">=0.14"
   },
   "dependencies": {
-    "deepmerge": "^0.2.10",
+    "deepmerge": "^1.0.0",
     "global-cache": "^1.2.0",
     "hoist-non-react-statics": "^1.2.0"
   }
