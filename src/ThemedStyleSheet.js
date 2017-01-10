@@ -16,7 +16,7 @@ function registerTheme(name, overrides) {
 
   // If we register a theme after stylesheets have been created, we have to
   // backfill them when we register the new theme.
-  Object.keys(makeFromThemes).forEach(id => {
+  Object.keys(makeFromThemes).forEach((id) => {
     themes[name].styles[id] = styleInterface.create(makeFromThemes[id](theme));
   });
 }
@@ -25,7 +25,7 @@ function registerInterface(interfaceToRegister) {
   styleInterface = interfaceToRegister;
 }
 
-const generatorFor = (id) => (name = 'default') => {
+const generatorFor = id => (name = 'default') => {
   const { styles } = themes[name];
   // TODO(lmr):
   // we may at some point want to lazily register styles
@@ -36,10 +36,11 @@ const generatorFor = (id) => (name = 'default') => {
 
 function create(makeFromTheme) {
   // Get an id to associate with this stylesheet
-  const id = internalId++;
+  const id = internalId;
+  internalId += 1;
 
   // run StyleSheet.create over each variation for each theme
-  Object.keys(themes).forEach(name => {
+  Object.keys(themes).forEach((name) => {
     const { theme, styles } = themes[name];
     styles[id] = styleInterface.create(makeFromTheme(theme));
   });
@@ -83,5 +84,5 @@ export default globalCache.setIfMissingThenGet(
     get,
     resolve,
     flush,
-  })
+  }),
 );

@@ -19,7 +19,7 @@ export function withStyles(
     stylesPropName = 'styles',
     themePropName = 'theme',
     flushBefore = false,
-  } = {}
+  } = {},
 ) {
   const styleDef = styleFn && ThemedStyleSheet.create(styleFn);
 
