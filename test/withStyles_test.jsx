@@ -176,5 +176,32 @@ describe('withStyles()', () => {
 
       expect(wrapper.prop('style')).to.eql({ color: '#990000' });
     });
+
+    it('copies over propTypes and defaultProps', () => {
+      function MyComponent({ styles }) {
+        return <div {...css(styles.foo)} />;
+      }
+      MyComponent.propTypes = {
+        styles: PropTypes.object.isRequired,
+        foo: PropTypes.number,
+      };
+      MyComponent.defaultProps = {
+        foo: 3,
+      };
+
+      const Wrapped = withStyles(({ color }) => ({
+        foo: {
+          color: color.red,
+        },
+      }))(MyComponent);
+
+      // copied
+      expect(Wrapped.propTypes).to.eql(MyComponent.propTypes);
+      expect(Wrapped.defaultProps).to.eql(MyComponent.defaultProps);
+
+      // cloned
+      expect(Wrapped.propTypes).not.to.equal(MyComponent.propTypes);
+      expect(Wrapped.defaultProps).not.to.equal(MyComponent.defaultProps);
+    });
   });
 });
