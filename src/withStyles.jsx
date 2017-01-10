@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
+import deepmerge from 'deepmerge';
 
 import ThemeProvider from './ThemeProvider';
 import ThemedStyleSheet from './ThemedStyleSheet';
@@ -60,6 +61,12 @@ export function withStyles(
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.contextTypes = contextTypes;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
+    if (WrappedComponent.propTypes) {
+      WithStyles.propTypes = deepmerge({}, WrappedComponent.propTypes);
+    }
+    if (WrappedComponent.defaultProps) {
+      WithStyles.defaultProps = deepmerge({}, WrappedComponent.defaultProps);
+    }
 
     return hoistNonReactStatics(WithStyles, WrappedComponent);
   };
