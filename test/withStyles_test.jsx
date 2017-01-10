@@ -22,7 +22,7 @@ describe('withStyles()', () => {
       flush: sinon.spy(),
     };
     sinon.stub(testInterface, 'create', styleHash => styleHash);
-    sinon.stub(testInterface, 'resolve', (styles) => ({
+    sinon.stub(testInterface, 'resolve', styles => ({
       style: styles.reduce((result, style) => Object.assign(result, style)),
     }));
 
@@ -164,7 +164,7 @@ describe('withStyles()', () => {
         return <div {...css(styles.foo)} />;
       }
       MyComponent.propTypes = {
-        styles: PropTypes.object.isRequired,
+        styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
       };
 
       const Wrapped = withStyles(({ color }) => ({
@@ -182,7 +182,7 @@ describe('withStyles()', () => {
         return <div {...css(styles.foo)} />;
       }
       MyComponent.propTypes = {
-        styles: PropTypes.object.isRequired,
+        styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
         foo: PropTypes.number,
       };
       MyComponent.defaultProps = {

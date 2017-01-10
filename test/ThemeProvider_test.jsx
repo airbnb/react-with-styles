@@ -9,7 +9,7 @@ describe('<ThemeProvider>', () => {
     const wrapper = shallow(
       <ThemeProvider name="tropical">
         <div>Under the sea</div>
-      </ThemeProvider>
+      </ThemeProvider>,
     );
     expect(wrapper.find('div')).to.have.length(1);
   });
@@ -18,7 +18,7 @@ describe('<ThemeProvider>', () => {
     const wrapper = shallow(
       <ThemeProvider name="tropical">
         <div>Under the sea</div>
-      </ThemeProvider>
+      </ThemeProvider>,
     );
     expect(wrapper.instance().getChildContext())
       .to.have.property('themeName', 'tropical');
