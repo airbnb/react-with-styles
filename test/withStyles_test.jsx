@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
+import deepmerge from 'deepmerge';
 import sinon from 'sinon-sandbox';
 
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
@@ -177,12 +178,13 @@ describe('withStyles()', () => {
       expect(wrapper.prop('style')).to.eql({ color: '#990000' });
     });
 
-    it('copies over propTypes and defaultProps', () => {
-      function MyComponent({ styles }) {
-        return <div {...css(styles.foo)} />;
+    it('copies over non-withStyles propTypes and defaultProps', () => {
+      function MyComponent({ styles, theme }) {
+        return <div {...css(styles.foo)}>{theme.color.default}</div>;
       }
       MyComponent.propTypes = {
         styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+        theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
         foo: PropTypes.number,
       };
       MyComponent.defaultProps = {
@@ -196,7 +198,12 @@ describe('withStyles()', () => {
       }))(MyComponent);
 
       // copied
-      expect(Wrapped.propTypes).to.eql(MyComponent.propTypes);
+      const expectedPropTypes = deepmerge({}, MyComponent.propTypes);
+      delete expectedPropTypes.styles;
+      delete expectedPropTypes.theme;
+      expect(Wrapped.propTypes).to.eql(expectedPropTypes);
+      expect(MyComponent.propTypes).to.include.keys('styles', 'theme');
+
       expect(Wrapped.defaultProps).to.eql(MyComponent.defaultProps);
 
       // cloned

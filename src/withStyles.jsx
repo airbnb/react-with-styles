@@ -63,6 +63,8 @@ export function withStyles(
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
     if (WrappedComponent.propTypes) {
       WithStyles.propTypes = deepmerge({}, WrappedComponent.propTypes);
+      delete WithStyles.propTypes[stylesPropName];
+      delete WithStyles.propTypes[themePropName];
     }
     if (WrappedComponent.defaultProps) {
       WithStyles.defaultProps = deepmerge({}, WrappedComponent.defaultProps);
