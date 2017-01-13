@@ -1,3 +1,7 @@
+## v1.1.1
+
+- Avoid copying withStyles propTypes (e.g. for `styles` and `theme`) from the wrapped component.
+
 ## v1.1.0
 
 - [New] copy propTypes and defaultProps from the wrapped component.
