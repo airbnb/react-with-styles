@@ -62,7 +62,7 @@
     "react": "^15.3.1",
     "react-addons-test-utils": "^15.3.1",
     "react-dom": "^15.3.1",
-    "react-native-mock": "^0.2.6",
+    "react-native-mock": "^0.3.1",
     "rimraf": "^2.5.4",
     "safe-publish-latest": "^1.0.1",
     "sinon": "^1.17.5",
