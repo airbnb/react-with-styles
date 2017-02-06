@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import deepmerge from 'deepmerge';
 
@@ -26,7 +26,7 @@ export function withStyles(
   return function withStylesHOC(WrappedComponent) {
     // NOTE: Use a class here so components are ref-able if need be:
     // eslint-disable-next-line react/prefer-stateless-function
-    class WithStyles extends React.Component {
+    class WithStyles extends Component {
       render() {
         const props = this.props;
         const { themeName } = this.context;
