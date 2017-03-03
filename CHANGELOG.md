@@ -1,3 +1,7 @@
+## v1.2.0
+
+- [New] Add `pureComponent` option (requires React 15.3.0+).
+
 ## v1.1.1
 
 - Avoid copying withStyles propTypes (e.g. for `styles` and `theme`) from the wrapped component.
