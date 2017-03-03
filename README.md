@@ -223,6 +223,9 @@ export default function MyComponent({ styles }) {
 
 ### Options
 
+#### `pureComponent` (default: `false`, React 15.3.0+)
+
+By default `withStyles()` will create a component that extends `React.Component`. If you want to apply the `shouldComponentUpdate()` optimization offered by `React.PureComponent`, you can set the `pureComponent` option to `true`. Note that [`React.PureComponent` was introduced in React 15.3.0](https://github.com/facebook/react/blob/master/CHANGELOG.md#1530-july-29-2016), so this will only work if you are using that version or later.
 
 #### `stylesPropName` (default: `'styles'`)
 

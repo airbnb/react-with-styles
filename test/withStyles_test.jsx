@@ -210,5 +210,29 @@ describe('withStyles()', () => {
       expect(Wrapped.propTypes).not.to.equal(MyComponent.propTypes);
       expect(Wrapped.defaultProps).not.to.equal(MyComponent.defaultProps);
     });
+
+    it('extends React.Component', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const Wrapped = withStyles(() => ({}))(MyComponent);
+      expect(Object.getPrototypeOf(Wrapped)).to.equal(React.Component);
+      expect(Object.getPrototypeOf(Wrapped.prototype)).to.equal(React.Component.prototype);
+      expect(Object.getPrototypeOf(Wrapped)).not.to.equal(React.PureComponent);
+      expect(Object.getPrototypeOf(Wrapped.prototype)).not.to.equal(React.PureComponent.prototype);
+    });
+
+    it('with the pureComponent option set, extends React.PureComponent', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const Wrapped = withStyles(() => ({}), { pureComponent: true })(MyComponent);
+      expect(Object.getPrototypeOf(Wrapped)).not.to.equal(React.Component);
+      expect(Object.getPrototypeOf(Wrapped.prototype)).not.to.equal(React.Component.prototype);
+      expect(Object.getPrototypeOf(Wrapped)).to.equal(React.PureComponent);
+      expect(Object.getPrototypeOf(Wrapped.prototype)).to.equal(React.PureComponent.prototype);
+    });
   });
 });

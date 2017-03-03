@@ -13,20 +13,34 @@ const contextTypes = {
   themeName: PropTypes.string,
 };
 
+function baseClass(pureComponent) {
+  if (pureComponent) {
+    if (!React.PureComponent) {
+      throw new ReferenceError('withStyles() pureComponent option requires React 15.3.0 or later');
+    }
+
+    return React.PureComponent;
+  }
+
+  return React.Component;
+}
+
 export function withStyles(
   styleFn,
   {
     stylesPropName = 'styles',
     themePropName = 'theme',
     flushBefore = false,
+    pureComponent = false,
   } = {},
 ) {
   const styleDef = styleFn && ThemedStyleSheet.create(styleFn);
+  const BaseClass = baseClass(pureComponent);
 
   return function withStylesHOC(WrappedComponent) {
     // NOTE: Use a class here so components are ref-able if need be:
     // eslint-disable-next-line react/prefer-stateless-function
-    class WithStyles extends React.Component {
+    class WithStyles extends BaseClass {
       render() {
         const props = this.props;
         const { themeName } = this.context;
