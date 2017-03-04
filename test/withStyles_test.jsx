@@ -72,7 +72,7 @@ describe('withStyles()', () => {
       }
 
       const Wrapped = withStyles(() => ({}))(MyComponent);
-      shallow(<Wrapped />);
+      shallow(<Wrapped />).dive();
     });
 
     it('allows the theme prop name to be customized', () => {
@@ -82,12 +82,12 @@ describe('withStyles()', () => {
       }
 
       const Wrapped = withStyles(() => ({}), { themePropName: 'foo' })(MyComponent);
-      shallow(<Wrapped />);
+      shallow(<Wrapped />).dive();
     });
 
     it('passes processed styles to wrapped component', () => {
       function MyComponent({ styles }) {
-        expect(styles).to.eql({ foo: { color: '#ff0000' } });
+        expect(styles).to.eql({ foo: { color: '#990000' } });
         return null;
       }
 
@@ -96,7 +96,7 @@ describe('withStyles()', () => {
           color: color.red,
         },
       }))(MyComponent);
-      shallow(<Wrapped />);
+      shallow(<Wrapped />).dive();
     });
 
     it('uses the theme from context', () => {
@@ -117,7 +117,7 @@ describe('withStyles()', () => {
           color: color.red,
         },
       }))(MyComponent);
-      shallow(<Wrapped />, { context: { themeName: 'tropical' } });
+      shallow(<Wrapped />, { context: { themeName: 'tropical' } }).dive();
     });
 
     it('allows the styles prop name to be customized', () => {
@@ -126,8 +126,12 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const Wrapped = withStyles(() => ({}), { stylesPropName: 'bar' })(MyComponent);
-      shallow(<Wrapped />);
+      const Wrapped = withStyles(() => ({
+        foo: {
+          color: '#ff0000',
+        },
+      }), { stylesPropName: 'bar' })(MyComponent);
+      shallow(<Wrapped />).dive();
     });
 
     it('does not flush styles before rendering', () => {
@@ -173,7 +177,7 @@ describe('withStyles()', () => {
           color: color.red,
         },
       }))(MyComponent);
-      const wrapper = shallow(<Wrapped />).first().shallow();
+      const wrapper = shallow(<Wrapped />).dive();
 
       expect(wrapper.prop('style')).to.eql({ color: '#990000' });
     });
