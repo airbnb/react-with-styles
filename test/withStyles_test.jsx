@@ -120,6 +120,36 @@ describe('withStyles()', () => {
       shallow(<Wrapped />, { context: { themeName: 'tropical' } }).dive();
     });
 
+    it('reacts to changed context', () => {
+      const tropicalTheme = {
+        color: {
+          red: 'yellow',
+        },
+      };
+      ThemedStyleSheet.registerTheme('tropical', tropicalTheme);
+
+      function MyComponent() {
+        return null;
+      }
+
+      const Wrapped = withStyles(({ color }) => ({
+        foo: {
+          color: color.red,
+        },
+      }))(MyComponent);
+      const wrapper = shallow(<Wrapped />, { context: { themeName: 'default' } });
+
+      // default theme
+      expect(wrapper.state('styles'))
+        .to.eql({ foo: { color: '#990000' } });
+
+      wrapper.setContext({ themeName: 'tropical' });
+
+      // tropical theme
+      expect(wrapper.state('styles'))
+        .to.eql({ foo: { color: 'yellow' } });
+    });
+
     it('allows the styles prop name to be customized', () => {
       function MyComponent({ bar }) {
         expect(bar).to.eql({ foo: { color: '#ff0000' } });

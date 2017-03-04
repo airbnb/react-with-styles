@@ -37,14 +37,33 @@ export function withStyles(
   const styleDef = styleFn && ThemedStyleSheet.create(styleFn);
   const BaseClass = baseClass(pureComponent);
 
-  return function withStylesHOC(WrappedComponent) {
-    // NOTE: Use a class here so components are ref-able if need be:
-    // eslint-disable-next-line react/prefer-stateless-function
-    class WithStyles extends BaseClass {
-      render() {
-        const props = this.props;
-        const { themeName } = this.context;
+  function getAddedProps(themeName) {
+    const addedProps = {
+      [themePropName]: ThemedStyleSheet.get(themeName),
+    };
 
+    if (styleDef) {
+      addedProps[stylesPropName] = styleDef(themeName);
+    }
+
+    return addedProps;
+  }
+
+  return function withStylesHOC(WrappedComponent) {
+    class WithStyles extends BaseClass {
+      constructor(props, context) {
+        super(props, context);
+
+        this.state = getAddedProps(context.themeName);
+      }
+
+      componentWillReceiveProps(nextProps, nextContext) {
+        if (this.context.themeName !== nextContext.themeName) {
+          this.setState(getAddedProps(nextContext.themeName));
+        }
+      }
+
+      render() {
         // As some components will depend on previous styles in
         // the component tree, we provide the option of flushing the
         // buffered styles (i.e. to a style tag) **before** the rendering
@@ -56,15 +75,7 @@ export function withStyles(
           ThemedStyleSheet.flush();
         }
 
-        const addedProps = {
-          [themePropName]: ThemedStyleSheet.get(themeName),
-        };
-
-        if (styleDef) {
-          addedProps[stylesPropName] = styleDef(themeName);
-        }
-
-        return <WrappedComponent {...props} {...addedProps} />;
+        return <WrappedComponent {...this.props} {...this.state} />;
       }
     }
 
