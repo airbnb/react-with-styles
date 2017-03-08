@@ -13,6 +13,8 @@ const contextTypes = {
   themeName: PropTypes.string,
 };
 
+const EMPTY_STYLES = {};
+
 function baseClass(pureComponent) {
   if (pureComponent) {
     if (!React.PureComponent) {
@@ -58,7 +60,7 @@ export function withStyles(
 
         const addedProps = {
           [themePropName]: ThemedStyleSheet.get(themeName),
-          [stylesPropName]: styleDef ? styleDef(themeName) : {},
+          [stylesPropName]: styleDef ? styleDef(themeName) : EMPTY_STYLES,
         };
 
         return <WrappedComponent {...props} {...addedProps} />;
