@@ -58,12 +58,15 @@ export function withStyles(
           ThemedStyleSheet.flush();
         }
 
-        const addedProps = {
-          [themePropName]: ThemedStyleSheet.get(themeName),
-          [stylesPropName]: styleDef ? styleDef(themeName) : EMPTY_STYLES,
-        };
-
-        return <WrappedComponent {...props} {...addedProps} />;
+        return (
+          <WrappedComponent
+            {...props}
+            {...{
+              [themePropName]: ThemedStyleSheet.get(themeName),
+              [stylesPropName]: styleDef ? styleDef(themeName) : EMPTY_STYLES,
+            }}
+          />
+        );
       }
     }
 
