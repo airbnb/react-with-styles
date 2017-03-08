@@ -13,6 +13,8 @@ const contextTypes = {
   themeName: PropTypes.string,
 };
 
+const EMPTY_STYLES = {};
+
 function baseClass(pureComponent) {
   if (pureComponent) {
     if (!React.PureComponent) {
@@ -56,15 +58,15 @@ export function withStyles(
           ThemedStyleSheet.flush();
         }
 
-        const addedProps = {
-          [themePropName]: ThemedStyleSheet.get(themeName),
-        };
-
-        if (styleDef) {
-          addedProps[stylesPropName] = styleDef(themeName);
-        }
-
-        return <WrappedComponent {...props} {...addedProps} />;
+        return (
+          <WrappedComponent
+            {...props}
+            {...{
+              [themePropName]: ThemedStyleSheet.get(themeName),
+              [stylesPropName]: styleDef ? styleDef(themeName) : EMPTY_STYLES,
+            }}
+          />
+        );
       }
     }
 
