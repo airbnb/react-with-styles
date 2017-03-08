@@ -99,6 +99,16 @@ describe('withStyles()', () => {
       shallow(<Wrapped />).dive();
     });
 
+    it('passes an empty styles object without a styleFn', () => {
+      function MyComponent({ styles }) {
+        expect(styles).to.eql({});
+        return null;
+      }
+
+      const Wrapped = withStyles()(MyComponent);
+      shallow(<Wrapped />).dive();
+    });
+
     it('uses the theme from context', () => {
       const tropicalTheme = {
         color: {

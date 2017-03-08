@@ -1,3 +1,7 @@
+## UNRELEASED
+
+- Adds empty style object when no style function is provided.
+
 ## v1.2.0
 
 - [New] Add `pureComponent` option (requires React 15.3.0+).

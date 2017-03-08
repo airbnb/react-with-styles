@@ -62,6 +62,8 @@ export function withStyles(
 
         if (styleDef) {
           addedProps[stylesPropName] = styleDef(themeName);
+        } else {
+          addedProps[stylesPropName] = {};
         }
 
         return <WrappedComponent {...props} {...addedProps} />;
