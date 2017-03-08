@@ -44,7 +44,6 @@ export function withStyles(
     // eslint-disable-next-line react/prefer-stateless-function
     class WithStyles extends BaseClass {
       render() {
-        const props = this.props;
         const { themeName } = this.context;
 
         // As some components will depend on previous styles in
@@ -60,7 +59,7 @@ export function withStyles(
 
         return (
           <WrappedComponent
-            {...props}
+            {...this.props}
             {...{
               [themePropName]: ThemedStyleSheet.get(themeName),
               [stylesPropName]: styleDef ? styleDef(themeName) : EMPTY_STYLES,
