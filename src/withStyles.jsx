@@ -58,13 +58,8 @@ export function withStyles(
 
         const addedProps = {
           [themePropName]: ThemedStyleSheet.get(themeName),
+          [stylesPropName]: styleDef ? styleDef(themeName) : {},
         };
-
-        if (styleDef) {
-          addedProps[stylesPropName] = styleDef(themeName);
-        } else {
-          addedProps[stylesPropName] = {};
-        }
 
         return <WrappedComponent {...props} {...addedProps} />;
       }
