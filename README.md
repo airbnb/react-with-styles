@@ -59,7 +59,8 @@ It is convenient to pass through `css`, `withStyles`, and `ThemeProvider` from `
 In your component, from our `withStyles.js` file above, use `withStyles()` to define styles and `css()` to consume them.
 
 ```jsx
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { css, withStyles } from './withStyles';
 
 function MyComponent({ styles }) {

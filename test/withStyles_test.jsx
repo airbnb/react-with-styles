@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import deepmerge from 'deepmerge';
