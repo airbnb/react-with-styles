@@ -1,3 +1,8 @@
+## v1.4.0
+
+- [Deps] update `deepmerge`
+- [Fix] update for React 15.5 changes
+
 ## v1.3.0
 
 - [New] Adds empty style object when no style function is provided.
