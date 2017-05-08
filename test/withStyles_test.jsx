@@ -1,3 +1,4 @@
+/* eslint react/forbid-prop-types: 0 */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { expect } from 'chai';
@@ -66,14 +67,30 @@ describe('withStyles()', () => {
       expect(result.displayName).to.equal('withStyles(MyComponent)');
     });
 
-    it('passes the theme to the wrapped component', () => {
+    it('passes the theme to the wrapped functional component', () => {
       function MyComponent({ theme }) {
         expect(theme).to.eql(defaultTheme);
         return null;
       }
 
       const Wrapped = withStyles(() => ({}))(MyComponent);
-      shallow(<Wrapped />).dive();
+      shallow(<Wrapped />);
+    });
+
+    it('passes the theme to the wrapped class component', () => {
+      class MyComponent extends React.Component {
+        render() {
+          const { theme } = this.props;
+          expect(theme).to.eql(defaultTheme);
+          return null;
+        }
+      }
+      MyComponent.propTypes = {
+        theme: PropTypes.object.isRequired,
+      };
+
+      const Wrapped = withStyles(() => ({}))(MyComponent);
+      shallow(<Wrapped />);
     });
 
     it('allows the theme prop name to be customized', () => {
@@ -83,7 +100,7 @@ describe('withStyles()', () => {
       }
 
       const Wrapped = withStyles(() => ({}), { themePropName: 'foo' })(MyComponent);
-      shallow(<Wrapped />).dive();
+      shallow(<Wrapped />);
     });
 
     it('passes processed styles to wrapped component', () => {
@@ -97,7 +114,7 @@ describe('withStyles()', () => {
           color: color.red,
         },
       }))(MyComponent);
-      shallow(<Wrapped />).dive();
+      shallow(<Wrapped />);
     });
 
     it('passes an empty styles object without a styleFn', () => {
@@ -107,7 +124,7 @@ describe('withStyles()', () => {
       }
 
       const Wrapped = withStyles()(MyComponent);
-      shallow(<Wrapped />).dive();
+      shallow(<Wrapped />);
     });
 
     it('uses the theme from context', () => {
@@ -128,7 +145,7 @@ describe('withStyles()', () => {
           color: color.red,
         },
       }))(MyComponent);
-      shallow(<Wrapped />, { context: { themeName: 'tropical' } }).dive();
+      shallow(<Wrapped />, { context: { themeName: 'tropical' } });
     });
 
     it('allows the styles prop name to be customized', () => {
@@ -142,7 +159,7 @@ describe('withStyles()', () => {
           color: '#ff0000',
         },
       }), { stylesPropName: 'bar' })(MyComponent);
-      shallow(<Wrapped />).dive();
+      shallow(<Wrapped />);
     });
 
     it('does not flush styles before rendering', () => {
@@ -188,7 +205,7 @@ describe('withStyles()', () => {
           color: color.red,
         },
       }))(MyComponent);
-      const wrapper = shallow(<Wrapped />).dive();
+      const wrapper = shallow(<Wrapped />);
 
       expect(wrapper.prop('style')).to.eql({ color: '#990000' });
     });
