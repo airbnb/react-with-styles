@@ -6,6 +6,14 @@ const themes = {};
 const makeFromThemes = {};
 let internalId = 0;
 
+// Used by tests to reset the state between tests.
+export function reset() {
+  Object.keys(themes).forEach(theme => delete themes[theme]);
+  Object.keys(makeFromThemes).forEach(id => delete makeFromThemes[id]);
+  internalId = 0;
+  styleInterface = undefined;
+}
+
 function registerTheme(name, overrides) {
   const theme = deepmerge(themes.default.theme, overrides);
 
@@ -58,7 +66,7 @@ function registerDefaultTheme(theme) {
 }
 
 function get(name = 'default') {
-  return themes[name].theme;
+  return themes[name] && themes[name].theme;
 }
 
 function resolve(...styles) {
