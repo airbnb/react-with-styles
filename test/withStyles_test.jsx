@@ -28,7 +28,7 @@ describe('withStyles()', () => {
       style: styles.reduce((result, style) => Object.assign(result, style)),
     }));
 
-    ThemedStyleSheet.registerDefaultTheme(defaultTheme);
+    ThemedStyleSheet.registerTheme(defaultTheme);
     ThemedStyleSheet.registerInterface(testInterface);
   });
 
@@ -108,27 +108,6 @@ describe('withStyles()', () => {
 
       const Wrapped = withStyles()(MyComponent);
       shallow(<Wrapped />).dive();
-    });
-
-    it('uses the theme from context', () => {
-      const tropicalTheme = {
-        color: {
-          red: 'yellow',
-        },
-      };
-      ThemedStyleSheet.registerTheme('tropical', tropicalTheme);
-
-      function MyComponent({ styles }) {
-        expect(styles).to.eql({ foo: { color: 'yellow' } });
-        return null;
-      }
-
-      const Wrapped = withStyles(({ color }) => ({
-        foo: {
-          color: color.red,
-        },
-      }))(MyComponent);
-      shallow(<Wrapped />, { context: { themeName: 'tropical' } }).dive();
     });
 
     it('allows the styles prop name to be customized', () => {

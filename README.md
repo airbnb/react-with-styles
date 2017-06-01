@@ -39,22 +39,22 @@ export default {
 };
 ```
 
-Register your default theme and interface. For example, if your default theme is exported by `MyDefaultTheme.js`, and you want to use Aphrodite, you can set this up in your own `withStyles.js` file.
+Register your theme and interface. For example, if your theme is exported by `MyTheme.js`, and you want to use Aphrodite, you can set this up in your own `withStyles.js` file.
 
 ```js
 import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
 import aphroditeInterface from 'react-with-styles-interface-aphrodite';
-import { css, withStyles, ThemeProvider } from 'react-with-styles';
+import { css, withStyles } from 'react-with-styles';
 
-import MyDefaultTheme from './MyDefaultTheme';
+import MyTheme from './MyTheme';
 
-ThemedStyleSheet.registerDefaultTheme(MyDefaultTheme);
+ThemedStyleSheet.registerTheme(MyTheme);
 ThemedStyleSheet.registerInterface(aphroditeInterface);
 
-export { css, withStyles, ThemeProvider, ThemedStyleSheet };
+export { css, withStyles, ThemedStyleSheet };
 ```
 
-It is convenient to pass through `css`, `withStyles`, and `ThemeProvider` from `react-with-styles` here so that everywhere you use them you can be assured that the default theme and interface have been registered. You could likely also set this up as an initializer that is added to the top of your bundles and then use `react-with-styles` directly in your components.
+It is convenient to pass through `css` and `withStyles` from `react-with-styles` here so that everywhere you use them you can be assured that the theme and interface have been registered. You could likely also set this up as an initializer that is added to the top of your bundles and then use `react-with-styles` directly in your components.
 
 In your component, from our `withStyles.js` file above, use `withStyles()` to define styles and `css()` to consume them.
 
@@ -106,36 +106,20 @@ export default withStyles(({ color }) => ({
 
 Registers themes and interfaces.
 
-### `ThemedStyleSheet.registerDefaultTheme(theme)`
+### `ThemedStyleSheet.registerTheme(theme)`
 
-Registers the default theme. `theme` is an object with properties that you want to be made available when styling your components.
+Registers the theme. `theme` is an object with properties that you want to be made available when styling your components.
 
 ```js
 import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
 
-ThemedStyleSheet.registerDefaultTheme({
+ThemedStyleSheet.registerTheme({
   color: {
     primary: '#FF5A5F',
     secondary: '#00A699',
   },
 });
 ```
-
-### `ThemedStyleSheet.registerTheme(name, overrides)`
-
-Registers a named theme that defines overrides for the default theme. This object is merged with the default theme.
-
-```js
-import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
-
-ThemedStyleSheet.registerTheme('tropical', {
-  color: {
-    primary: 'yellow',
-  },
-});
-```
-
-Combined with the above example for default theme, `color.primary` would be `'yellow'` and `color.secondary` would be `'#00A699'`.
 
 ### `ThemedStyleSheet.registerInterface(interface)`
 
@@ -149,35 +133,13 @@ ThemedStyleSheet.registerInterface(aphroditeInterface);
 ```
 
 
-## `<ThemeProvider name="theme name">`
-
-This component simply takes a `name` prop that matches a registered theme, and stores that value in context. This allows sub-trees of your application to change to different themes as necessary.
-
-```jsx
-import React from 'react';
-import { ThemeProvider } from './withStyles';
-
-export default function App() {
-  return (
-    <div>
-      <MyComponent />
-
-      <ThemeProvider name="tropical">
-        <MyComponent />
-      </ThemeProvider>
-    </div>
-  );
-}
-```
-
-
 ## `withStyles([ stylesThunk [, options ] ])`
 
-This is a higher-order function that returns a higher-order component used to wrap React components to add styles using the theme provided from context. We use this to abstract away the context, to make themed styles easier to work with.
+This is a higher-order function that returns a higher-order component used to wrap React components to add styles using the theme. We use this to make themed styles easier to work with.
 
 `stylesThunk` will receive the theme as an argument, and it should return an object containing the styles for the component.
 
-The wrapped component will receive a `styles` prop containing the processed styles for this component and a `theme` prop with the current theme object. Most of the time you will only need the `styles` prop. Reliance on the `theme` prop should be minimized.
+The wrapped component will receive a `styles` prop containing the processed styles for this component and a `theme` prop with the theme object. Most of the time you will only need the `styles` prop. Reliance on the `theme` prop should be minimized.
 
 ### Example usage
 

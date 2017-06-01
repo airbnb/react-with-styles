@@ -1,21 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import deepmerge from 'deepmerge';
 
-import ThemeProvider from './ThemeProvider';
 import ThemedStyleSheet from './ThemedStyleSheet';
 
 // Add some named exports for convenience.
-export { ThemeProvider };
 export const css = ThemedStyleSheet.resolve;
 export const cssNoRTL = ThemedStyleSheet.resolveNoRTL || css;
 
-const contextTypes = {
-  themeName: PropTypes.string,
-};
-
 const EMPTY_STYLES = {};
+const EMPTY_STYLES_FN = () => EMPTY_STYLES;
 
 function baseClass(pureComponent) {
   if (pureComponent) {
@@ -38,7 +32,7 @@ export function withStyles(
     pureComponent = false,
   } = {},
 ) {
-  const styleDef = styleFn && ThemedStyleSheet.create(styleFn);
+  const styleDef = styleFn ? ThemedStyleSheet.create(styleFn) : EMPTY_STYLES_FN;
   const BaseClass = baseClass(pureComponent);
 
   return function withStylesHOC(WrappedComponent) {
@@ -46,8 +40,6 @@ export function withStyles(
     // eslint-disable-next-line react/prefer-stateless-function
     class WithStyles extends BaseClass {
       render() {
-        const { themeName } = this.context;
-
         // As some components will depend on previous styles in
         // the component tree, we provide the option of flushing the
         // buffered styles (i.e. to a style tag) **before** the rendering
@@ -63,8 +55,8 @@ export function withStyles(
           <WrappedComponent
             {...this.props}
             {...{
-              [themePropName]: ThemedStyleSheet.get(themeName),
-              [stylesPropName]: styleDef ? styleDef(themeName) : EMPTY_STYLES,
+              [themePropName]: ThemedStyleSheet.get(),
+              [stylesPropName]: styleDef(),
             }}
           />
         );
@@ -76,7 +68,6 @@ export function withStyles(
       || 'Component';
 
     WithStyles.WrappedComponent = WrappedComponent;
-    WithStyles.contextTypes = contextTypes;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
     if (WrappedComponent.propTypes) {
       WithStyles.propTypes = deepmerge({}, WrappedComponent.propTypes);
