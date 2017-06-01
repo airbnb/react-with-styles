@@ -38,3 +38,7 @@ jspm_packages
 
 # Built files
 /lib
+
+# lockfiles
+package-lock.json
+yarn.lock
