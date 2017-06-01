@@ -23,8 +23,8 @@ describe('withStyles()', () => {
       resolve() {},
       flush: sinon.spy(),
     };
-    sinon.stub(testInterface, 'create', styleHash => styleHash);
-    sinon.stub(testInterface, 'resolve', styles => ({
+    sinon.stub(testInterface, 'create').callsFake(styleHash => styleHash);
+    sinon.stub(testInterface, 'resolve').callsFake(styles => ({
       style: styles.reduce((result, style) => Object.assign(result, style)),
     }));
 
