@@ -28,6 +28,8 @@ function baseClass(pureComponent) {
   return React.Component;
 }
 
+const NOOP = () => {};
+
 export function withStyles(
   styleFn,
   {
@@ -40,24 +42,25 @@ export function withStyles(
   const styleDef = styleFn && ThemedStyleSheet.create(styleFn);
   const BaseClass = baseClass(pureComponent);
 
+  // As some components will depend on previous styles in the component tree, we
+  // provide the option of flushing the buffered styles (i.e. to a style tag)
+  // **before** the rendering cycle begins.
+  //
+  // The interfaces provide the optional "flush" method which is run in turn by
+  // ThemedStyleSheet.flush.
+  const flushIfNecessary = flushBefore ? ThemedStyleSheet.flush : NOOP;
+
   return function withStylesHOC(WrappedComponent) {
+    const isClass = !!(WrappedComponent.prototype && WrappedComponent.prototype.isReactComponent);
+
     // NOTE: Use a class here so components are ref-able if need be:
     // eslint-disable-next-line react/prefer-stateless-function
-    class WithStyles extends BaseClass {
-      render() {
+    class WithStyles extends BaseClass {}
+
+    if (isClass) {
+      WithStyles.prototype.render = function render() {
         const { themeName } = this.context;
-
-        // As some components will depend on previous styles in
-        // the component tree, we provide the option of flushing the
-        // buffered styles (i.e. to a style tag) **before** the rendering
-        // cycle begins.
-        //
-        // The interfaces provide the optional "flush" method which
-        // is run in turn by ThemedStyleSheet.flush.
-        if (flushBefore) {
-          ThemedStyleSheet.flush();
-        }
-
+        flushIfNecessary();
         return (
           <WrappedComponent
             {...this.props}
@@ -67,7 +70,21 @@ export function withStyles(
             }}
           />
         );
-      }
+      };
+    } else {
+      // WrappedComponent is a function, so we can avoid a little overhead by
+      // calling it directly instead of rendering it. This avoids React
+      // lifecycle overhead for the wrapped component and may not be necessary
+      // in a future version of React.
+      WithStyles.prototype.render = function render() {
+        const { themeName } = this.context;
+        flushIfNecessary();
+        return WrappedComponent({
+          ...this.props,
+          [themePropName]: ThemedStyleSheet.get(themeName),
+          [stylesPropName]: styleDef ? styleDef(themeName) : EMPTY_STYLES,
+        }, this.context);
+      };
     }
 
     const wrappedComponentName = WrappedComponent.displayName
