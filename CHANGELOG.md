@@ -1,3 +1,7 @@
+## v2.0.0
+- [new] Export `ThemedStyleSheet.resolveNoRTL` as `cssNoRTL` if it exists. ([#95](https://github.com/airbnb/react-with-styles/pull/95))
+- [breaking] Remove contextual theming. ([#93](https://github.com/airbnb/react-with-styles/pull/93))
+
 ## v1.4.0
 
 - [Deps] update `deepmerge`
