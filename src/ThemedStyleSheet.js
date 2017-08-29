@@ -1,64 +1,36 @@
-import deepmerge from 'deepmerge';
 import globalCache from 'global-cache';
 
 let styleInterface;
-const themes = {};
+let styleTheme;
 const makeFromThemes = {};
 let internalId = 0;
 
-function registerTheme(name, overrides) {
-  const theme = deepmerge(themes.default.theme, overrides);
-
-  themes[name] = {
+function registerTheme(theme) {
+  styleTheme = {
     theme,
     styles: {},
   };
-
-  // If we register a theme after stylesheets have been created, we have to
-  // backfill them when we register the new theme.
-  Object.keys(makeFromThemes).forEach((id) => {
-    themes[name].styles[id] = styleInterface.create(makeFromThemes[id](theme));
-  });
 }
 
 function registerInterface(interfaceToRegister) {
   styleInterface = interfaceToRegister;
 }
 
-const generatorFor = id => (name = 'default') => {
-  const { styles } = themes[name];
-  // TODO(lmr):
-  // we may at some point want to lazily register styles
-  // for the non default theme. Think about strategies around this...
-  // for now, this shouldn't be a big deal.
-  return styles[id];
-};
-
 function create(makeFromTheme) {
   // Get an id to associate with this stylesheet
   const id = internalId;
   internalId += 1;
 
-  // run StyleSheet.create over each variation for each theme
-  Object.keys(themes).forEach((name) => {
-    const { theme, styles } = themes[name];
-    styles[id] = styleInterface.create(makeFromTheme(theme));
-  });
+  const { theme, styles } = styleTheme;
+  styles[id] = styleInterface.create(makeFromTheme(theme));
 
   makeFromThemes[id] = makeFromTheme;
 
-  return generatorFor(id);
+  return () => styleTheme.styles[id];
 }
 
-function registerDefaultTheme(theme) {
-  themes.default = {
-    theme,
-    styles: {},
-  };
-}
-
-function get(name = 'default') {
-  return themes[name].theme;
+function get() {
+  return styleTheme.theme;
 }
 
 function resolve(...styles) {
@@ -77,7 +49,6 @@ function flush() {
 export default globalCache.setIfMissingThenGet(
   'react-with-styles ThemedStyleSheet',
   () => ({
-    registerDefaultTheme,
     registerTheme,
     registerInterface,
     create,
