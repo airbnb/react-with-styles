@@ -9,6 +9,7 @@ import ThemedStyleSheet from './ThemedStyleSheet';
 // Add some named exports for convenience.
 export { ThemeProvider };
 export const css = ThemedStyleSheet.resolve;
+export const cssNoRTL = ThemedStyleSheet.resolveNoRTL || css;
 
 const contextTypes = {
   themeName: PropTypes.string,
