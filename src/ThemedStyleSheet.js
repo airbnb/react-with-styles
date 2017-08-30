@@ -37,6 +37,10 @@ function resolve(...styles) {
   return styleInterface.resolve(styles);
 }
 
+function resolveNoRTL(...styles) {
+  return styleInterface.resolveNoRTL(styles);
+}
+
 function flush() {
   if (styleInterface.flush) {
     styleInterface.flush();
@@ -53,6 +57,7 @@ export default globalCache.setIfMissingThenGet(
     registerInterface,
     create,
     get,
+    resolveNoRTL,
     resolve,
     flush,
   }),
