@@ -38,7 +38,11 @@ function resolve(...styles) {
 }
 
 function resolveNoRTL(...styles) {
-  return styleInterface.resolveNoRTL(styles);
+  if (styleInterface.resolveNoRTL) {
+    return styleInterface.resolveNoRTL(styles);
+  }
+
+  return resolve(styles);
 }
 
 function flush() {
