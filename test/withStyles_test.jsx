@@ -6,7 +6,7 @@ import deepmerge from 'deepmerge';
 import sinon from 'sinon-sandbox';
 
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
-import { css, withStyles } from '../src/withStyles';
+import { css, cssNoRTL, withStyles } from '../src/withStyles';
 
 describe('withStyles()', () => {
   const defaultTheme = {
@@ -16,6 +16,7 @@ describe('withStyles()', () => {
   };
 
   let testInterface;
+  let testInterfaceResolveStub;
 
   beforeEach(() => {
     testInterface = {
@@ -24,7 +25,7 @@ describe('withStyles()', () => {
       flush: sinon.spy(),
     };
     sinon.stub(testInterface, 'create').callsFake(styleHash => styleHash);
-    sinon.stub(testInterface, 'resolve').callsFake(styles => ({
+    testInterfaceResolveStub = sinon.stub(testInterface, 'resolve').callsFake(styles => ({
       style: styles.reduce((result, style) => Object.assign(result, style)),
     }));
 
@@ -227,6 +228,74 @@ describe('withStyles()', () => {
       expect(Object.getPrototypeOf(Wrapped.prototype)).not.to.equal(React.Component.prototype);
       expect(Object.getPrototypeOf(Wrapped)).to.equal(React.PureComponent);
       expect(Object.getPrototypeOf(Wrapped.prototype)).to.equal(React.PureComponent.prototype);
+    });
+  });
+
+  describe('css/cssNoRTL', () => {
+    it('css calls resolve method', () => {
+      function MyComponent() {
+        return <div {...css({ color: 'red' })} />;
+      }
+
+      shallow(<MyComponent />);
+      expect(testInterfaceResolveStub.callCount).to.equal(1);
+    });
+
+    it('cssNoRTL calls resolve method if resolveNoRTL does not exist', () => {
+      function MyComponent() {
+        return <div {...cssNoRTL({ color: 'red' })} />;
+      }
+
+      shallow(<MyComponent />);
+      expect(testInterfaceResolveStub.callCount).to.equal(1);
+    });
+  });
+});
+
+describe('RTL support', () => {
+  let testInterface;
+  let resolveStub;
+  let resolveNoRTLStub;
+
+  beforeEach(() => {
+    resolveStub = sinon.stub();
+    resolveNoRTLStub = sinon.stub();
+
+    testInterface = {
+      create() {},
+      resolve: resolveStub,
+      resolveNoRTL: resolveNoRTLStub,
+      flush: sinon.spy(),
+    };
+    sinon.stub(testInterface, 'create').callsFake(styleHash => styleHash);
+
+    ThemedStyleSheet.registerTheme({});
+    ThemedStyleSheet.registerInterface(testInterface);
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe('css/cssNoRTL', () => {
+    it('css calls resolve method', () => {
+      function MyComponent() {
+        return <div {...css({ color: 'red' })} />;
+      }
+
+      shallow(<MyComponent />);
+      expect(resolveStub.callCount).to.equal(1);
+      expect(resolveNoRTLStub.callCount).to.equal(0);
+    });
+
+    it('cssNoRTL calls resolve method if resolveNoRTL does not exist', () => {
+      function MyComponent() {
+        return <div {...cssNoRTL({ color: 'red' })} />;
+      }
+
+      shallow(<MyComponent />);
+      expect(resolveStub.callCount).to.equal(0);
+      expect(resolveNoRTLStub.callCount).to.equal(1);
     });
   });
 });

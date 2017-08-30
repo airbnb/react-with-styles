@@ -6,7 +6,7 @@ import ThemedStyleSheet from './ThemedStyleSheet';
 
 // Add some named exports for convenience.
 export const css = ThemedStyleSheet.resolve;
-export const cssNoRTL = ThemedStyleSheet.resolveNoRTL || css;
+export const cssNoRTL = ThemedStyleSheet.resolveNoRTL;
 
 const EMPTY_STYLES = {};
 const EMPTY_STYLES_FN = () => EMPTY_STYLES;
