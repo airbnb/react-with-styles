@@ -1,3 +1,6 @@
+## v2.1.0
+- [new] Actually export `resolveNoRTL` from the interface if it exists ([#98](https://github.com/airbnb/react-with-styles/pull/98))
+
 ## v2.0.0
 - [new] Export `ThemedStyleSheet.resolveNoRTL` as `cssNoRTL` if it exists. ([#95](https://github.com/airbnb/react-with-styles/pull/95))
 - [breaking] Remove contextual theming. ([#93](https://github.com/airbnb/react-with-styles/pull/93))
