@@ -1,0 +1,4 @@
+--compilers js:babel-register,jsx:babel-register
+--require airbnb-js-shims
+--require ./test/_setup
+--recursive
