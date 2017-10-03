@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import deepmerge from 'deepmerge';
 
@@ -7,6 +8,10 @@ import ThemedStyleSheet from './ThemedStyleSheet';
 // Add some named exports for convenience.
 export const css = ThemedStyleSheet.resolve;
 export const cssNoRTL = ThemedStyleSheet.resolveNoRTL;
+export const withStylesPropTypes = {
+  styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+};
 
 const EMPTY_STYLES = {};
 const EMPTY_STYLES_FN = () => EMPTY_STYLES;
