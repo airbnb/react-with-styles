@@ -1,3 +1,6 @@
+## v2.2.0
+- [new] Exports `withStylesPropTypes` ([#110](https://github.com/airbnb/react-with-styles/pull/110))
+
 ## v2.1.0
 - [new] Actually export `resolveNoRTL` from the interface if it exists ([#98](https://github.com/airbnb/react-with-styles/pull/98))
 
