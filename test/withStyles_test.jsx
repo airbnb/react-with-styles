@@ -6,7 +6,7 @@ import deepmerge from 'deepmerge';
 import sinon from 'sinon-sandbox';
 
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
-import { css, cssNoRTL, withStyles } from '../src/withStyles';
+import { css, cssNoRTL, withStyles, withStylesPropTypes } from '../src/withStyles';
 
 describe('withStyles()', () => {
   const defaultTheme = {
@@ -160,7 +160,7 @@ describe('withStyles()', () => {
         return <div {...css(styles.foo)} />;
       }
       MyComponent.propTypes = {
-        styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+        ...withStylesPropTypes,
       };
 
       const Wrapped = withStyles(({ color }) => ({
@@ -174,12 +174,13 @@ describe('withStyles()', () => {
     });
 
     it('copies over non-withStyles propTypes and defaultProps', () => {
+      // TODO: fix eslint-plugin-react bug
+      // eslint-disable-next-line react/prop-types
       function MyComponent({ styles, theme }) {
         return <div {...css(styles.foo)}>{theme.color.default}</div>;
       }
       MyComponent.propTypes = {
-        styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-        theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+        ...withStylesPropTypes,
         foo: PropTypes.number,
       };
       MyComponent.defaultProps = {
