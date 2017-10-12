@@ -12,11 +12,53 @@ function registerTheme(theme) {
   };
 }
 
+function invalidMethodError(invalidMethodName) {
+  return new TypeError(`
+    react-with-styles internal error: An invalid Style Interface has been registered.
+    typeof interface.${invalidMethodName} must be a function.
+  `);
+}
+
+function validateStyleInterfaceShape(interfaceToValidate) {
+  if (!(typeof interfaceToValidate.create === 'function')) {
+    throw invalidMethodError('create');
+  }
+
+  if (!(typeof interfaceToValidate.resolve === 'function')) {
+    throw invalidMethodError('resolve');
+  }
+}
+
 function registerInterface(interfaceToRegister) {
+  if (process.env.NODE_ENV !== 'production') {
+    validateStyleInterfaceShape(interfaceToRegister);
+  }
   styleInterface = interfaceToRegister;
 }
 
+function validateStyleInterface() {
+  if (!styleInterface) {
+    throw new ReferenceError(`
+      react-with-styles internal error: A Style Interface has not been registered.
+      You must register a valid Style Interface using ThemedStyleSheet.registerInterface.
+    `);
+  }
+}
+
+function validateStyleTheme() {
+  if (!styleTheme) {
+    throw new ReferenceError(`
+      react-with-styles internal error: A Theme has not been registered.
+      You must register a theme using ThemedStyleSheet.registerTheme.
+    `);
+  }
+}
+
 function create(makeFromTheme) {
+  if (process.env.NODE_ENV !== 'production') {
+    validateStyleInterface();
+    validateStyleTheme();
+  }
   // Get an id to associate with this stylesheet
   const id = internalId;
   internalId += 1;
@@ -34,6 +76,9 @@ function get() {
 }
 
 function resolve(...styles) {
+  if (process.env.NODE_ENV !== 'production') {
+    validateStyleInterface();
+  }
   return styleInterface.resolve(styles);
 }
 
