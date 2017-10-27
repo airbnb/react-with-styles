@@ -37,13 +37,20 @@ export function withStyles(
     pureComponent = false,
   } = {},
 ) {
-  const styleDef = styleFn ? ThemedStyleSheet.create(styleFn) : EMPTY_STYLES_FN;
+  let styleDef;
   const BaseClass = baseClass(pureComponent);
 
   return function withStylesHOC(WrappedComponent) {
     // NOTE: Use a class here so components are ref-able if need be:
     // eslint-disable-next-line react/prefer-stateless-function
     class WithStyles extends BaseClass {
+      componentWillMount() {
+        // defer StyleSheet creation to run-time
+        if (!styleDef) {
+          styleDef = styleFn ? ThemedStyleSheet.create(styleFn) : EMPTY_STYLES_FN;
+        }
+      }
+
       render() {
         // As some components will depend on previous styles in
         // the component tree, we provide the option of flushing the
