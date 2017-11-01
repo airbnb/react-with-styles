@@ -1,3 +1,6 @@
+## v2.2.1
+- [fix] Defer `Stylesheet.create` to `componentWillMount` of `withStyles` ([#115](https://github.com/airbnb/react-with-styles/pull/115))
+
 ## v2.2.0
 - [new] Exports `withStylesPropTypes` ([#110](https://github.com/airbnb/react-with-styles/pull/110))
 
