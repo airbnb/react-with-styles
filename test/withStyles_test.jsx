@@ -52,12 +52,18 @@ describe('withStyles()', () => {
     expect(typeof withStyles(() => ({}))).to.equal('function');
   });
 
-  it('creates the styles', () => {
-    withStyles(() => ({}));
-    expect(testInterface.create.callCount).to.equal(1);
-  });
-
   describe('HOC', () => {
+    it('creates the styles', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      shallow(<WrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(1);
+    });
+
+
     it('has a wrapped displayName', () => {
       function MyComponent() {
         return null;
