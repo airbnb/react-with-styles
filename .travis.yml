@@ -23,7 +23,7 @@ env:
 matrix:
   fast_finish: true
   include:
-    - node_js: "node"
+    - node_js: "lts/*"
       env: PRETEST=true
   allow_failures:
     - os: osx
