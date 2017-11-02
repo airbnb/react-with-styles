@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import { render, shallow } from 'enzyme';
 import deepmerge from 'deepmerge';
 import sinon from 'sinon-sandbox';
+import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
 
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
 import { css, cssNoRTL, withStyles, withStylesPropTypes } from '../src/withStyles';
@@ -62,7 +63,6 @@ describe('withStyles()', () => {
       shallow(<WrappedComponent />);
       expect(testInterface.create.callCount).to.equal(1);
     });
-
 
     it('has a wrapped displayName', () => {
       function MyComponent() {
@@ -263,18 +263,23 @@ describe('RTL support', () => {
   let testInterface;
   let resolveStub;
   let resolveNoRTLStub;
+  let createStub;
+  let createRTLStub;
 
   beforeEach(() => {
     resolveStub = sinon.stub();
     resolveNoRTLStub = sinon.stub();
 
+    createStub = sinon.stub();
+    createRTLStub = sinon.stub();
+
     testInterface = {
-      create() {},
+      create: createStub,
+      createRTL: createRTLStub,
       resolve: resolveStub,
       resolveNoRTL: resolveNoRTLStub,
       flush: sinon.spy(),
     };
-    sinon.stub(testInterface, 'create').callsFake(styleHash => styleHash);
 
     ThemedStyleSheet.registerTheme({});
     ThemedStyleSheet.registerInterface(testInterface);
@@ -303,6 +308,46 @@ describe('RTL support', () => {
       shallow(<MyComponent />);
       expect(resolveStub.callCount).to.equal(0);
       expect(resolveNoRTLStub.callCount).to.equal(1);
+    });
+  });
+
+  describe('contextual create', () => {
+    it('calls ThemedStyleSheet.create without direction set', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      render(<WrappedComponent />);
+      expect(testInterface.create).to.have.property('callCount', 1);
+    });
+
+    it('calls ThemedStyleSheet.create with LTR direction', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      render(
+        <DirectionProvider direction={DIRECTIONS.LTR}>
+          <WrappedComponent />
+        </DirectionProvider>,
+      );
+      expect(testInterface.create).to.have.property('callCount', 1);
+    });
+
+    it('calls ThemedStyleSheet.createRTL with RTL direction', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      render(
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <WrappedComponent />
+        </DirectionProvider>,
+      );
+      expect(testInterface.createRTL).to.have.property('callCount', 1);
     });
   });
 });

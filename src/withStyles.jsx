@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import deepmerge from 'deepmerge';
 
+import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
+import brcastShape from 'react-with-direction/dist/proptypes/brcast';
+
 import ThemedStyleSheet from './ThemedStyleSheet';
 
 // Add some named exports for convenience.
@@ -28,6 +31,10 @@ function baseClass(pureComponent) {
   return React.Component;
 }
 
+const contextTypes = {
+  [CHANNEL]: brcastShape,
+};
+
 export function withStyles(
   styleFn,
   {
@@ -37,7 +44,8 @@ export function withStyles(
     pureComponent = false,
   } = {},
 ) {
-  let styleDef;
+  let styleDefLTR;
+  let styleDefRTL;
   const BaseClass = baseClass(pureComponent);
 
   return function withStylesHOC(WrappedComponent) {
@@ -45,10 +53,19 @@ export function withStyles(
     // eslint-disable-next-line react/prefer-stateless-function
     class WithStyles extends BaseClass {
       componentWillMount() {
-        // defer StyleSheet creation to run-time
-        if (!styleDef) {
-          styleDef = styleFn ? ThemedStyleSheet.create(styleFn) : EMPTY_STYLES_FN;
+        this.maybeCreateStyles();
+      }
+
+      maybeCreateStyles() {
+        const direction = this.context[CHANNEL] && this.context[CHANNEL].getState();
+        const isRTL = direction === DIRECTIONS.RTL;
+        if (isRTL && !styleDefRTL) {
+          styleDefRTL = styleFn ? ThemedStyleSheet.createRTL(styleFn) : EMPTY_STYLES_FN;
+        } else if (!isRTL && !styleDefLTR) {
+          styleDefLTR = styleFn ? ThemedStyleSheet.create(styleFn) : EMPTY_STYLES_FN;
         }
+
+        return isRTL ? styleDefRTL : styleDefLTR;
       }
 
       render() {
@@ -62,6 +79,8 @@ export function withStyles(
         if (flushBefore) {
           ThemedStyleSheet.flush();
         }
+
+        const styleDef = this.maybeCreateStyles();
 
         return (
           <WrappedComponent
@@ -81,6 +100,7 @@ export function withStyles(
 
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
+    WithStyles.contextTypes = contextTypes;
     if (WrappedComponent.propTypes) {
       WithStyles.propTypes = deepmerge({}, WrappedComponent.propTypes);
       delete WithStyles.propTypes[stylesPropName];
