@@ -16,17 +16,25 @@ function registerInterface(interfaceToRegister) {
   styleInterface = interfaceToRegister;
 }
 
-function create(makeFromTheme) {
+function create(makeFromTheme, createWithDirection) {
   // Get an id to associate with this stylesheet
   const id = internalId;
   internalId += 1;
 
   const { theme, styles } = styleTheme;
-  styles[id] = styleInterface.create(makeFromTheme(theme));
+  styles[id] = createWithDirection(makeFromTheme(theme));
 
   makeFromThemes[id] = makeFromTheme;
 
   return () => styleTheme.styles[id];
+}
+
+function createLTR(makeFromTheme) {
+  return create(makeFromTheme, styleInterface.create);
+}
+
+function createRTL(makeFromTheme) {
+  return create(makeFromTheme, styleInterface.createRTL || styleInterface.create);
 }
 
 function get() {
@@ -59,7 +67,8 @@ export default globalCache.setIfMissingThenGet(
   () => ({
     registerTheme,
     registerInterface,
-    create,
+    create: createLTR,
+    createRTL,
     get,
     resolveNoRTL,
     resolve,
