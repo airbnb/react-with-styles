@@ -1,3 +1,6 @@
+## v2.3.0
+- [new] Add contextual StyleSheet creation based on direction ([#117](https://github.com/airbnb/react-with-styles/pull/117))
+
 ## v2.2.1
 - [fix] Defer `Stylesheet.create` to `componentWillMount` of `withStyles` ([#115](https://github.com/airbnb/react-with-styles/pull/115))
 
