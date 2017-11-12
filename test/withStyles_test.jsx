@@ -328,11 +328,11 @@ describe('RTL support', () => {
       }
 
       const WrappedComponent = withStyles(() => ({}))(MyComponent);
-      render(
+      render((
         <DirectionProvider direction={DIRECTIONS.LTR}>
           <WrappedComponent />
-        </DirectionProvider>,
-      );
+        </DirectionProvider>
+      ));
       expect(testInterface.create).to.have.property('callCount', 1);
     });
 
@@ -342,11 +342,11 @@ describe('RTL support', () => {
       }
 
       const WrappedComponent = withStyles(() => ({}))(MyComponent);
-      render(
+      render((
         <DirectionProvider direction={DIRECTIONS.RTL}>
           <WrappedComponent />
-        </DirectionProvider>,
-      );
+        </DirectionProvider>
+      ));
       expect(testInterface.createRTL).to.have.property('callCount', 1);
     });
   });
