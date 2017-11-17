@@ -4,8 +4,8 @@
   },
   "extends": "airbnb",
   "rules": {
-    "import/no-extraneous-dependencies": [2, {
-      "devDependencies": true
-    }]
+    "react/prefer-stateless-function": 0,
+    "react/no-multi-comp": 0,
+    "react/prop-types": 0,
   }
 }

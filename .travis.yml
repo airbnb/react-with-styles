@@ -19,6 +19,7 @@ script:
   - 'if [ -n "${TEST-}" ]; then npm run tests-only ; fi'
 sudo: false
 env:
+  - TEST=true REACT=16
   - TEST=true REACT=15
   - TEST=true REACT=15.4
   - TEST=true REACT=0.14
@@ -35,3 +36,4 @@ matrix:
     - node_js: "9"
     - node_js: "7"
     - node_js: "5"
+    - env: TEST=true REACT=0.13

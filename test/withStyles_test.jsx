@@ -5,9 +5,14 @@ import { render, shallow } from 'enzyme';
 import deepmerge from 'deepmerge';
 import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
+import semver from 'semver';
 
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
 import { css, cssNoRTL, withStyles, withStylesPropTypes } from '../src/withStyles';
+
+const itIfReact = function itIfReact(range) {
+  return semver.intersects(range, React.version) ? it : it.skip;
+};
 
 describe('withStyles()', () => {
   const defaultTheme = {
@@ -219,13 +224,17 @@ describe('withStyles()', () => {
       }
 
       const Wrapped = withStyles(() => ({}))(MyComponent);
-      expect(Object.getPrototypeOf(Wrapped)).to.equal(React.Component);
-      expect(Object.getPrototypeOf(Wrapped.prototype)).to.equal(React.Component.prototype);
-      expect(Object.getPrototypeOf(Wrapped)).not.to.equal(React.PureComponent);
-      expect(Object.getPrototypeOf(Wrapped.prototype)).not.to.equal(React.PureComponent.prototype);
+      const wrappedProto = Object.getPrototypeOf(Wrapped);
+      const wrappedProtoProto = Object.getPrototypeOf(Wrapped.prototype);
+      expect(wrappedProto).to.equal(React.Component);
+      expect(wrappedProtoProto).to.equal(React.Component.prototype);
+      if (React.PureComponent) {
+        expect(wrappedProto).not.to.equal(React.PureComponent);
+        expect(wrappedProtoProto).not.to.equal(React.PureComponent.prototype);
+      }
     });
 
-    it('with the pureComponent option set, extends React.PureComponent', () => {
+    itIfReact('>= 15.3', 'with the pureComponent option set, extends React.PureComponent', () => {
       function MyComponent() {
         return null;
       }
