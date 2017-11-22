@@ -54,7 +54,7 @@
     "babel-register": "^6.26.0",
     "chai": "^4.1.2",
     "enzyme": "^3.2.0",
-    "enzyme-adapter-react-helper": "^1.0.3",
+    "enzyme-adapter-react-helper": "^1.1.0",
     "eslint": "^4.11.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
@@ -70,7 +70,6 @@
     "react-test-renderer": "~15.4.2",
     "rimraf": "^2.6.2",
     "safe-publish-latest": "^1.1.1",
-    "semver": "^5.4.1",
     "sinon": "^4.1.2",
     "sinon-sandbox": "^1.0.2"
   },

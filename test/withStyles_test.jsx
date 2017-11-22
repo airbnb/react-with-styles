@@ -5,14 +5,10 @@ import { render, shallow } from 'enzyme';
 import deepmerge from 'deepmerge';
 import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
-import semver from 'semver';
+import ifReact from 'enzyme-adapter-react-helper/build/ifReact';
 
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
 import { css, cssNoRTL, withStyles, withStylesPropTypes } from '../src/withStyles';
-
-const itIfReact = function itIfReact(range) {
-  return semver.intersects(range, React.version) ? it : it.skip;
-};
 
 describe('withStyles()', () => {
   const defaultTheme = {
@@ -234,7 +230,7 @@ describe('withStyles()', () => {
       }
     });
 
-    itIfReact('>= 15.3', 'with the pureComponent option set, extends React.PureComponent', () => {
+    ifReact('>= 15.3', it, it.skip)('with the pureComponent option set, extends React.PureComponent', () => {
       function MyComponent() {
         return null;
       }
