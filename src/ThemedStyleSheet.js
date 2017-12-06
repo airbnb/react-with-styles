@@ -5,7 +5,11 @@ let styleTheme;
 const makeFromThemes = {};
 let internalId = 0;
 
-function registerTheme(theme) {
+function registerTheme(theme, { onlyIfChanged } = {}) {
+  if (onlyIfChanged && styleTheme && styleTheme.theme === theme) {
+    return;
+  }
+
   styleTheme = {
     theme,
     styles: {},
