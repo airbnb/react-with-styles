@@ -2,14 +2,9 @@ import globalCache from 'global-cache';
 
 let styleInterface;
 let styleTheme;
-const makeFromThemes = {};
-let internalId = 0;
 
 function registerTheme(theme) {
-  styleTheme = {
-    theme,
-    styles: {},
-  };
+  styleTheme = theme;
 }
 
 function registerInterface(interfaceToRegister) {
@@ -17,16 +12,8 @@ function registerInterface(interfaceToRegister) {
 }
 
 function create(makeFromTheme, createWithDirection) {
-  // Get an id to associate with this stylesheet
-  const id = internalId;
-  internalId += 1;
-
-  const { theme, styles } = styleTheme;
-  styles[id] = createWithDirection(makeFromTheme(theme));
-
-  makeFromThemes[id] = makeFromTheme;
-
-  return () => styleTheme.styles[id];
+  const styles = createWithDirection(makeFromTheme(styleTheme));
+  return () => styles;
 }
 
 function createLTR(makeFromTheme) {
@@ -38,7 +25,7 @@ function createRTL(makeFromTheme) {
 }
 
 function get() {
-  return styleTheme.theme;
+  return styleTheme;
 }
 
 function resolve(...styles) {
