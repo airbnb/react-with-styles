@@ -1,3 +1,6 @@
+## v2.3.1
+- [fix] Remove unnecessary `makeFromThemes`/`styles` globals from the `ThemedStyleSheet` ([#122](https://github.com/airbnb/react-with-styles/pull/122))
+
 ## v2.3.0
 - [new] Add contextual StyleSheet creation based on direction ([#117](https://github.com/airbnb/react-with-styles/pull/117))
 
