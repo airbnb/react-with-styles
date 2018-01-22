@@ -1,3 +1,6 @@
+## v2.4.0
+- [new] Recreate styles on render when the theme changes ([#128](https://github.com/airbnb/react-with-styles/pull/128))
+
 ## v2.3.1
 - [fix] Remove unnecessary `makeFromThemes`/`styles` globals from the `ThemedStyleSheet` ([#122](https://github.com/airbnb/react-with-styles/pull/122))
 
