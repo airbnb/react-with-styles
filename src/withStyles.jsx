@@ -46,7 +46,23 @@ export function withStyles(
 ) {
   let styleDefLTR;
   let styleDefRTL;
+  let currentThemeLTR;
+  let currentThemeRTL;
   const BaseClass = baseClass(pureComponent);
+
+  function createStyles(isRTL) {
+    const registeredTheme = ThemedStyleSheet.get();
+
+    if (isRTL) {
+      styleDefRTL = styleFn ? ThemedStyleSheet.createRTL(styleFn) : EMPTY_STYLES_FN;
+      currentThemeRTL = registeredTheme;
+      return styleDefRTL;
+    }
+
+    styleDefLTR = styleFn ? ThemedStyleSheet.create(styleFn) : EMPTY_STYLES_FN;
+    currentThemeLTR = registeredTheme;
+    return styleDefLTR;
+  }
 
   return function withStylesHOC(WrappedComponent) {
     // NOTE: Use a class here so components are ref-able if need be:
@@ -59,13 +75,19 @@ export function withStyles(
       maybeCreateStyles() {
         const direction = this.context[CHANNEL] && this.context[CHANNEL].getState();
         const isRTL = direction === DIRECTIONS.RTL;
-        if (isRTL && !styleDefRTL) {
-          styleDefRTL = styleFn ? ThemedStyleSheet.createRTL(styleFn) : EMPTY_STYLES_FN;
-        } else if (!isRTL && !styleDefLTR) {
-          styleDefLTR = styleFn ? ThemedStyleSheet.create(styleFn) : EMPTY_STYLES_FN;
+
+        const styleDef = isRTL ? styleDefRTL : styleDefLTR;
+        const currentTheme = isRTL ? currentThemeRTL : currentThemeLTR;
+        const registeredTheme = ThemedStyleSheet.get();
+
+        // Return the existing styles if they've already been defined
+        // and if the theme used to create them corresponds to the theme
+        // registered with ThemedStyleSheet
+        if (styleDef && currentTheme === registeredTheme) {
+          return styleDef;
         }
 
-        return isRTL ? styleDefRTL : styleDefLTR;
+        return createStyles(isRTL);
       }
 
       render() {

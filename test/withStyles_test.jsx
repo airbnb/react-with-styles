@@ -64,6 +64,43 @@ describe('withStyles()', () => {
       expect(testInterface.create.callCount).to.equal(1);
     });
 
+    it('recreates the styles for all components when a new theme is registered', () => {
+      function MyComponent() {
+        return null;
+      }
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      const OtherWrappedComponent = withStyles(() => ({}))(MyComponent);
+
+      expect(testInterface.create.callCount).to.equal(0);
+      shallow(<WrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(1);
+      shallow(<OtherWrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(2);
+
+      const otherTheme = { unit: 8 };
+      ThemedStyleSheet.registerTheme(otherTheme);
+      ThemedStyleSheet.registerTheme(otherTheme);
+      shallow(<WrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(3);
+      shallow(<OtherWrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(4);
+    });
+
+    it('does not recreate styles when the same theme is registered', () => {
+      function MyComponent() {
+        return null;
+      }
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
+      expect(testInterface.create.callCount).to.equal(0);
+      shallow(<WrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(1);
+
+      ThemedStyleSheet.registerTheme(defaultTheme);
+      shallow(<WrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(1);
+    });
+
     it('has a wrapped displayName', () => {
       function MyComponent() {
         return null;
@@ -260,6 +297,12 @@ describe('withStyles()', () => {
 });
 
 describe('RTL support', () => {
+  const defaultTheme = {
+    color: {
+      red: '#990000',
+    },
+  };
+
   let testInterface;
   let resolveStub;
   let resolveNoRTLStub;
@@ -281,7 +324,7 @@ describe('RTL support', () => {
       flush: sinon.spy(),
     };
 
-    ThemedStyleSheet.registerTheme({});
+    ThemedStyleSheet.registerTheme(defaultTheme);
     ThemedStyleSheet.registerInterface(testInterface);
   });
 
@@ -348,6 +391,60 @@ describe('RTL support', () => {
         </DirectionProvider>
       ));
       expect(testInterface.createRTL).to.have.property('callCount', 1);
+    });
+
+    it('recreates all styles when a new theme is registered', () => {
+      function MyComponent() {
+        return null;
+      }
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
+      expect(testInterface.createRTL.callCount).to.equal(0);
+      render((
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <WrappedComponent />
+        </DirectionProvider>
+      ));
+      expect(testInterface.createRTL.callCount).to.equal(1);
+
+      expect(testInterface.create.callCount).to.equal(0);
+      render(<WrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(1);
+
+      const otherTheme = { unit: 8 };
+      ThemedStyleSheet.registerTheme(otherTheme);
+      render((
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <WrappedComponent />
+        </DirectionProvider>
+      ));
+      expect(testInterface.createRTL.callCount).to.equal(2);
+      expect(testInterface.create.callCount).to.equal(1);
+      render(<WrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(2);
+    });
+
+    it('does not recreate styles when the same theme is registered', () => {
+      function MyComponent() {
+        return null;
+      }
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
+      expect(testInterface.createRTL.callCount).to.equal(0);
+      render((
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <WrappedComponent />
+        </DirectionProvider>
+      ));
+      expect(testInterface.createRTL.callCount).to.equal(1);
+
+      ThemedStyleSheet.registerTheme(defaultTheme);
+      render((
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <WrappedComponent />
+        </DirectionProvider>
+      ));
+      expect(testInterface.createRTL.callCount).to.equal(1);
     });
   });
 });
