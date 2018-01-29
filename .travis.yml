@@ -2,6 +2,7 @@ language: node_js
 os:
  - linux
 node_js:
+  - "9"
   - "8"
   - "7"
   - "6"
@@ -18,7 +19,11 @@ script:
   - 'if [ -n "${TEST-}" ]; then npm run tests-only ; fi'
 sudo: false
 env:
-  - TEST=true
+  - TEST=true REACT=16
+  - TEST=true REACT=15
+  - TEST=true REACT=15.4
+  - TEST=true REACT=0.14
+  - TEST=true REACT=0.13
 matrix:
   fast_finish: true
   include:
@@ -28,3 +33,7 @@ matrix:
     - os: osx
     - env: TEST=true ALLOW_FAILURE=true
     - env: COVERAGE=true
+    - node_js: "9"
+    - node_js: "7"
+    - node_js: "5"
+    - env: TEST=true REACT=0.13

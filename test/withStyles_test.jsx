@@ -5,6 +5,8 @@ import { render, shallow } from 'enzyme';
 import deepmerge from 'deepmerge';
 import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
+import ifReact from 'enzyme-adapter-react-helper/build/ifReact';
+import safeSFC from 'enzyme-adapter-react-helper/build/safeSFC';
 
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
 import { css, cssNoRTL, withStyles, withStylesPropTypes } from '../src/withStyles';
@@ -59,7 +61,7 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      const WrappedComponent = withStyles(() => ({}))(safeSFC(MyComponent));
       shallow(<WrappedComponent />);
       expect(testInterface.create.callCount).to.equal(1);
     });
@@ -106,7 +108,7 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const result = withStyles(() => ({}))(MyComponent);
+      const result = withStyles(() => ({}))(safeSFC(MyComponent));
       expect(result.displayName).to.equal('withStyles(MyComponent)');
     });
 
@@ -116,7 +118,7 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const Wrapped = withStyles(() => ({}))(MyComponent);
+      const Wrapped = withStyles(() => ({}))(safeSFC(MyComponent));
       shallow(<Wrapped />).dive();
     });
 
@@ -126,7 +128,7 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const Wrapped = withStyles(() => ({}), { themePropName: 'foo' })(MyComponent);
+      const Wrapped = withStyles(() => ({}), { themePropName: 'foo' })(safeSFC(MyComponent));
       shallow(<Wrapped />).dive();
     });
 
@@ -140,7 +142,7 @@ describe('withStyles()', () => {
         foo: {
           color: color.red,
         },
-      }))(MyComponent);
+      }))(safeSFC(MyComponent));
       shallow(<Wrapped />).dive();
     });
 
@@ -150,7 +152,7 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const Wrapped = withStyles()(MyComponent);
+      const Wrapped = withStyles()(safeSFC(MyComponent));
       shallow(<Wrapped />).dive();
     });
 
@@ -164,7 +166,7 @@ describe('withStyles()', () => {
         foo: {
           color: '#ff0000',
         },
-      }), { stylesPropName: 'bar' })(MyComponent);
+      }), { stylesPropName: 'bar' })(safeSFC(MyComponent));
       shallow(<Wrapped />).dive();
     });
 
@@ -173,7 +175,7 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const Wrapped = withStyles(() => ({}))(MyComponent);
+      const Wrapped = withStyles(() => ({}))(safeSFC(MyComponent));
       shallow(<Wrapped />);
       expect(testInterface.flush.callCount).to.equal(0);
     });
@@ -183,7 +185,7 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const Wrapped = withStyles(() => ({}), { flushBefore: true })(MyComponent);
+      const Wrapped = withStyles(() => ({}), { flushBefore: true })(safeSFC(MyComponent));
       shallow(<Wrapped />);
       expect(testInterface.flush.callCount).to.equal(1);
     });
@@ -194,7 +196,7 @@ describe('withStyles()', () => {
       }
       MyComponent.foo = 'bar';
 
-      const Wrapped = withStyles(() => ({}), { flushBefore: true })(MyComponent);
+      const Wrapped = withStyles(() => ({}), { flushBefore: true })(safeSFC(MyComponent));
       expect(Wrapped.foo).to.equal('bar');
     });
 
@@ -210,7 +212,7 @@ describe('withStyles()', () => {
         foo: {
           color: color.red,
         },
-      }))(MyComponent);
+      }))(safeSFC(MyComponent));
       const wrapper = shallow(<Wrapped />).dive();
 
       expect(wrapper.prop('style')).to.eql({ color: '#990000' });
@@ -234,7 +236,7 @@ describe('withStyles()', () => {
         foo: {
           color: color.red,
         },
-      }))(MyComponent);
+      }))(safeSFC(MyComponent));
 
       // copied
       const expectedPropTypes = deepmerge({}, MyComponent.propTypes);
@@ -255,19 +257,23 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const Wrapped = withStyles(() => ({}))(MyComponent);
-      expect(Object.getPrototypeOf(Wrapped)).to.equal(React.Component);
-      expect(Object.getPrototypeOf(Wrapped.prototype)).to.equal(React.Component.prototype);
-      expect(Object.getPrototypeOf(Wrapped)).not.to.equal(React.PureComponent);
-      expect(Object.getPrototypeOf(Wrapped.prototype)).not.to.equal(React.PureComponent.prototype);
+      const Wrapped = withStyles(() => ({}))(safeSFC(MyComponent));
+      const wrappedProto = Object.getPrototypeOf(Wrapped);
+      const wrappedProtoProto = Object.getPrototypeOf(Wrapped.prototype);
+      expect(wrappedProto).to.equal(React.Component);
+      expect(wrappedProtoProto).to.equal(React.Component.prototype);
+      if (React.PureComponent) {
+        expect(wrappedProto).not.to.equal(React.PureComponent);
+        expect(wrappedProtoProto).not.to.equal(React.PureComponent.prototype);
+      }
     });
 
-    it('with the pureComponent option set, extends React.PureComponent', () => {
+    ifReact('>= 15.3', it, it.skip)('with the pureComponent option set, extends React.PureComponent', () => {
       function MyComponent() {
         return null;
       }
 
-      const Wrapped = withStyles(() => ({}), { pureComponent: true })(MyComponent);
+      const Wrapped = withStyles(() => ({}), { pureComponent: true })(safeSFC(MyComponent));
       expect(Object.getPrototypeOf(Wrapped)).not.to.equal(React.Component);
       expect(Object.getPrototypeOf(Wrapped.prototype)).not.to.equal(React.Component.prototype);
       expect(Object.getPrototypeOf(Wrapped)).to.equal(React.PureComponent);
@@ -277,18 +283,18 @@ describe('withStyles()', () => {
 
   describe('css/cssNoRTL', () => {
     it('css calls resolve method', () => {
-      function MyComponent() {
+      const MyComponent = safeSFC(function MyComponent() {
         return <div {...css({ color: 'red' })} />;
-      }
+      });
 
       shallow(<MyComponent />);
       expect(testInterfaceResolveStub.callCount).to.equal(1);
     });
 
     it('cssNoRTL calls resolve method if resolveNoRTL does not exist', () => {
-      function MyComponent() {
+      const MyComponent = safeSFC(function MyComponent() {
         return <div {...cssNoRTL({ color: 'red' })} />;
-      }
+      });
 
       shallow(<MyComponent />);
       expect(testInterfaceResolveStub.callCount).to.equal(1);
@@ -334,9 +340,9 @@ describe('RTL support', () => {
 
   describe('css/cssNoRTL', () => {
     it('css calls resolve method', () => {
-      function MyComponent() {
+      const MyComponent = safeSFC(function MyComponent() {
         return <div {...css({ color: 'red' })} />;
-      }
+      });
 
       shallow(<MyComponent />);
       expect(resolveStub.callCount).to.equal(1);
@@ -344,9 +350,9 @@ describe('RTL support', () => {
     });
 
     it('cssNoRTL calls resolve method if resolveNoRTL does not exist', () => {
-      function MyComponent() {
+      const MyComponent = safeSFC(function MyComponent() {
         return <div {...cssNoRTL({ color: 'red' })} />;
-      }
+      });
 
       shallow(<MyComponent />);
       expect(resolveStub.callCount).to.equal(0);
@@ -360,7 +366,7 @@ describe('RTL support', () => {
         return null;
       }
 
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      const WrappedComponent = withStyles(() => ({}))(safeSFC(MyComponent));
       render(<WrappedComponent />);
       expect(testInterface.create).to.have.property('callCount', 1);
     });
@@ -370,7 +376,7 @@ describe('RTL support', () => {
         return null;
       }
 
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      const WrappedComponent = withStyles(() => ({}))(safeSFC(MyComponent));
       render((
         <DirectionProvider direction={DIRECTIONS.LTR}>
           <WrappedComponent />
@@ -384,7 +390,7 @@ describe('RTL support', () => {
         return null;
       }
 
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      const WrappedComponent = withStyles(() => ({}))(safeSFC(MyComponent));
       render((
         <DirectionProvider direction={DIRECTIONS.RTL}>
           <WrappedComponent />
