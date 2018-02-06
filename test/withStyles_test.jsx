@@ -7,7 +7,7 @@ import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
 
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
-import { css, cssNoRTL, withStyles, withStylesPropTypes } from '../src/withStyles';
+import { withStyles, withStylesPropTypes } from '../src/withStyles';
 
 describe('withStyles()', () => {
   const defaultTheme = {
@@ -17,18 +17,30 @@ describe('withStyles()', () => {
   };
 
   let testInterface;
-  let testInterfaceResolveStub;
+  let testInterfaceResolveLTRStub;
+  let testInterfaceResolveRTLStub;
 
   beforeEach(() => {
     testInterface = {
       create() {},
+      createLTR() {},
+      createRTL() {},
       resolve() {},
+      resolveLTR() {},
+      resolveRTL() {},
       flush: sinon.spy(),
     };
     sinon.stub(testInterface, 'create').callsFake(styleHash => styleHash);
-    testInterfaceResolveStub = sinon.stub(testInterface, 'resolve').callsFake(styles => ({
+    sinon.stub(testInterface, 'createLTR').callsFake(styleHash => styleHash);
+    sinon.stub(testInterface, 'createRTL').callsFake(styleHash => styleHash);
+    const fakeResolveMethod = styles => ({
       style: styles.reduce((result, style) => Object.assign(result, style)),
-    }));
+    });
+    sinon.stub(testInterface, 'resolve').callsFake(fakeResolveMethod);
+    testInterfaceResolveLTRStub =
+      sinon.stub(testInterface, 'resolveLTR').callsFake(fakeResolveMethod);
+    testInterfaceResolveRTLStub =
+      sinon.stub(testInterface, 'resolveRTL').callsFake(fakeResolveMethod);
 
     ThemedStyleSheet.registerTheme(defaultTheme);
     ThemedStyleSheet.registerInterface(testInterface);
@@ -46,6 +58,8 @@ describe('withStyles()', () => {
     it('does not create styles', () => {
       withStyles();
       expect(testInterface.create.callCount).to.equal(0);
+      expect(testInterface.createLTR.callCount).to.equal(0);
+      expect(testInterface.createRTL.callCount).to.equal(0);
     });
   });
 
@@ -54,51 +68,137 @@ describe('withStyles()', () => {
   });
 
   describe('HOC', () => {
-    it('creates the styles', () => {
-      function MyComponent() {
-        return null;
-      }
+    describe('StyleSheet creation', () => {
+      it('creates the styles in a non-directional context', () => {
+        function MyComponent() {
+          return null;
+        }
 
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
-      shallow(<WrappedComponent />);
-      expect(testInterface.create.callCount).to.equal(1);
+        const WrappedComponent = withStyles(() => ({}))(MyComponent);
+        shallow(<WrappedComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(1);
+      });
+
+      it('creates the styles in an LTR context', () => {
+        function MyComponent() {
+          return null;
+        }
+
+        const WrappedComponent = withStyles(() => ({}))(MyComponent);
+        render((
+          <DirectionProvider direction={DIRECTIONS.LTR}>
+            <WrappedComponent />
+          </DirectionProvider>
+        ));
+        expect(testInterface.createLTR.callCount).to.equal(1);
+      });
+
+      it('creates the styles in an RTL context', () => {
+        function MyComponent() {
+          return null;
+        }
+
+        const WrappedComponent = withStyles(() => ({}))(MyComponent);
+        render((
+          <DirectionProvider direction={DIRECTIONS.RTL}>
+            <WrappedComponent />
+          </DirectionProvider>
+        ));
+        expect(testInterface.createRTL.callCount).to.equal(1);
+      });
     });
 
-    it('recreates the styles for all components when a new theme is registered', () => {
-      function MyComponent() {
-        return null;
-      }
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
-      const OtherWrappedComponent = withStyles(() => ({}))(MyComponent);
+    describe('StyleSheet clobbering', () => {
+      it('recreates the styles for all components when a new theme is registered', () => {
+        function MyComponent() {
+          return null;
+        }
+        const WrappedComponent = withStyles(() => ({}))(MyComponent);
+        const OtherWrappedComponent = withStyles(() => ({}))(MyComponent);
 
-      expect(testInterface.create.callCount).to.equal(0);
-      shallow(<WrappedComponent />);
-      expect(testInterface.create.callCount).to.equal(1);
-      shallow(<OtherWrappedComponent />);
-      expect(testInterface.create.callCount).to.equal(2);
+        expect(testInterface.createLTR.callCount).to.equal(0);
+        shallow(<WrappedComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(1);
+        shallow(<OtherWrappedComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(2);
 
-      const otherTheme = { unit: 8 };
-      ThemedStyleSheet.registerTheme(otherTheme);
-      ThemedStyleSheet.registerTheme(otherTheme);
-      shallow(<WrappedComponent />);
-      expect(testInterface.create.callCount).to.equal(3);
-      shallow(<OtherWrappedComponent />);
-      expect(testInterface.create.callCount).to.equal(4);
-    });
+        const otherTheme = { unit: 8 };
+        ThemedStyleSheet.registerTheme(otherTheme);
+        ThemedStyleSheet.registerTheme(otherTheme);
+        shallow(<WrappedComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(3);
+        shallow(<OtherWrappedComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(4);
+      });
 
-    it('does not recreate styles when the same theme is registered', () => {
-      function MyComponent() {
-        return null;
-      }
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      it('does not recreate styles when the same theme is registered', () => {
+        function MyComponent() {
+          return null;
+        }
+        const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
-      expect(testInterface.create.callCount).to.equal(0);
-      shallow(<WrappedComponent />);
-      expect(testInterface.create.callCount).to.equal(1);
+        expect(testInterface.createLTR.callCount).to.equal(0);
+        shallow(<WrappedComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(1);
 
-      ThemedStyleSheet.registerTheme(defaultTheme);
-      shallow(<WrappedComponent />);
-      expect(testInterface.create.callCount).to.equal(1);
+        ThemedStyleSheet.registerTheme(defaultTheme);
+        shallow(<WrappedComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(1);
+      });
+
+      it('recreates all RTL styles when a new theme is registered', () => {
+        function MyComponent() {
+          return null;
+        }
+        const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
+        expect(testInterface.createRTL.callCount).to.equal(0);
+        render((
+          <DirectionProvider direction={DIRECTIONS.RTL}>
+            <WrappedComponent />
+          </DirectionProvider>
+        ));
+        expect(testInterface.createRTL.callCount).to.equal(1);
+
+        expect(testInterface.createLTR.callCount).to.equal(0);
+        render(<WrappedComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(1);
+
+        const otherTheme = { unit: 8 };
+        ThemedStyleSheet.registerTheme(otherTheme);
+        render((
+          <DirectionProvider direction={DIRECTIONS.RTL}>
+            <WrappedComponent />
+          </DirectionProvider>
+        ));
+        expect(testInterface.createRTL.callCount).to.equal(2);
+        expect(testInterface.createLTR.callCount).to.equal(1);
+        render(<WrappedComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(2);
+      });
+
+      it('does not recreate RTL styles when the same theme is registered', () => {
+        function MyComponent() {
+          return null;
+        }
+        const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
+        expect(testInterface.createRTL.callCount).to.equal(0);
+        render((
+          <DirectionProvider direction={DIRECTIONS.RTL}>
+            <WrappedComponent />
+          </DirectionProvider>
+        ));
+        expect(testInterface.createRTL.callCount).to.equal(1);
+
+        ThemedStyleSheet.registerTheme(defaultTheme);
+        render((
+          <DirectionProvider direction={DIRECTIONS.RTL}>
+            <WrappedComponent />
+          </DirectionProvider>
+        ));
+        expect(testInterface.createRTL.callCount).to.equal(1);
+      });
     });
 
     it('has a wrapped displayName', () => {
@@ -198,8 +298,8 @@ describe('withStyles()', () => {
       expect(Wrapped.foo).to.equal('bar');
     });
 
-    it('works with css()', () => {
-      function MyComponent({ styles }) {
+    it('works with css prop', () => {
+      function MyComponent({ css, styles }) {
         return <div {...css(styles.foo)} />;
       }
       MyComponent.propTypes = {
@@ -219,7 +319,7 @@ describe('withStyles()', () => {
     it('copies over non-withStyles propTypes and defaultProps', () => {
       // TODO: fix eslint-plugin-react bug
       // eslint-disable-next-line react/prop-types
-      function MyComponent({ styles, theme }) {
+      function MyComponent({ css, styles, theme }) {
         return <div {...css(styles.foo)}>{theme.color.default}</div>;
       }
       MyComponent.propTypes = {
@@ -240,6 +340,7 @@ describe('withStyles()', () => {
       const expectedPropTypes = deepmerge({}, MyComponent.propTypes);
       delete expectedPropTypes.styles;
       delete expectedPropTypes.theme;
+      delete expectedPropTypes.css;
       expect(Wrapped.propTypes).to.eql(expectedPropTypes);
       expect(MyComponent.propTypes).to.include.keys('styles', 'theme');
 
@@ -275,28 +376,60 @@ describe('withStyles()', () => {
     });
   });
 
-  describe('css/cssNoRTL', () => {
-    it('css calls resolve method', () => {
-      function MyComponent() {
+  describe('css', () => {
+    it('css calls resolveLTR method in non-directional context', () => {
+      function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
+      MyComponent.propTypes = {
+        ...withStylesPropTypes,
+      };
 
-      shallow(<MyComponent />);
-      expect(testInterfaceResolveStub.callCount).to.equal(1);
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
+      render(<WrappedComponent />);
+      expect(testInterfaceResolveLTRStub.callCount).to.equal(1);
     });
 
-    it('cssNoRTL calls resolve method if resolveNoRTL does not exist', () => {
-      function MyComponent() {
-        return <div {...cssNoRTL({ color: 'red' })} />;
+    it('css calls resolveLTR method in LTR context', () => {
+      function MyComponent({ css }) {
+        return <div {...css({ color: 'red' })} />;
       }
+      MyComponent.propTypes = {
+        ...withStylesPropTypes,
+      };
 
-      shallow(<MyComponent />);
-      expect(testInterfaceResolveStub.callCount).to.equal(1);
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
+      render((
+        <DirectionProvider direction={DIRECTIONS.LTR}>
+          <WrappedComponent />
+        </DirectionProvider>
+      ));
+      expect(testInterfaceResolveLTRStub.callCount).to.equal(1);
+    });
+
+    it('css calls resolveRTL method in RTL context', () => {
+      function MyComponent({ css }) {
+        return <div {...css({ color: 'red' })} />;
+      }
+      MyComponent.propTypes = {
+        ...withStylesPropTypes,
+      };
+
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
+      render((
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <WrappedComponent />
+        </DirectionProvider>
+      ));
+      expect(testInterfaceResolveRTLStub.callCount).to.equal(1);
     });
   });
 });
 
-describe('RTL support', () => {
+describe('fallbacks', () => {
   const defaultTheme = {
     color: {
       red: '#990000',
@@ -305,22 +438,15 @@ describe('RTL support', () => {
 
   let testInterface;
   let resolveStub;
-  let resolveNoRTLStub;
   let createStub;
-  let createRTLStub;
 
   beforeEach(() => {
     resolveStub = sinon.stub();
-    resolveNoRTLStub = sinon.stub();
-
-    createStub = sinon.stub();
-    createRTLStub = sinon.stub();
+    createStub = sinon.stub().returns({});
 
     testInterface = {
       create: createStub,
-      createRTL: createRTLStub,
       resolve: resolveStub,
-      resolveNoRTL: resolveNoRTLStub,
       flush: sinon.spy(),
     };
 
@@ -332,40 +458,18 @@ describe('RTL support', () => {
     sinon.restore();
   });
 
-  describe('css/cssNoRTL', () => {
-    it('css calls resolve method', () => {
-      function MyComponent() {
-        return <div {...css({ color: 'red' })} />;
-      }
-
-      shallow(<MyComponent />);
-      expect(resolveStub.callCount).to.equal(1);
-      expect(resolveNoRTLStub.callCount).to.equal(0);
-    });
-
-    it('cssNoRTL calls resolve method if resolveNoRTL does not exist', () => {
-      function MyComponent() {
-        return <div {...cssNoRTL({ color: 'red' })} />;
-      }
-
-      shallow(<MyComponent />);
-      expect(resolveStub.callCount).to.equal(0);
-      expect(resolveNoRTLStub.callCount).to.equal(1);
-    });
-  });
-
-  describe('contextual create', () => {
-    it('calls ThemedStyleSheet.create without direction set', () => {
+  describe('StyleSheet creation', () => {
+    it('creates the styles in a non-directional context', () => {
       function MyComponent() {
         return null;
       }
 
       const WrappedComponent = withStyles(() => ({}))(MyComponent);
-      render(<WrappedComponent />);
-      expect(testInterface.create).to.have.property('callCount', 1);
+      shallow(<WrappedComponent />);
+      expect(testInterface.create.callCount).to.equal(1);
     });
 
-    it('calls ThemedStyleSheet.create with LTR direction', () => {
+    it('creates the styles in an LTR context', () => {
       function MyComponent() {
         return null;
       }
@@ -376,75 +480,73 @@ describe('RTL support', () => {
           <WrappedComponent />
         </DirectionProvider>
       ));
-      expect(testInterface.create).to.have.property('callCount', 1);
-    });
-
-    it('calls ThemedStyleSheet.createRTL with RTL direction', () => {
-      function MyComponent() {
-        return null;
-      }
-
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
-      render((
-        <DirectionProvider direction={DIRECTIONS.RTL}>
-          <WrappedComponent />
-        </DirectionProvider>
-      ));
-      expect(testInterface.createRTL).to.have.property('callCount', 1);
-    });
-
-    it('recreates all styles when a new theme is registered', () => {
-      function MyComponent() {
-        return null;
-      }
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
-
-      expect(testInterface.createRTL.callCount).to.equal(0);
-      render((
-        <DirectionProvider direction={DIRECTIONS.RTL}>
-          <WrappedComponent />
-        </DirectionProvider>
-      ));
-      expect(testInterface.createRTL.callCount).to.equal(1);
-
-      expect(testInterface.create.callCount).to.equal(0);
-      render(<WrappedComponent />);
       expect(testInterface.create.callCount).to.equal(1);
-
-      const otherTheme = { unit: 8 };
-      ThemedStyleSheet.registerTheme(otherTheme);
-      render((
-        <DirectionProvider direction={DIRECTIONS.RTL}>
-          <WrappedComponent />
-        </DirectionProvider>
-      ));
-      expect(testInterface.createRTL.callCount).to.equal(2);
-      expect(testInterface.create.callCount).to.equal(1);
-      render(<WrappedComponent />);
-      expect(testInterface.create.callCount).to.equal(2);
     });
 
-    it('does not recreate styles when the same theme is registered', () => {
+    it('creates the styles in an RTL context', () => {
       function MyComponent() {
         return null;
       }
+
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      render((
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <WrappedComponent />
+        </DirectionProvider>
+      ));
+      expect(testInterface.create.callCount).to.equal(1);
+    });
+  });
+
+  describe('css', () => {
+    it('css calls resolveLTR method in non-directional context', () => {
+      function MyComponent({ css }) {
+        return <div {...css({ color: 'red' })} />;
+      }
+      MyComponent.propTypes = {
+        ...withStylesPropTypes,
+      };
+
       const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
-      expect(testInterface.createRTL.callCount).to.equal(0);
-      render((
-        <DirectionProvider direction={DIRECTIONS.RTL}>
-          <WrappedComponent />
-        </DirectionProvider>
-      ));
-      expect(testInterface.createRTL.callCount).to.equal(1);
+      render(<WrappedComponent />);
+      expect(resolveStub.callCount).to.equal(1);
+    });
 
-      ThemedStyleSheet.registerTheme(defaultTheme);
+    it('css calls resolveLTR method in LTR context', () => {
+      function MyComponent({ css }) {
+        return <div {...css({ color: 'red' })} />;
+      }
+      MyComponent.propTypes = {
+        ...withStylesPropTypes,
+      };
+
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
+      render((
+        <DirectionProvider direction={DIRECTIONS.LTR}>
+          <WrappedComponent />
+        </DirectionProvider>
+      ));
+      expect(resolveStub.callCount).to.equal(1);
+    });
+
+    it('css calls resolveRTL method in RTL context', () => {
+      function MyComponent({ css }) {
+        return <div {...css({ color: 'red' })} />;
+      }
+      MyComponent.propTypes = {
+        ...withStylesPropTypes,
+      };
+
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+
       render((
         <DirectionProvider direction={DIRECTIONS.RTL}>
           <WrappedComponent />
         </DirectionProvider>
       ));
-      expect(testInterface.createRTL.callCount).to.equal(1);
+      expect(resolveStub.callCount).to.equal(1);
     });
   });
 });

@@ -8,12 +8,12 @@ import brcastShape from 'react-with-direction/dist/proptypes/brcast';
 
 import ThemedStyleSheet from './ThemedStyleSheet';
 
-// Add some named exports for convenience.
-export const css = ThemedStyleSheet.resolve;
-export const cssNoRTL = ThemedStyleSheet.resolveNoRTL;
+// Add some named exports to assist in upgrading and for convenience
+export const css = ThemedStyleSheet.resolveLTR;
 export const withStylesPropTypes = {
   styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  css: PropTypes.func.isRequired,
 };
 
 const EMPTY_STYLES = {};
@@ -35,11 +35,14 @@ const contextTypes = {
   [CHANNEL]: brcastShape,
 };
 
+const defaultDirection = DIRECTIONS.LTR;
+
 export function withStyles(
   styleFn,
   {
     stylesPropName = 'styles',
     themePropName = 'theme',
+    cssPropName = 'css',
     flushBefore = false,
     pureComponent = false,
   } = {},
@@ -59,7 +62,7 @@ export function withStyles(
       return styleDefRTL;
     }
 
-    styleDefLTR = styleFn ? ThemedStyleSheet.create(styleFn) : EMPTY_STYLES_FN;
+    styleDefLTR = styleFn ? ThemedStyleSheet.createLTR(styleFn) : EMPTY_STYLES_FN;
     currentThemeLTR = registeredTheme;
     return styleDefLTR;
   }
@@ -68,12 +71,46 @@ export function withStyles(
     // NOTE: Use a class here so components are ref-able if need be:
     // eslint-disable-next-line react/prefer-stateless-function
     class WithStyles extends BaseClass {
+      constructor(props, context) {
+        super(props, context);
+
+        // direction needs to be stored in state in order to trigger a rerender
+        // when context changes.
+        this.state = {
+          direction: context[CHANNEL] ? context[CHANNEL].getState() : defaultDirection,
+        };
+      }
+
       componentWillMount() {
         this.maybeCreateStyles();
       }
 
+      componentDidMount() {
+        if (this.context[CHANNEL]) {
+          // subscribe to future direction changes
+          this.channelUnsubscribe = this.context[CHANNEL].subscribe((direction) => {
+            this.setState({ direction });
+          });
+        }
+      }
+
+      componentWillUnmount() {
+        if (this.channelUnsubscribe) {
+          this.channelUnsubscribe();
+        }
+      }
+
+      getResolveMethod() {
+        const { direction } = this.state;
+        if (direction === DIRECTIONS.RTL) {
+          return ThemedStyleSheet.resolveRTL;
+        }
+
+        return ThemedStyleSheet.resolveLTR;
+      }
+
       maybeCreateStyles() {
-        const direction = this.context[CHANNEL] && this.context[CHANNEL].getState();
+        const { direction } = this.state;
         const isRTL = direction === DIRECTIONS.RTL;
 
         const styleDef = isRTL ? styleDefRTL : styleDefLTR;
@@ -110,6 +147,7 @@ export function withStyles(
             {...{
               [themePropName]: ThemedStyleSheet.get(),
               [stylesPropName]: styleDef(),
+              [cssPropName]: this.getResolveMethod(),
             }}
           />
         );
@@ -127,6 +165,7 @@ export function withStyles(
       WithStyles.propTypes = deepmerge({}, WrappedComponent.propTypes);
       delete WithStyles.propTypes[stylesPropName];
       delete WithStyles.propTypes[themePropName];
+      delete WithStyles.propTypes[cssPropName];
     }
     if (WrappedComponent.defaultProps) {
       WithStyles.defaultProps = deepmerge({}, WrappedComponent.defaultProps);
