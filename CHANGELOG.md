@@ -1,3 +1,6 @@
+## v3.0.0
+- [breaking] Send css method down as a prop; remove cssNoRTL and some ThemedStyleSheet methods ([#124](https://github.com/airbnb/react-with-styles/pull/124))
+
 ## v2.4.0
 - [new] Recreate styles on render when the theme changes ([#128](https://github.com/airbnb/react-with-styles/pull/128))
 
