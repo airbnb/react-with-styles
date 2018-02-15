@@ -1,3 +1,6 @@
+## v3.1.0
+- [new] Add back default create/resolve methods to ThemedStyleSheet ([#130](https://github.com/airbnb/react-with-styles/pull/130))
+
 ## v3.0.0
 - [breaking] Send css method down as a prop; remove cssNoRTL and some ThemedStyleSheet methods ([#124](https://github.com/airbnb/react-with-styles/pull/124))
 
