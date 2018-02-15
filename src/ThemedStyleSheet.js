@@ -62,9 +62,11 @@ export default globalCache.setIfMissingThenGet(
   () => ({
     registerTheme,
     registerInterface,
+    create: createLTR,
     createLTR,
     createRTL,
     get,
+    resolve: resolveLTR,
     resolveLTR,
     resolveRTL,
     flush,
