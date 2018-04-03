@@ -1,5 +1,3 @@
-import globalCache from 'global-cache';
-
 let styleInterface;
 let styleTheme;
 
@@ -54,21 +52,15 @@ function flush() {
   }
 }
 
-// Using globalCache in order to export a singleton. This file may be imported
-// in several places, which otherwise stomps over any registered themes and
-// resets to just the defaults.
-export default globalCache.setIfMissingThenGet(
-  'react-with-styles ThemedStyleSheet',
-  () => ({
-    registerTheme,
-    registerInterface,
-    create: createLTR,
-    createLTR,
-    createRTL,
-    get,
-    resolve: resolveLTR,
-    resolveLTR,
-    resolveRTL,
-    flush,
-  }),
-);
+export default {
+  registerTheme,
+  registerInterface,
+  create: createLTR,
+  createLTR,
+  createRTL,
+  get,
+  resolve: resolveLTR,
+  resolveLTR,
+  resolveRTL,
+  flush,
+};
