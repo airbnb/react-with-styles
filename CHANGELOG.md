@@ -1,3 +1,6 @@
+## v3.1.1
+- [fix] Remove unnecessary `ThemedStyleSheet` caching ([#130](https://github.com/airbnb/react-with-styles/pull/135))
+
 ## v3.1.0
 - [new] Add back default create/resolve methods to ThemedStyleSheet ([#130](https://github.com/airbnb/react-with-styles/pull/130))
 
