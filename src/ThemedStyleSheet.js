@@ -1,5 +1,6 @@
 let styleInterface;
 let styleTheme;
+let styleTransform;
 
 function registerTheme(theme) {
   styleTheme = theme;
@@ -10,7 +11,10 @@ function registerInterface(interfaceToRegister) {
 }
 
 function create(makeFromTheme, createWithDirection) {
-  const styles = createWithDirection(makeFromTheme(styleTheme));
+  const styles = createWithDirection(styleTransform
+    ? styleTransform(styleTheme, makeFromTheme(styleTheme))
+    : makeFromTheme(styleTheme));
+
   return () => styles;
 }
 
@@ -52,6 +56,10 @@ function flush() {
   }
 }
 
+function registerStyleTransform(transform) {
+  styleTransform = transform;
+}
+
 export default {
   registerTheme,
   registerInterface,
@@ -63,4 +71,5 @@ export default {
   resolveLTR,
   resolveRTL,
   flush,
+  registerStyleTransform,
 };

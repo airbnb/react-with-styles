@@ -16,11 +16,13 @@ describe('withStyles()', () => {
     },
   };
 
+  let styleTransform;
   let testInterface;
   let testInterfaceResolveLTRStub;
   let testInterfaceResolveRTLStub;
 
   beforeEach(() => {
+    styleTransform = null;
     testInterface = {
       create() {},
       createLTR() {},
@@ -42,6 +44,7 @@ describe('withStyles()', () => {
     testInterfaceResolveRTLStub =
       sinon.stub(testInterface, 'resolveRTL').callsFake(fakeResolveMethod);
 
+    ThemedStyleSheet.registerStyleTransform(styleTransform);
     ThemedStyleSheet.registerTheme(defaultTheme);
     ThemedStyleSheet.registerInterface(testInterface);
   });
@@ -113,6 +116,7 @@ describe('withStyles()', () => {
         function MyComponent() {
           return null;
         }
+
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
         const OtherWrappedComponent = withStyles(() => ({}))(MyComponent);
 
@@ -135,6 +139,7 @@ describe('withStyles()', () => {
         function MyComponent() {
           return null;
         }
+
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
         expect(testInterface.createLTR.callCount).to.equal(0);
@@ -150,6 +155,7 @@ describe('withStyles()', () => {
         function MyComponent() {
           return null;
         }
+
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
         expect(testInterface.createRTL.callCount).to.equal(0);
@@ -181,6 +187,7 @@ describe('withStyles()', () => {
         function MyComponent() {
           return null;
         }
+
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
         expect(testInterface.createRTL.callCount).to.equal(0);
@@ -244,6 +251,35 @@ describe('withStyles()', () => {
       shallow(<Wrapped />).dive();
     });
 
+    it('transforms component styles', () => {
+      styleTransform = (theme, styles) => ({
+        ...styles,
+        MyComponent: {
+          ...styles.MyComponent,
+          border: '1px dashed',
+        },
+      });
+
+      ThemedStyleSheet.registerStyleTransform(styleTransform);
+
+      function MyComponent({ styles }) {
+        expect(styles).to.eql({ MyComponent: { backgroundColor: '#990000', border: '1px dashed' } });
+        return null;
+      }
+
+      MyComponent.propTypes = {
+        ...withStylesPropTypes,
+      };
+
+      const Wrapped = withStyles(({ color }) => ({
+        MyComponent: {
+          backgroundColor: color.red,
+        },
+      }))(MyComponent);
+
+      shallow(<Wrapped />).dive();
+    });
+
     it('passes an empty styles object without a styleFn', () => {
       function MyComponent({ styles }) {
         expect(styles).to.eql({});
@@ -292,6 +328,7 @@ describe('withStyles()', () => {
       function MyComponent() {
         return null;
       }
+
       MyComponent.foo = 'bar';
 
       const Wrapped = withStyles(() => ({}), { flushBefore: true })(MyComponent);
@@ -302,6 +339,7 @@ describe('withStyles()', () => {
       function MyComponent({ css, styles }) {
         return <div {...css(styles.foo)} />;
       }
+
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -322,6 +360,7 @@ describe('withStyles()', () => {
       function MyComponent({ css, styles, theme }) {
         return <div {...css(styles.foo)}>{theme.color.default}</div>;
       }
+
       MyComponent.propTypes = {
         ...withStylesPropTypes,
         foo: PropTypes.number,
@@ -381,6 +420,7 @@ describe('withStyles()', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
+
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -395,6 +435,7 @@ describe('withStyles()', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
+
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -413,6 +454,7 @@ describe('withStyles()', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
+
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -503,6 +545,7 @@ describe('fallbacks', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
+
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -517,6 +560,7 @@ describe('fallbacks', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
+
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -535,6 +579,7 @@ describe('fallbacks', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
+
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
