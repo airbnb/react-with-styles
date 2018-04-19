@@ -116,7 +116,6 @@ describe('withStyles()', () => {
         function MyComponent() {
           return null;
         }
-
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
         const OtherWrappedComponent = withStyles(() => ({}))(MyComponent);
 
@@ -139,7 +138,6 @@ describe('withStyles()', () => {
         function MyComponent() {
           return null;
         }
-
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
         expect(testInterface.createLTR.callCount).to.equal(0);
@@ -155,7 +153,6 @@ describe('withStyles()', () => {
         function MyComponent() {
           return null;
         }
-
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
         expect(testInterface.createRTL.callCount).to.equal(0);
@@ -187,7 +184,6 @@ describe('withStyles()', () => {
         function MyComponent() {
           return null;
         }
-
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
         expect(testInterface.createRTL.callCount).to.equal(0);
@@ -328,7 +324,6 @@ describe('withStyles()', () => {
       function MyComponent() {
         return null;
       }
-
       MyComponent.foo = 'bar';
 
       const Wrapped = withStyles(() => ({}), { flushBefore: true })(MyComponent);
@@ -339,7 +334,6 @@ describe('withStyles()', () => {
       function MyComponent({ css, styles }) {
         return <div {...css(styles.foo)} />;
       }
-
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -360,7 +354,6 @@ describe('withStyles()', () => {
       function MyComponent({ css, styles, theme }) {
         return <div {...css(styles.foo)}>{theme.color.default}</div>;
       }
-
       MyComponent.propTypes = {
         ...withStylesPropTypes,
         foo: PropTypes.number,
@@ -420,7 +413,6 @@ describe('withStyles()', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
-
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -435,7 +427,6 @@ describe('withStyles()', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
-
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -454,7 +445,6 @@ describe('withStyles()', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
-
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -545,7 +535,6 @@ describe('fallbacks', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
-
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -560,7 +549,6 @@ describe('fallbacks', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
-
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
@@ -579,7 +567,6 @@ describe('fallbacks', () => {
       function MyComponent({ css }) {
         return <div {...css({ color: 'red' })} />;
       }
-
       MyComponent.propTypes = {
         ...withStylesPropTypes,
       };
