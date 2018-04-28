@@ -53,7 +53,15 @@ export function withStyles(
   let currentThemeRTL;
   const BaseClass = baseClass(pureComponent);
 
-  function createStyles(isRTL) {
+  function createStyles(isRTL, wrappedComponentName) {
+    if (
+      process.env.NODE_ENV !== 'production'
+      && typeof performance !== 'undefined'
+      && performance.mark !== undefined
+    ) {
+      performance.mark('react-with-styles.createStyles.start');
+    }
+
     const registeredTheme = ThemedStyleSheet.get();
 
     if (isRTL) {
@@ -64,10 +72,29 @@ export function withStyles(
 
     styleDefLTR = styleFn ? ThemedStyleSheet.createLTR(styleFn) : EMPTY_STYLES_FN;
     currentThemeLTR = registeredTheme;
+
+    if (
+      process.env.NODE_ENV !== 'production'
+      && typeof performance !== 'undefined'
+      && performance.mark !== undefined
+    ) {
+      performance.mark('react-with-styles.createStyles.end');
+
+      performance.measure(
+        `\ud83d\udc69\u200d\ud83c\udfa8 withStyles(${wrappedComponentName}) [create styles]`,
+        'react-with-styles.createStyles.start',
+        'react-with-styles.createStyles.end',
+      );
+    }
+
     return styleDefLTR;
   }
 
   return function withStylesHOC(WrappedComponent) {
+    const wrappedComponentName = WrappedComponent.displayName
+      || WrappedComponent.name
+      || 'Component';
+
     // NOTE: Use a class here so components are ref-able if need be:
     // eslint-disable-next-line react/prefer-stateless-function
     class WithStyles extends BaseClass {
@@ -124,7 +151,7 @@ export function withStyles(
           return styleDef;
         }
 
-        return createStyles(isRTL);
+        return createStyles(isRTL, wrappedComponentName);
       }
 
       render() {
@@ -153,10 +180,6 @@ export function withStyles(
         );
       }
     }
-
-    const wrappedComponentName = WrappedComponent.displayName
-      || WrappedComponent.name
-      || 'Component';
 
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
