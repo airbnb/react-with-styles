@@ -27,7 +27,31 @@ function get() {
 }
 
 function resolve(...styles) {
-  return styleInterface.resolve(styles);
+  if (
+    process.env.NODE_ENV !== 'production'
+    && typeof performance !== 'undefined'
+    && performance.mark !== undefined
+  ) {
+    performance.mark('react-with-styles.resolve.start');
+  }
+
+  const result = styleInterface.resolve(styles);
+
+  if (
+    process.env.NODE_ENV !== 'production'
+    && typeof performance !== 'undefined'
+    && performance.mark !== undefined
+  ) {
+    performance.mark('react-with-styles.resolve.end');
+
+    performance.measure(
+      '\ud83d\udc69\u200d\ud83c\udfa8 [resolve]',
+      'react-with-styles.resolve.start',
+      'react-with-styles.resolve.end',
+    );
+  }
+
+  return result;
 }
 
 function resolveLTR(...styles) {
