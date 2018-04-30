@@ -68,7 +68,7 @@
     "react-test-renderer": "~15.4.2",
     "rimraf": "^2.6.2",
     "safe-publish-latest": "^1.1.1",
-    "sinon": "^4.1.2",
+    "sinon": "^5.0.1",
     "sinon-sandbox": "^1.0.2"
   },
   "peerDependencies": {
