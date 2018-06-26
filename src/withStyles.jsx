@@ -104,7 +104,7 @@ export function withStyles(
         // direction needs to be stored in state in order to trigger a rerender
         // when context changes.
         this.state = {
-          direction: context[CHANNEL] ? context[CHANNEL].getState() : defaultDirection,
+          direction: this.context[CHANNEL] ? this.context[CHANNEL].getState() : defaultDirection,
         };
       }
 
