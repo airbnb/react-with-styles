@@ -108,10 +108,6 @@ export function withStyles(
         };
       }
 
-      componentWillMount() {
-        this.maybeCreateStyles();
-      }
-
       componentDidMount() {
         if (this.context[CHANNEL]) {
           // subscribe to future direction changes
@@ -155,6 +151,8 @@ export function withStyles(
       }
 
       render() {
+        const styleDef = this.maybeCreateStyles();
+
         // As some components will depend on previous styles in
         // the component tree, we provide the option of flushing the
         // buffered styles (i.e. to a style tag) **before** the rendering
@@ -165,8 +163,6 @@ export function withStyles(
         if (flushBefore) {
           ThemedStyleSheet.flush();
         }
-
-        const styleDef = this.maybeCreateStyles();
 
         return (
           <WrappedComponent
