@@ -53,43 +53,106 @@ export function withStyles(
   let currentThemeRTL;
   const BaseClass = baseClass(pureComponent);
 
-  function createStyles(isRTL) {
+  function getResolveMethod(direction) {
+    return direction === DIRECTIONS.LTR
+      ? ThemedStyleSheet.resolveLTR
+      : ThemedStyleSheet.resolveRTL;
+  }
+
+  function getCurrentTheme(direction) {
+    return direction === DIRECTIONS.LTR
+      ? currentThemeLTR
+      : currentThemeRTL;
+  }
+
+  function getStyleDef(direction, wrappedComponentName) {
+    const currentTheme = getCurrentTheme(direction);
+    let styleDef = direction === DIRECTIONS.LTR
+      ? styleDefLTR
+      : styleDefRTL;
+
     const registeredTheme = ThemedStyleSheet.get();
 
-    if (isRTL) {
-      styleDefRTL = styleFn ? ThemedStyleSheet.createRTL(styleFn) : EMPTY_STYLES_FN;
-      currentThemeRTL = registeredTheme;
-      return styleDefRTL;
+    // Return the existing styles if they've already been defined
+    // and if the theme used to create them corresponds to the theme
+    // registered with ThemedStyleSheet
+    if (styleDef && currentTheme === registeredTheme) {
+      return styleDef;
     }
 
-    styleDefLTR = styleFn ? ThemedStyleSheet.createLTR(styleFn) : EMPTY_STYLES_FN;
-    currentThemeLTR = registeredTheme;
-    return styleDefLTR;
+    if (
+      process.env.NODE_ENV !== 'production'
+      && typeof performance !== 'undefined'
+      && performance.mark !== undefined
+    ) {
+      performance.mark('react-with-styles.createStyles.start');
+    }
+
+    const isRTL = direction === DIRECTIONS.RTL;
+
+    if (isRTL) {
+      styleDefRTL = styleFn
+        ? ThemedStyleSheet.createRTL(styleFn)
+        : EMPTY_STYLES_FN;
+
+      currentThemeRTL = registeredTheme;
+      styleDef = styleDefRTL;
+    } else {
+      styleDefLTR = styleFn
+        ? ThemedStyleSheet.createLTR(styleFn)
+        : EMPTY_STYLES_FN;
+
+      currentThemeLTR = registeredTheme;
+      styleDef = styleDefLTR;
+    }
+
+    if (
+      process.env.NODE_ENV !== 'production'
+      && typeof performance !== 'undefined'
+      && performance.mark !== undefined
+    ) {
+      performance.mark('react-with-styles.createStyles.end');
+
+      performance.measure(
+        `\ud83d\udc69\u200d\ud83c\udfa8 withStyles(${wrappedComponentName}) [create styles]`,
+        'react-with-styles.createStyles.start',
+        'react-with-styles.createStyles.end',
+      );
+    }
+
+    return styleDef;
+  }
+
+  function getState(direction, wrappedComponentName) {
+    return {
+      resolveMethod: getResolveMethod(direction),
+      styleDef: getStyleDef(direction, wrappedComponentName),
+    };
   }
 
   return function withStylesHOC(WrappedComponent) {
+    const wrappedComponentName = WrappedComponent.displayName
+      || WrappedComponent.name
+      || 'Component';
+
     // NOTE: Use a class here so components are ref-able if need be:
     // eslint-disable-next-line react/prefer-stateless-function
     class WithStyles extends BaseClass {
       constructor(props, context) {
         super(props, context);
 
-        // direction needs to be stored in state in order to trigger a rerender
-        // when context changes.
-        this.state = {
-          direction: context[CHANNEL] ? context[CHANNEL].getState() : defaultDirection,
-        };
-      }
+        const direction = this.context[CHANNEL]
+          ? this.context[CHANNEL].getState()
+          : defaultDirection;
 
-      componentWillMount() {
-        this.maybeCreateStyles();
+        this.state = getState(direction, wrappedComponentName);
       }
 
       componentDidMount() {
         if (this.context[CHANNEL]) {
           // subscribe to future direction changes
           this.channelUnsubscribe = this.context[CHANNEL].subscribe((direction) => {
-            this.setState({ direction });
+            this.setState(getState(direction, wrappedComponentName));
           });
         }
       }
@@ -98,33 +161,6 @@ export function withStyles(
         if (this.channelUnsubscribe) {
           this.channelUnsubscribe();
         }
-      }
-
-      getResolveMethod() {
-        const { direction } = this.state;
-        if (direction === DIRECTIONS.RTL) {
-          return ThemedStyleSheet.resolveRTL;
-        }
-
-        return ThemedStyleSheet.resolveLTR;
-      }
-
-      maybeCreateStyles() {
-        const { direction } = this.state;
-        const isRTL = direction === DIRECTIONS.RTL;
-
-        const styleDef = isRTL ? styleDefRTL : styleDefLTR;
-        const currentTheme = isRTL ? currentThemeRTL : currentThemeLTR;
-        const registeredTheme = ThemedStyleSheet.get();
-
-        // Return the existing styles if they've already been defined
-        // and if the theme used to create them corresponds to the theme
-        // registered with ThemedStyleSheet
-        if (styleDef && currentTheme === registeredTheme) {
-          return styleDef;
-        }
-
-        return createStyles(isRTL);
       }
 
       render() {
@@ -139,7 +175,10 @@ export function withStyles(
           ThemedStyleSheet.flush();
         }
 
-        const styleDef = this.maybeCreateStyles();
+        const {
+          resolveMethod,
+          styleDef,
+        } = this.state;
 
         return (
           <WrappedComponent
@@ -147,16 +186,12 @@ export function withStyles(
             {...{
               [themePropName]: ThemedStyleSheet.get(),
               [stylesPropName]: styleDef(),
-              [cssPropName]: this.getResolveMethod(),
+              [cssPropName]: resolveMethod,
             }}
           />
         );
       }
     }
-
-    const wrappedComponentName = WrappedComponent.displayName
-      || WrappedComponent.name
-      || 'Component';
 
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;

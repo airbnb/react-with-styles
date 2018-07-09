@@ -1,3 +1,11 @@
+## v3.2.1
+- [deps] Update `hoist-non-react-statics`, `prop-types`, `react-with-direction`
+- [fix] Move work out of render and into state ([156](https://github.com/airbnb/react-with-styles/pull/156))
+- [fix] Use `this.context` instead of constructor arguments directly ([154](https://github.com/airbnb/react-with-styles/pull/154))
+
+## v3.2.0
+- [new] Add `performance.mark()` and `performance.measure()` in development ([#141](https://github.com/airbnb/react-with-styles/pull/141))
+
 ## v3.1.1
 - [fix] Remove unnecessary `ThemedStyleSheet` caching ([#130](https://github.com/airbnb/react-with-styles/pull/135))
 

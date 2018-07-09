@@ -39,10 +39,10 @@ describe('withStyles()', () => {
       style: styles.reduce((result, style) => Object.assign(result, style)),
     });
     sinon.stub(testInterface, 'resolve').callsFake(fakeResolveMethod);
-    testInterfaceResolveLTRStub =
-      sinon.stub(testInterface, 'resolveLTR').callsFake(fakeResolveMethod);
-    testInterfaceResolveRTLStub =
-      sinon.stub(testInterface, 'resolveRTL').callsFake(fakeResolveMethod);
+    testInterfaceResolveLTRStub = sinon.stub(testInterface, 'resolveLTR')
+      .callsFake(fakeResolveMethod);
+    testInterfaceResolveRTLStub = sinon.stub(testInterface, 'resolveRTL')
+      .callsFake(fakeResolveMethod);
 
     ThemedStyleSheet.registerStyleTransform(styleTransform);
     ThemedStyleSheet.registerTheme(defaultTheme);
@@ -352,7 +352,11 @@ describe('withStyles()', () => {
       // TODO: fix eslint-plugin-react bug
       // eslint-disable-next-line react/prop-types
       function MyComponent({ css, styles, theme }) {
-        return <div {...css(styles.foo)}>{theme.color.default}</div>;
+        return (
+          <div {...css(styles.foo)}>
+            {theme.color.default}
+          </div>
+        );
       }
       MyComponent.propTypes = {
         ...withStylesPropTypes,
