@@ -340,7 +340,7 @@ describe('withStyles()', () => {
       }))(MyComponent);
 
       // copied
-      const expectedPropTypes = Object.assign({}, MyComponent.propTypes);
+      const expectedPropTypes = { ...MyComponent.propTypes };
       delete expectedPropTypes.styles;
       delete expectedPropTypes.theme;
       delete expectedPropTypes.css;
