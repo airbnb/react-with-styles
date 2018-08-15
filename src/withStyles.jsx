@@ -3,7 +3,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
-import objectAssign from 'object.assign';
 
 import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
 import brcastShape from 'react-with-direction/dist/proptypes/brcast';
@@ -199,13 +198,13 @@ export function withStyles(
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
     WithStyles.contextTypes = contextTypes;
     if (WrappedComponent.propTypes) {
-      WithStyles.propTypes = objectAssign({}, WrappedComponent.propTypes);
+      WithStyles.propTypes = { ...WrappedComponent.propTypes };
       delete WithStyles.propTypes[stylesPropName];
       delete WithStyles.propTypes[themePropName];
       delete WithStyles.propTypes[cssPropName];
     }
     if (WrappedComponent.defaultProps) {
-      WithStyles.defaultProps = objectAssign({}, WrappedComponent.defaultProps);
+      WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
     }
 
     return hoistNonReactStatics(WithStyles, WrappedComponent);
