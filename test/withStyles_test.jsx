@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { expect } from 'chai';
 import { render, shallow } from 'enzyme';
-import deepmerge from 'deepmerge';
 import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
 
@@ -341,7 +340,7 @@ describe('withStyles()', () => {
       }))(MyComponent);
 
       // copied
-      const expectedPropTypes = deepmerge({}, MyComponent.propTypes);
+      const expectedPropTypes = { ...MyComponent.propTypes };
       delete expectedPropTypes.styles;
       delete expectedPropTypes.theme;
       delete expectedPropTypes.css;
