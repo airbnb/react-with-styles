@@ -19,6 +19,7 @@ export const withStylesPropTypes = {
 
 const EMPTY_STYLES = {};
 const EMPTY_STYLES_FN = () => EMPTY_STYLES;
+function noop() { }
 
 function baseClass(pureComponent) {
   if (pureComponent) {
@@ -33,6 +34,7 @@ function baseClass(pureComponent) {
 }
 
 const contextTypes = {
+  noInjectedStyles: PropTypes.boolean,
   [CHANNEL]: brcastShape,
 };
 
@@ -54,7 +56,15 @@ export function withStyles(
   let currentThemeRTL;
   const BaseClass = baseClass(pureComponent);
 
-  function getResolveMethod(direction) {
+  function getResolveMethod(direction, noInjectedStyles) {
+    // `noInjectedStyles` is useful for scenarios where the component tree is being crawled using
+    // render without wanting to actually capture the rendered output. For example, Apollo's
+    // getDataFromTree takes a pass through the component tree to gather queries to fetch during
+    // server rendering.
+    if (noInjectedStyles) {
+      return noop;
+    }
+
     return direction === DIRECTIONS.LTR
       ? ThemedStyleSheet.resolveLTR
       : ThemedStyleSheet.resolveRTL;
@@ -124,9 +134,9 @@ export function withStyles(
     return styleDef;
   }
 
-  function getState(direction, wrappedComponentName) {
+  function getState(direction, wrappedComponentName, noInjectedStyles) {
     return {
-      resolveMethod: getResolveMethod(direction),
+      resolveMethod: getResolveMethod(direction, noInjectedStyles),
       styleDef: getStyleDef(direction, wrappedComponentName),
     };
   }
@@ -142,18 +152,20 @@ export function withStyles(
       constructor(props, context) {
         super(props, context);
 
-        const direction = this.context[CHANNEL]
-          ? this.context[CHANNEL].getState()
+        const { noInjectedStyles } = context;
+        const direction = context[CHANNEL]
+          ? context[CHANNEL].getState()
           : defaultDirection;
 
-        this.state = getState(direction, wrappedComponentName);
+        this.state = getState(direction, wrappedComponentName, noInjectedStyles);
       }
 
       componentDidMount() {
+        const { noInjectedStyles } = this.context;
         if (this.context[CHANNEL]) {
           // subscribe to future direction changes
           this.channelUnsubscribe = this.context[CHANNEL].subscribe((direction) => {
-            this.setState(getState(direction, wrappedComponentName));
+            this.setState(getState(direction, wrappedComponentName, noInjectedStyles));
           });
         }
       }
