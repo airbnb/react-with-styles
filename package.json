@@ -63,7 +63,7 @@
     "mocha": "^5.2.0",
     "react": "~16.5.0",
     "react-addons-test-utils": "~15.4.2",
-    "react-dom": "~15.4.2",
+    "react-dom": "~16.5.0",
     "react-native": "0.42.x",
     "react-native-mock": "^0.3.1",
     "react-test-renderer": "~15.4.2",
