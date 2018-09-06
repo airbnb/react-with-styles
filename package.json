@@ -66,7 +66,7 @@
     "react-dom": "~16.5.0",
     "react-native": "0.42.x",
     "react-native-mock": "^0.3.1",
-    "react-test-renderer": "~15.4.2",
+    "react-test-renderer": "~16.5.0",
     "rimraf": "^2.6.2",
     "safe-publish-latest": "^1.1.2",
     "sinon": "^6.1.5",
