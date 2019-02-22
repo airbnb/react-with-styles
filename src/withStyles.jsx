@@ -136,7 +136,7 @@ export function withStyles(
       || WrappedComponent.name
       || 'Component';
 
-    if (typeof window === 'undefined' && global.WITH_STYLES_STATIC_BUILD) {
+    if (typeof window === 'undefined' && process.env.WITH_STYLES_STATIC_BUILD) {
       getStyleDef(defaultDirection, wrappedComponentName);
     }
 
