@@ -136,6 +136,10 @@ export function withStyles(
       || WrappedComponent.name
       || 'Component';
 
+    if (typeof window === 'undefined' && global.WITH_STYLES_STATIC_BUILD) {
+      getStyleDef(defaultDirection, wrappedComponentName);
+    }
+
     // NOTE: Use a class here so components are ref-able if need be:
     // eslint-disable-next-line react/prefer-stateless-function
     class WithStyles extends BaseClass {
