@@ -136,7 +136,9 @@ export function withStyles(
       || WrappedComponent.name
       || 'Component';
 
-    if (typeof window === 'undefined' && process.env.WITH_STYLES_STATIC_BUILD) {
+    if (process.env.WITH_STYLES_STATIC_BUILD) {
+      // Usually we wait for the component to be rendered to generate styles.
+      // This flag forces immediate generation. 
       getStyleDef(defaultDirection, wrappedComponentName);
     }
 
