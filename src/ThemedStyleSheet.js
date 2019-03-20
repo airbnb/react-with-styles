@@ -11,25 +11,68 @@ function registerInterface(interfaceToRegister) {
   styleInterface = interfaceToRegister;
 }
 
-function extendStyles(makeFromTheme, extendFromTheme = []) {
+function validateStyle(style, extendableStyles, currentPath = '') {
+  if (style === null || Array.isArray(style) || typeof style !== 'object') {
+    return;
+  }
+
+  const styleKeys = Object.keys(style);
+  if (styleKeys.length) {
+    styleKeys.forEach((styleKey) => {
+      const path = `${currentPath}.${styleKey}`;
+      const isValid = extendableStyles[styleKey];
+      if (!isValid) {
+        throw new Error(
+          `withStyles() extending style is invalid: ${path}. If this style is expected, add it to`
+          + 'the component\'s "extendableStyles" option.',
+        );
+      }
+      validateStyle(style[styleKey], extendableStyles[styleKey], path);
+    });
+  }
+}
+
+function validateAndMergeStyles(makeFromTheme, extendFromTheme = [], extendableStyles) {
   const baseStyle = makeFromTheme(styleTheme);
-  const extendedStyles = extendFromTheme.map(extendStyleFn => extendStyleFn(styleTheme));
+  const extendedStyles = extendFromTheme.map((extendStyleFn) => {
+    const style = extendStyleFn(styleTheme);
+
+    if (process.env.NODE_ENV !== 'production') {
+      validateStyle(style, extendableStyles);
+    }
+
+    return style;
+  });
 
   return deepmerge.all([baseStyle, ...extendedStyles]);
 }
 
-function create(makeFromTheme, createWithDirection, extendFromTheme) {
-  const styles = createWithDirection(extendStyles(makeFromTheme, extendFromTheme));
+function create(makeFromTheme, createWithDirection, extendFromTheme, extendableStyles) {
+  const styles = createWithDirection(validateAndMergeStyles(
+    makeFromTheme,
+    extendFromTheme,
+    extendableStyles,
+  ));
 
   return () => styles;
 }
 
-function createLTR(makeFromTheme, extendFromTheme) {
-  return create(makeFromTheme, styleInterface.createLTR || styleInterface.create, extendFromTheme);
+function createLTR(makeFromTheme, extendFromTheme, extendableStyles) {
+  return create(
+    makeFromTheme,
+    styleInterface.createLTR || styleInterface.create,
+    extendFromTheme,
+    extendableStyles,
+  );
 }
 
-function createRTL(makeFromTheme, extendFromTheme) {
-  return create(makeFromTheme, styleInterface.createRTL || styleInterface.create, extendFromTheme);
+function createRTL(makeFromTheme, extendFromTheme, extendableStyles) {
+  return create(
+    makeFromTheme,
+    styleInterface.createRTL || styleInterface.create,
+    extendFromTheme,
+    extendableStyles,
+  );
 }
 
 function get() {

@@ -48,6 +48,7 @@ export function withStyles(
     themePropName = 'theme',
     cssPropName = 'css',
     extendStyleFnPropName = '_extendStyleFn',
+    extendableStyles = {},
     flushBefore = false,
     pureComponent = false,
   } = {},
@@ -97,14 +98,14 @@ export function withStyles(
 
     if (isRTL) {
       styleDefRTL = styleFn
-        ? ThemedStyleSheet.createRTL(styleFn, extendStyleFns)
+        ? ThemedStyleSheet.createRTL(styleFn, extendStyleFns, extendableStyles)
         : EMPTY_STYLES_FN;
 
       currentThemeRTL = registeredTheme;
       styleDef = styleDefRTL;
     } else {
       styleDefLTR = styleFn
-        ? ThemedStyleSheet.createLTR(styleFn, extendStyleFns)
+        ? ThemedStyleSheet.createLTR(styleFn, extendStyleFns, extendableStyles)
         : EMPTY_STYLES_FN;
 
       currentThemeLTR = registeredTheme;
