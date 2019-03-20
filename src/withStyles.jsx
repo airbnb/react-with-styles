@@ -7,6 +7,7 @@ import hoistNonReactStatics from 'hoist-non-react-statics';
 import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
 import brcastShape from 'react-with-direction/dist/proptypes/brcast';
 
+import withExtendStylesHoc from './withExtendStyles';
 import ThemedStyleSheet from './ThemedStyleSheet';
 
 // Add some named exports to assist in upgrading and for convenience
@@ -15,7 +16,9 @@ export const withStylesPropTypes = {
   styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   css: PropTypes.func.isRequired,
+  _extendStyleFn: PropTypes.arrayOf(PropTypes.func),
 };
+export const withExtendStyles = withExtendStylesHoc;
 
 const EMPTY_STYLES = {};
 const EMPTY_STYLES_FN = () => EMPTY_STYLES;
@@ -44,6 +47,7 @@ export function withStyles(
     stylesPropName = 'styles',
     themePropName = 'theme',
     cssPropName = 'css',
+    extendStyleFnPropName = '_extendStyleFn',
     flushBefore = false,
     pureComponent = false,
   } = {},
@@ -66,7 +70,7 @@ export function withStyles(
       : currentThemeRTL;
   }
 
-  function getStyleDef(direction, wrappedComponentName) {
+  function getStyleDef(direction, wrappedComponentName, extendStyleFns) {
     const currentTheme = getCurrentTheme(direction);
     let styleDef = direction === DIRECTIONS.LTR
       ? styleDefLTR
@@ -93,14 +97,14 @@ export function withStyles(
 
     if (isRTL) {
       styleDefRTL = styleFn
-        ? ThemedStyleSheet.createRTL(styleFn)
+        ? ThemedStyleSheet.createRTL(styleFn, extendStyleFns)
         : EMPTY_STYLES_FN;
 
       currentThemeRTL = registeredTheme;
       styleDef = styleDefRTL;
     } else {
       styleDefLTR = styleFn
-        ? ThemedStyleSheet.createLTR(styleFn)
+        ? ThemedStyleSheet.createLTR(styleFn, extendStyleFns)
         : EMPTY_STYLES_FN;
 
       currentThemeLTR = registeredTheme;
@@ -124,10 +128,10 @@ export function withStyles(
     return styleDef;
   }
 
-  function getState(direction, wrappedComponentName) {
+  function getState(direction, wrappedComponentName, extendStyleFns) {
     return {
       resolveMethod: getResolveMethod(direction),
-      styleDef: getStyleDef(direction, wrappedComponentName),
+      styleDef: getStyleDef(direction, wrappedComponentName, extendStyleFns),
     };
   }
 
@@ -146,14 +150,16 @@ export function withStyles(
           ? this.context[CHANNEL].getState()
           : defaultDirection;
 
-        this.state = getState(direction, wrappedComponentName);
+        this.extendStyleFns = props[extendStyleFnPropName] || [];
+
+        this.state = getState(direction, wrappedComponentName, this.extendStyleFns);
       }
 
       componentDidMount() {
         if (this.context[CHANNEL]) {
           // subscribe to future direction changes
           this.channelUnsubscribe = this.context[CHANNEL].subscribe((direction) => {
-            this.setState(getState(direction, wrappedComponentName));
+            this.setState(getState(direction, wrappedComponentName, this.extendStyleFns));
           });
         }
       }
@@ -180,10 +186,14 @@ export function withStyles(
           resolveMethod,
           styleDef,
         } = this.state;
+        const {
+          [extendStyleFnPropName]: extendStyleFns,
+          ...rest
+        } = this.props;
 
         return (
           <WrappedComponent
-            {...this.props}
+            {...rest}
             {...{
               [themePropName]: ThemedStyleSheet.get(),
               [stylesPropName]: styleDef(),
@@ -197,8 +207,11 @@ export function withStyles(
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
     WithStyles.contextTypes = contextTypes;
+
     if (WrappedComponent.propTypes) {
-      WithStyles.propTypes = { ...WrappedComponent.propTypes };
+      WithStyles.propTypes = {
+        ...WrappedComponent.propTypes,
+      };
       delete WithStyles.propTypes[stylesPropName];
       delete WithStyles.propTypes[themePropName];
       delete WithStyles.propTypes[cssPropName];

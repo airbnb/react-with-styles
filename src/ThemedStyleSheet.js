@@ -1,3 +1,5 @@
+import deepmerge from 'deepmerge';
+
 let styleInterface;
 let styleTheme;
 
@@ -9,17 +11,25 @@ function registerInterface(interfaceToRegister) {
   styleInterface = interfaceToRegister;
 }
 
-function create(makeFromTheme, createWithDirection) {
-  const styles = createWithDirection(makeFromTheme(styleTheme));
+function extendStyles(makeFromTheme, extendFromTheme = []) {
+  const baseStyle = makeFromTheme(styleTheme);
+  const extendedStyles = extendFromTheme.map(extendStyleFn => extendStyleFn(styleTheme));
+
+  return deepmerge.all([baseStyle, ...extendedStyles]);
+}
+
+function create(makeFromTheme, createWithDirection, extendFromTheme) {
+  const styles = createWithDirection(extendStyles(makeFromTheme, extendFromTheme));
+
   return () => styles;
 }
 
-function createLTR(makeFromTheme) {
-  return create(makeFromTheme, styleInterface.createLTR || styleInterface.create);
+function createLTR(makeFromTheme, extendFromTheme) {
+  return create(makeFromTheme, styleInterface.createLTR || styleInterface.create, extendFromTheme);
 }
 
-function createRTL(makeFromTheme) {
-  return create(makeFromTheme, styleInterface.createRTL || styleInterface.create);
+function createRTL(makeFromTheme, extendFromTheme) {
+  return create(makeFromTheme, styleInterface.createRTL || styleInterface.create, extendFromTheme);
 }
 
 function get() {

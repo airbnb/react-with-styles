@@ -200,6 +200,158 @@ describe('withStyles()', () => {
       });
     });
 
+    describe('extendStyleFn', () => {
+      it('extends styles in a non-directional context', () => {
+        function MyComponent() {
+          return null;
+        }
+
+        const WrappedComponent = withStyles(() => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }))(MyComponent);
+        render(
+          <WrappedComponent
+            _extendStyleFn={[
+              () => ({
+                container: {
+                  background: 'green',
+                },
+              }),
+            ]}
+          />,
+        );
+
+        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+          container: {
+            background: 'green',
+            color: 'blue',
+          },
+        });
+      });
+
+      it('extends styles in an LTR context', () => {
+        function MyComponent() {
+          return null;
+        }
+
+        const WrappedComponent = withStyles(() => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }))(MyComponent);
+        render(
+          <DirectionProvider direction={DIRECTIONS.LTR}>
+            <WrappedComponent
+              _extendStyleFn={[
+                () => ({
+                  container: {
+                    background: 'green',
+                  },
+                }),
+              ]}
+            />
+          </DirectionProvider>,
+        );
+
+        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+          container: {
+            background: 'green',
+            color: 'blue',
+          },
+        });
+      });
+
+      it('extends styles in an RTL context', () => {
+        function MyComponent() {
+          return null;
+        }
+
+        const WrappedComponent = withStyles(() => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }))(MyComponent);
+        render(
+          <DirectionProvider direction={DIRECTIONS.RTL}>
+            <WrappedComponent
+              _extendStyleFn={[
+                () => ({
+                  container: {
+                    background: 'green',
+                  },
+                }),
+              ]}
+            />
+          </DirectionProvider>,
+        );
+
+        expect(testInterface.createRTL.callCount).to.equal(1);
+        expect(testInterface.createRTL.getCall(0).args[0]).to.eql({
+          container: {
+            background: 'green',
+            color: 'blue',
+          },
+        });
+      });
+
+      it('receives the registered theme in the extend style function', (done) => {
+        function MyComponent() {
+          return null;
+        }
+
+        const WrappedComponent = withStyles(() => ({}))(MyComponent);
+        shallow(
+          <WrappedComponent
+            _extendStyleFn={[
+              (theme) => {
+                expect(theme).to.equal(defaultTheme);
+                done();
+                return {};
+              },
+            ]}
+          />,
+        );
+      });
+
+      it('allows the extendStyleFn prop name to be customized', () => {
+        function MyComponent() {
+          return null;
+        }
+
+        const WrappedComponent = withStyles(
+          () => ({}),
+          {
+            extendStyleFnPropName: 'newExtendStyleFn',
+          },
+        )(MyComponent);
+        shallow(
+          <WrappedComponent
+            newExtendStyleFn={[
+              () => ({
+                container: {
+                  background: 'green',
+                },
+              }),
+            ]}
+          />,
+        );
+
+        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+          container: {
+            background: 'green',
+          },
+        });
+      });
+    });
+
     it('has a wrapped displayName', () => {
       function MyComponent() {
         return null;
@@ -340,16 +492,12 @@ describe('withStyles()', () => {
       }))(MyComponent);
 
       // copied
-      const expectedPropTypes = { ...MyComponent.propTypes };
-      delete expectedPropTypes.styles;
-      delete expectedPropTypes.theme;
-      delete expectedPropTypes.css;
-      expect(Wrapped.propTypes).to.eql(expectedPropTypes);
-      expect(MyComponent.propTypes).to.include.keys('styles', 'theme');
+      expect(Wrapped.propTypes).to.include.keys('foo', '_extendStyleFn');
+      expect(MyComponent.propTypes).to.include.keys('styles', 'theme', 'css');
 
       expect(Wrapped.defaultProps).to.eql(MyComponent.defaultProps);
 
-      // cloned
+      // // cloned
       expect(Wrapped.propTypes).not.to.equal(MyComponent.propTypes);
       expect(Wrapped.defaultProps).not.to.equal(MyComponent.defaultProps);
     });
