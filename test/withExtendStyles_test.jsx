@@ -95,12 +95,21 @@ describe('withExtendStyles()', () => {
       return null;
     }
 
-    const WrappedComponent = withStyles(() => ({
-      container: {
-        background: 'red',
-        color: 'blue',
+    const WrappedComponent = withStyles(
+      () => ({
+        container: {
+          background: 'red',
+          color: 'blue',
+        },
+      }),
+      {
+        extendableStyles: {
+          container: {
+            background: true,
+          },
+        },
       },
-    }))(MyComponent);
+    )(MyComponent);
     const WrappedComponentWithExtendedStyles = withExtendStyles(() => ({
       container: {
         background: 'green',
@@ -124,19 +133,34 @@ describe('withExtendStyles()', () => {
       return null;
     }
 
-    const WrappedComponent = withStyles(() => ({
-      container: {
-        background: 'red',
-        color: 'blue',
+    const WrappedComponent = withStyles(
+      () => ({
+        container: {
+          background: 'red',
+          color: 'blue',
+        },
+        innerContainer: {
+          background: 'white',
+          border: '1px solid black',
+        },
+        content: {
+          fontSize: '25px',
+        },
+      }),
+      {
+        extendableStyles: {
+          container: {
+            background: true,
+          },
+          innerContainer: {
+            border: true,
+          },
+          content: {
+            fontSize: true,
+          },
+        },
       },
-      innerContainer: {
-        background: 'white',
-        border: '1px solid black',
-      },
-      content: {
-        fontSize: '25px',
-      },
-    }))(MyComponent);
+    )(MyComponent);
     const WrappedComponentWithExtendedStyles = withExtendStyles(() => ({
       container: {
         background: 'green',
@@ -173,13 +197,23 @@ describe('withExtendStyles()', () => {
       return null;
     }
 
-    const WrappedComponent = withStyles(() => ({
-      container: {
-        background: 'red',
-        color: 'blue',
-        fontSize: '10px',
+    const WrappedComponent = withStyles(
+      () => ({
+        container: {
+          background: 'red',
+          color: 'blue',
+          fontSize: '10px',
+        },
+      }),
+      {
+        extendableStyles: {
+          container: {
+            background: true,
+            fontSize: true,
+          },
+        },
       },
-    }))(MyComponent);
+    )(MyComponent);
 
     const WrappedComponentWithExtendedStyles = withExtendStyles(() => ({
       container: {
@@ -188,14 +222,14 @@ describe('withExtendStyles()', () => {
       },
     }))(WrappedComponent);
 
-    const WrappedComponentWithNestedCustomStyles = withExtendStyles(() => ({
+    const WrappedComponentWithNestedExtendedStyles = withExtendStyles(() => ({
       container: {
         fontSize: '20px',
       },
     }))(WrappedComponentWithExtendedStyles);
 
     render(
-      <WrappedComponentWithNestedCustomStyles />,
+      <WrappedComponentWithNestedExtendedStyles />,
     );
 
     expect(testInterface.createLTR.callCount).to.equal(1);
@@ -208,7 +242,71 @@ describe('withExtendStyles()', () => {
     });
   });
 
-  it('uses original base styles if no extended styles are provided', () => {
+  it('throws an error if an invalid extending style is provided', () => {
+    function MyComponent() {
+      return null;
+    }
+
+    const WrappedComponent = withStyles(
+      () => ({
+        container: {
+          background: 'red',
+          color: 'blue',
+          fontSize: '10px',
+        },
+      }),
+      {
+        extendableStyles: {
+          container: {
+            background: true,
+          },
+        },
+      },
+    )(MyComponent);
+
+    const WrappedComponentWithExtendedStyles = withExtendStyles(() => ({
+      container: {
+        // fontSize is invalid
+        fontSize: '12px',
+      },
+    }))(WrappedComponent);
+
+    expect(() => render(
+      <WrappedComponentWithExtendedStyles />,
+    )).to.throw();
+  });
+
+  it('throws an error if extendableStyles is not defined, and an extending style is provided', () => {
+    function MyComponent() {
+      return null;
+    }
+
+    const WrappedComponent = withStyles(
+      () => ({
+        container: {
+          background: 'red',
+          color: 'blue',
+          fontSize: '10px',
+        },
+      }),
+      {
+        // no extendableStyles
+      },
+    )(MyComponent);
+
+    const WrappedComponentWithExtendedStyles = withExtendStyles(() => ({
+      container: {
+        // fontSize is invalid
+        fontSize: '12px',
+      },
+    }))(WrappedComponent);
+
+    expect(() => render(
+      <WrappedComponentWithExtendedStyles />,
+    )).to.throw();
+  });
+
+  it('uses original base styles if no extending styles are provided', () => {
     function MyComponent() {
       return null;
     }
@@ -261,7 +359,14 @@ describe('withExtendStyles()', () => {
           color: 'blue',
         },
       }),
-      { extendStyleFnPropName: 'foobar' },
+      {
+        extendStyleFnPropName: 'foobar',
+        extendableStyles: {
+          container: {
+            background: true,
+          },
+        },
+      },
     )(MyComponent);
     const WrappedComponentWithExtendedStyles = withExtendStyles(
       () => ({
@@ -290,11 +395,20 @@ describe('withExtendStyles()', () => {
       return null;
     }
 
-    const WrappedComponent = withStyles(({ color }) => ({
-      foo: {
-        color: color.red,
+    const WrappedComponent = withStyles(
+      ({ color }) => ({
+        foo: {
+          color: color.red,
+        },
+      }),
+      {
+        extendableStyles: {
+          foo: {
+            color: true,
+          },
+        },
       },
-    }))(MyComponent);
+    )(MyComponent);
     const WrappedComponentWithExtendedStyles = withExtendStyles(({ color }) => ({
       foo: {
         color: color.blue,

@@ -206,12 +206,21 @@ describe('withStyles()', () => {
           return null;
         }
 
-        const WrappedComponent = withStyles(() => ({
-          container: {
-            background: 'red',
-            color: 'blue',
+        const WrappedComponent = withStyles(
+          () => ({
+            container: {
+              background: 'red',
+              color: 'blue',
+            },
+          }),
+          {
+            extendableStyles: {
+              container: {
+                background: true,
+              },
+            },
           },
-        }))(MyComponent);
+        )(MyComponent);
         render(
           <WrappedComponent
             _extendStyleFn={[
@@ -238,12 +247,21 @@ describe('withStyles()', () => {
           return null;
         }
 
-        const WrappedComponent = withStyles(() => ({
-          container: {
-            background: 'red',
-            color: 'blue',
+        const WrappedComponent = withStyles(
+          () => ({
+            container: {
+              background: 'red',
+              color: 'blue',
+            },
+          }),
+          {
+            extendableStyles: {
+              container: {
+                background: true,
+              },
+            },
           },
-        }))(MyComponent);
+        )(MyComponent);
         render(
           <DirectionProvider direction={DIRECTIONS.LTR}>
             <WrappedComponent
@@ -272,12 +290,21 @@ describe('withStyles()', () => {
           return null;
         }
 
-        const WrappedComponent = withStyles(() => ({
-          container: {
-            background: 'red',
-            color: 'blue',
+        const WrappedComponent = withStyles(
+          () => ({
+            container: {
+              background: 'red',
+              color: 'blue',
+            },
+          }),
+          {
+            extendableStyles: {
+              container: {
+                background: true,
+              },
+            },
           },
-        }))(MyComponent);
+        )(MyComponent);
         render(
           <DirectionProvider direction={DIRECTIONS.RTL}>
             <WrappedComponent
@@ -299,6 +326,43 @@ describe('withStyles()', () => {
             color: 'blue',
           },
         });
+      });
+
+      it('throws an error if an invalid style is extending', () => {
+        function MyComponent() {
+          return null;
+        }
+
+        const WrappedComponent = withStyles(
+          () => ({
+            container: {
+              background: 'red',
+              color: 'blue',
+            },
+          }),
+          {
+            extendableStyles: {
+              container: {
+                background: true,
+              },
+            },
+          },
+        )(MyComponent);
+
+        expect(() => render(
+          <DirectionProvider direction={DIRECTIONS.RTL}>
+            <WrappedComponent
+              _extendStyleFn={[
+                () => ({
+                  container: {
+                    // color is invalid
+                    color: 'green',
+                  },
+                }),
+              ]}
+            />
+          </DirectionProvider>,
+        )).to.throw();
       });
 
       it('receives the registered theme in the extend style function', (done) => {
@@ -329,6 +393,11 @@ describe('withStyles()', () => {
           () => ({}),
           {
             extendStyleFnPropName: 'newExtendStyleFn',
+            extendableStyles: {
+              container: {
+                background: true,
+              },
+            },
           },
         )(MyComponent);
         shallow(
