@@ -200,227 +200,6 @@ describe('withStyles()', () => {
       });
     });
 
-    describe('extendStyleFn', () => {
-      it('extends styles in a non-directional context', () => {
-        function MyComponent() {
-          return null;
-        }
-
-        const WrappedComponent = withStyles(
-          () => ({
-            container: {
-              background: 'red',
-              color: 'blue',
-            },
-          }),
-          {
-            extendableStyles: {
-              container: {
-                background: true,
-              },
-            },
-          },
-        )(MyComponent);
-        render(
-          <WrappedComponent
-            _extendStyleFn={[
-              () => ({
-                container: {
-                  background: 'green',
-                },
-              }),
-            ]}
-          />,
-        );
-
-        expect(testInterface.createLTR.callCount).to.equal(1);
-        expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
-          container: {
-            background: 'green',
-            color: 'blue',
-          },
-        });
-      });
-
-      it('extends styles in an LTR context', () => {
-        function MyComponent() {
-          return null;
-        }
-
-        const WrappedComponent = withStyles(
-          () => ({
-            container: {
-              background: 'red',
-              color: 'blue',
-            },
-          }),
-          {
-            extendableStyles: {
-              container: {
-                background: true,
-              },
-            },
-          },
-        )(MyComponent);
-        render(
-          <DirectionProvider direction={DIRECTIONS.LTR}>
-            <WrappedComponent
-              _extendStyleFn={[
-                () => ({
-                  container: {
-                    background: 'green',
-                  },
-                }),
-              ]}
-            />
-          </DirectionProvider>,
-        );
-
-        expect(testInterface.createLTR.callCount).to.equal(1);
-        expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
-          container: {
-            background: 'green',
-            color: 'blue',
-          },
-        });
-      });
-
-      it('extends styles in an RTL context', () => {
-        function MyComponent() {
-          return null;
-        }
-
-        const WrappedComponent = withStyles(
-          () => ({
-            container: {
-              background: 'red',
-              color: 'blue',
-            },
-          }),
-          {
-            extendableStyles: {
-              container: {
-                background: true,
-              },
-            },
-          },
-        )(MyComponent);
-        render(
-          <DirectionProvider direction={DIRECTIONS.RTL}>
-            <WrappedComponent
-              _extendStyleFn={[
-                () => ({
-                  container: {
-                    background: 'green',
-                  },
-                }),
-              ]}
-            />
-          </DirectionProvider>,
-        );
-
-        expect(testInterface.createRTL.callCount).to.equal(1);
-        expect(testInterface.createRTL.getCall(0).args[0]).to.eql({
-          container: {
-            background: 'green',
-            color: 'blue',
-          },
-        });
-      });
-
-      it('throws an error if an invalid style is extending', () => {
-        function MyComponent() {
-          return null;
-        }
-
-        const WrappedComponent = withStyles(
-          () => ({
-            container: {
-              background: 'red',
-              color: 'blue',
-            },
-          }),
-          {
-            extendableStyles: {
-              container: {
-                background: true,
-              },
-            },
-          },
-        )(MyComponent);
-
-        expect(() => render(
-          <DirectionProvider direction={DIRECTIONS.RTL}>
-            <WrappedComponent
-              _extendStyleFn={[
-                () => ({
-                  container: {
-                    // color is invalid
-                    color: 'green',
-                  },
-                }),
-              ]}
-            />
-          </DirectionProvider>,
-        )).to.throw();
-      });
-
-      it('receives the registered theme in the extend style function', (done) => {
-        function MyComponent() {
-          return null;
-        }
-
-        const WrappedComponent = withStyles(() => ({}))(MyComponent);
-        shallow(
-          <WrappedComponent
-            _extendStyleFn={[
-              (theme) => {
-                expect(theme).to.equal(defaultTheme);
-                done();
-                return {};
-              },
-            ]}
-          />,
-        );
-      });
-
-      it('allows the extendStyleFn prop name to be customized', () => {
-        function MyComponent() {
-          return null;
-        }
-
-        const WrappedComponent = withStyles(
-          () => ({}),
-          {
-            extendStyleFnPropName: 'newExtendStyleFn',
-            extendableStyles: {
-              container: {
-                background: true,
-              },
-            },
-          },
-        )(MyComponent);
-        shallow(
-          <WrappedComponent
-            newExtendStyleFn={[
-              () => ({
-                container: {
-                  background: 'green',
-                },
-              }),
-            ]}
-          />,
-        );
-
-        expect(testInterface.createLTR.callCount).to.equal(1);
-        expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
-          container: {
-            background: 'green',
-          },
-        });
-      });
-    });
-
     it('has a wrapped displayName', () => {
       function MyComponent() {
         return null;
@@ -561,12 +340,16 @@ describe('withStyles()', () => {
       }))(MyComponent);
 
       // copied
-      expect(Wrapped.propTypes).to.include.keys('foo', '_extendStyleFn');
-      expect(MyComponent.propTypes).to.include.keys('styles', 'theme', 'css');
+      const expectedPropTypes = { ...MyComponent.propTypes };
+      delete expectedPropTypes.styles;
+      delete expectedPropTypes.theme;
+      delete expectedPropTypes.css;
+      expect(Wrapped.propTypes).to.eql(expectedPropTypes);
+      expect(MyComponent.propTypes).to.include.keys('styles', 'theme');
 
       expect(Wrapped.defaultProps).to.eql(MyComponent.defaultProps);
 
-      // // cloned
+      // cloned
       expect(Wrapped.propTypes).not.to.equal(MyComponent.propTypes);
       expect(Wrapped.defaultProps).not.to.equal(MyComponent.defaultProps);
     });
@@ -645,6 +428,227 @@ describe('withStyles()', () => {
         </DirectionProvider>
       ));
       expect(testInterfaceResolveRTLStub.callCount).to.equal(1);
+    });
+  });
+
+  describe('extendStyles', () => {
+    it('extends styles in a non-directional context', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green',
+        },
+      }));
+
+      render(
+        <ExtendedComponent />,
+      );
+
+      expect(testInterface.createLTR.callCount).to.equal(1);
+      expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+        container: {
+          background: 'green',
+          color: 'blue',
+        },
+      });
+    });
+
+    it('extends styles in an LTR context', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green',
+        },
+      }));
+
+      render(
+        <DirectionProvider direction={DIRECTIONS.LTR}>
+          <ExtendedComponent />
+        </DirectionProvider>,
+      );
+
+      expect(testInterface.createLTR.callCount).to.equal(1);
+      expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+        container: {
+          background: 'green',
+          color: 'blue',
+        },
+      });
+    });
+
+    it('extends styles in an RTL context', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green',
+        },
+      }));
+      render(
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <ExtendedComponent />
+        </DirectionProvider>,
+      );
+
+      expect(testInterface.createRTL.callCount).to.equal(1);
+      expect(testInterface.createRTL.getCall(0).args[0]).to.eql({
+        container: {
+          background: 'green',
+          color: 'blue',
+        },
+      });
+    });
+
+    it('throws an error if an invalid style is extending', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          // color is invalid
+          color: 'green',
+        },
+      }));
+
+      expect(() => render(
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <ExtendedComponent />
+        </DirectionProvider>,
+      )).to.throw();
+    });
+
+    it('receives the registered theme in the extend style function', (done) => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles((theme) => {
+        expect(theme).to.equal(defaultTheme);
+        done();
+        return {};
+      });
+      shallow(
+        <ExtendedComponent />,
+      );
+    });
+
+    it('allows nested extends styles', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+            fontSize: 12,
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: true,
+              color: true,
+              fontSize: true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green',
+          color: 'purple',
+        },
+      }));
+      const NestedExtendedComponent = ExtendedComponent.extendStyles(() => ({
+        container: {
+          background: 'pink',
+        },
+      }));
+
+      render(
+        <NestedExtendedComponent />,
+      );
+
+      expect(testInterface.createLTR.callCount).to.equal(1);
+      expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+        container: {
+          background: 'pink',
+          color: 'purple',
+          fontSize: 12,
+        },
+      });
     });
   });
 });
