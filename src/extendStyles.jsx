@@ -5,20 +5,22 @@ import deepmerge from 'deepmerge';
 function validateStyle(style, extendableStyles, currentPath = '') {
   if (process.env.NODE_ENV !== 'production') {
     if (style === null || Array.isArray(style) || typeof style !== 'object') {
-      const styleKeys = Object.keys(style);
-      if (styleKeys.length) {
-        styleKeys.forEach((styleKey) => {
-          const path = `${currentPath}.${styleKey}`;
-          const isValid = extendableStyles[styleKey];
-          if (!isValid) {
-            throw new Error(
-              `withStyles() extending style is invalid: ${path}. If this style is expected, add it to`
+      return;
+    }
+
+    const styleKeys = Object.keys(style);
+    if (styleKeys.length) {
+      styleKeys.forEach((styleKey) => {
+        const path = `${currentPath}.${styleKey}`;
+        const isValid = extendableStyles[styleKey];
+        if (!isValid) {
+          throw new Error(
+            `withStyles() extending style is invalid: ${path}. If this style is expected, add it to`
             + 'the component\'s "extendableStyles" option.',
-            );
-          }
-          validateStyle(style[styleKey], extendableStyles[styleKey], path);
-        });
-      }
+          );
+        }
+        validateStyle(style[styleKey], extendableStyles[styleKey], path);
+      });
     }
   }
 }
