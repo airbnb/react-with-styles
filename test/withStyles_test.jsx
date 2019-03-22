@@ -552,6 +552,55 @@ describe('withStyles()', () => {
       });
     });
 
+    it('allows nested extends styles', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+            fontSize: 20,
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: true,
+              color: true,
+              fontSize: true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green',
+          fontSize: 12,
+        },
+      }));
+      const NestedExtendedComponent = ExtendedComponent.extendStyles(() => ({
+        container: {
+          background: 'pink',
+        },
+      }));
+
+      render(
+        <NestedExtendedComponent />,
+      );
+
+      expect(testInterface.createLTR.callCount).to.equal(1);
+      expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+        container: {
+          background: 'pink',
+          color: 'blue',
+          fontSize: 12,
+        },
+      });
+    });
+
     it('throws an error if an invalid style is extending', () => {
       function MyComponent() {
         return null;
@@ -600,55 +649,6 @@ describe('withStyles()', () => {
       shallow(
         <ExtendedComponent />,
       );
-    });
-
-    it('allows nested extends styles', () => {
-      function MyComponent() {
-        return null;
-      }
-
-      const WrappedComponent = withStyles(
-        () => ({
-          container: {
-            background: 'red',
-            color: 'blue',
-            fontSize: 12,
-          },
-        }),
-        {
-          extendableStyles: {
-            container: {
-              background: true,
-              color: true,
-              fontSize: true,
-            },
-          },
-        },
-      )(MyComponent);
-      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
-        container: {
-          background: 'green',
-          color: 'purple',
-        },
-      }));
-      const NestedExtendedComponent = ExtendedComponent.extendStyles(() => ({
-        container: {
-          background: 'pink',
-        },
-      }));
-
-      render(
-        <NestedExtendedComponent />,
-      );
-
-      expect(testInterface.createLTR.callCount).to.equal(1);
-      expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
-        container: {
-          background: 'pink',
-          color: 'purple',
-          fontSize: 12,
-        },
-      });
     });
   });
 });
