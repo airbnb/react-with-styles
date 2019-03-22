@@ -10,7 +10,6 @@ import brcastShape from 'react-with-direction/dist/proptypes/brcast';
 import extendStyles from './extendStyles';
 import ThemedStyleSheet from './ThemedStyleSheet';
 
-
 // Add some named exports to assist in upgrading and for convenience
 export const css = ThemedStyleSheet.resolveLTR;
 export const withStylesPropTypes = {
