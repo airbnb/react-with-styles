@@ -12,7 +12,7 @@ function validateStyle(style, extendableStyles, path = '') {
     }
 
     const styleKeys = Object.keys(style);
-    if (styleKeys.length) {
+    if (styleKeys.length > 0) {
       styleKeys.forEach((styleKey) => {
         const currentPath = `${path}.${styleKey}`;
         const isValid = extendableStyles[styleKey];
