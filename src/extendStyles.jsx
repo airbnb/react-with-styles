@@ -7,7 +7,7 @@ import deepmerge from 'deepmerge';
 function validateStyle(style, extendableStyles, path = '') {
   if (process.env.NODE_ENV !== 'production') {
     // Stop recursively validating when we hit a style's value
-    if (typeof style === 'string' || typeof style === 'number') {
+    if (!style || Array.isArray(style) || typeof style !== 'object') {
       return;
     }
 
