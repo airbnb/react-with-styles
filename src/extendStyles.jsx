@@ -18,8 +18,7 @@ function validateStyle(style, extendableStyles, path = '') {
         const isValid = extendableStyles[styleKey];
         if (!isValid) {
           throw new Error(
-            `withStyles() extending style is invalid: ${currentPath}. If this style is expected, add it to`
-            + 'the component\'s "extendableStyles" option.',
+            `withStyles() extending style is invalid: ${currentPath}. If this style is expected, add it to the component's "extendableStyles" option.`,
           );
         }
         validateStyle(style[styleKey], extendableStyles[styleKey], currentPath);
