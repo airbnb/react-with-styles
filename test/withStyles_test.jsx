@@ -743,6 +743,68 @@ describe('withStyles()', () => {
       )).to.not.throw();
     });
 
+    it('validates the extending style against the defined predicate with a theme (fail)', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: (v, t) => (v === t.color.red), // color = '#990000'
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green', // fails
+        },
+      }));
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.throw();
+    });
+
+    it('validates the extending style against the defined predicate with a theme (pass)', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: (v, t) => (v === t.color.red), // color = '#990000'
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(theme => ({
+        container: {
+          background: theme.color.red, // pass
+        },
+      }));
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.not.throw();
+    });
+
     it('validates all extending styles against the defined predicates', () => {
       function MyComponent() {
         return null;
@@ -758,7 +820,7 @@ describe('withStyles()', () => {
         {
           extendableStyles: {
             container: {
-              background: v => (v === 'red'),
+              background: (v, t) => (v === t.color.red),
               color: v => (v === 'green'),
               fontSize: v => (v === 12),
             },
@@ -772,23 +834,23 @@ describe('withStyles()', () => {
           fontSize: 12,
         },
       }));
-      const FailingBackgroundComponent = WrappedComponent.extendStyles(() => ({
+      const FailingBackgroundComponent = WrappedComponent.extendStyles(theme => ({
         container: {
-          background: 'red',
+          background: theme.color.red,
           color: 15, // fails
           fontSize: 12,
         },
       }));
-      const FailingFontSizeComponent = WrappedComponent.extendStyles(() => ({
+      const FailingFontSizeComponent = WrappedComponent.extendStyles(theme => ({
         container: {
-          background: 'red',
+          background: theme.color.red,
           color: 'green',
           fontSize: '12', // fails
         },
       }));
-      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+      const ExtendedComponent = WrappedComponent.extendStyles(theme => ({
         container: {
-          background: 'red',
+          background: theme.color.red,
           color: 'green',
           fontSize: 12,
         },
@@ -829,7 +891,7 @@ describe('withStyles()', () => {
         {
           extendableStyles: {
             container: {
-              background: v => (v === 'red'),
+              background: (v, t) => (v === t.color.red),
               color: v => (v === 'green'),
             },
             innerContainer: {
@@ -847,18 +909,18 @@ describe('withStyles()', () => {
           fontSize: 12,
         },
       }));
-      const FailingBackgroundComponent = WrappedComponent.extendStyles(() => ({
+      const FailingBackgroundComponent = WrappedComponent.extendStyles(theme => ({
         container: {
-          background: 'red',
+          background: theme.color.red,
           color: 15, // fails
         },
         innerContainer: {
           fontSize: 12,
         },
       }));
-      const FailingFontSizeComponent = WrappedComponent.extendStyles(() => ({
+      const FailingFontSizeComponent = WrappedComponent.extendStyles(theme => ({
         container: {
-          background: 'red',
+          background: theme.color.red,
           color: 'green',
           fontSize: '12',
         },
@@ -866,9 +928,9 @@ describe('withStyles()', () => {
           fontSize: '12', // fails
         },
       }));
-      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+      const ExtendedComponent = WrappedComponent.extendStyles(theme => ({
         container: {
-          background: 'red',
+          background: theme.color.red,
           color: 'green',
         },
         innerContainer: {
