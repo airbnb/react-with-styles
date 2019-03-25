@@ -6,8 +6,19 @@ import deepmerge from 'deepmerge';
 // extendableStyles object.
 function validateStyle(style, extendableStyles, path = '') {
   if (process.env.NODE_ENV !== 'production') {
-    // Stop recursively validating when we hit a style's value
+    // Stop recursively validating when we hit a style's value and validate the value passes the
+    // style's predicate
     if (!style || Array.isArray(style) || typeof style !== 'object') {
+      const stylePredicate = extendableStyles;
+      if (typeof stylePredicate !== 'function') {
+        throw new Error(`withStyles() style predicate should be a function: "${path}". Check the component's "extendableStyles" option.`);
+      }
+
+      const isValid = stylePredicate(style);
+      if (!isValid) {
+        throw new Error(`withStyles() style did not pass the predicate: "${path}": ${style}. Check the component's "extendableStyles" option.`);
+      }
+
       return;
     }
 
@@ -18,7 +29,7 @@ function validateStyle(style, extendableStyles, path = '') {
         const isValid = extendableStyles[styleKey];
         if (!isValid) {
           throw new Error(
-            `withStyles() extending style is invalid: ${currentPath}. If this style is expected, add it to the component's "extendableStyles" option.`,
+            `withStyles() extending style is invalid: "${currentPath}". If this style is expected, add it to the component's "extendableStyles" option.`,
           );
         }
         validateStyle(style[styleKey], extendableStyles[styleKey], currentPath);
