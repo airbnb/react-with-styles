@@ -248,7 +248,7 @@ Some components depend on previous styles to be ready in the component tree when
 
 #### `extendableStyles` (default: `{}`)
 
-By default, the styles created using `withStyles()` will not be extendable. To extend a specific style or styles, you must define the paths and predicates that dictate which styles can be extended and with what values. This is useful if your component wants to define some constrained styles, while allowing consumers of the component to have flexibility around others. See the `extendStyles()` section below for more info on how to extend styles.
+By default, components created using `withStyles()` will not be extendable. To extend a component's style or styles, you must define the paths and predicates that dictate which styles can be extended and with what values. This is useful if your component wants to restrict some styles, while allowing consumers of the component to have flexibility around others. See the `extendStyles()` section for more info on how to extend styles.
 
 ```jsx
 import React from 'react';
@@ -266,6 +266,7 @@ export default withStyles(
   ({ color, unit }) => ({
     container: {
       color: color.primary,
+      background: color.secondary,
       marginBottom: 2 * unit,
     },
   }),
@@ -273,11 +274,14 @@ export default withStyles(
     extendableStyles: {
       container: {
         color: (value, theme) => true,
+        background: (value, theme) => value === theme.color.primary || value === theme.color.secondary
       },
     },
   },
 )(MyComponent);
 ```
+
+The `container.color` predicate allows for any value to be passed in. The `container.background` predicate only allows for the primary and secondary color to be passed.
 
 ## `css(...styles)`
 
@@ -346,8 +350,8 @@ const BaseMyComponent = withStyles(
   {
     extendableStyles: {
       container: {
-        color: (value, theme) => true, // will allow all values of color
-        background: (value, { color }) => value === color.primary || color.secondary, // will only allow primary or secondary color
+        color: (value, theme) => true,
+        background: (value, { color }) => value === color.primary || color.secondary,
       },
     },
   },
@@ -369,7 +373,6 @@ const NestedExtendedMyComponent = ExtendedMyComponent.extendStyles(() => ({
   },
 }));
 ```
-
 
 ## Examples
 ### With React Router's `Link`
