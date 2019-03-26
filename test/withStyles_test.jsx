@@ -954,6 +954,27 @@ describe('withStyles()', () => {
         <ExtendedComponent />,
       )).to.not.throw();
     });
+
+    it('does not attach an "extendStyles" static property when "extendableStyles" option is not defined', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+          innerContainer: {
+            fontSize: 12,
+          },
+        }),
+        {}, // extendableStyles is not defined
+      )(MyComponent);
+
+      expect(WrappedComponent.extendStyles).to.equal(undefined);
+    });
   });
 });
 

@@ -210,7 +210,7 @@ export function withStyles(
       WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
     }
 
-    if (extendableStyles) {
+    if (extendableStyles && Object.keys(extendableStyles).length !== 0) {
       WithStyles.extendStyles = extendStyleFn => withStyles(
         extendStyles(styleFn, extendStyleFn, extendableStyles),
         {
