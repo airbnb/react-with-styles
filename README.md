@@ -246,6 +246,38 @@ export default withStyles(({ color, unit }) => ({
 
 Some components depend on previous styles to be ready in the component tree when mounting (e.g. dimension calculations). Some interfaces add styles to the page asynchronously, which is an obstacle for this. So, we provide the option of flushing the buffered styles before the rendering cycle begins. It is up to the interface to define what this means.
 
+#### `extendableStyles` (default: `{}`)
+
+By default, the styles created using `withStyles()` will not be extendable. To extend a specific style or styles, you must define the paths and predicates that dictate which styles can be extended and with what values. This is useful if your component wants to define some constrained styles, while allowing consumers of the component to have flexibility around others. See the `extendStyles()` section below for more info on how to extend styles.
+
+```jsx
+import React from 'react';
+import { css, withStyles } from './withStyles';
+
+function MyComponent({ withStylesStyles }) {
+  return (
+    <div {...css(withStylesStyles.container)}>
+      Try to be a rainbow in someone's cloud.
+    </div>
+  );
+}
+
+export default withStyles(
+  ({ color, unit }) => ({
+    container: {
+      color: color.primary,
+      marginBottom: 2 * unit,
+    },
+  }),
+  {
+    extendableStyles: {
+      container: {
+        color: (value, theme) => true,
+      },
+    },
+  },
+)(MyComponent);
+```
 
 ## `css(...styles)`
 
@@ -286,6 +318,58 @@ export default withStyles(({ color, unit }) => ({
 ```
 
 `className` and `style` props must not be used on the same elements as `css()`.
+
+## `extendStyles()`
+
+Components that define an "extendableStyles" option allow consumers to extend certain styles via the `extendStyles()` static property. This function takes in a styles thunk, exactly like `withStyles()`, and should return the extended styles. Any styles that are not explicitly defined in the "extendableStyles" option or do not pass the style's predicate function will throw an error.
+
+```jsx
+import React from 'react';
+import { css, withStyles } from './withStyles';
+
+function MyComponent({ withStylesStyles }) {
+  return (
+    <div {...css(withStylesStyles.container)}>
+      Try to be a rainbow in someone's cloud.
+    </div>
+  );
+}
+
+const BaseMyComponent = withStyles(
+  ({ color, unit }) => ({
+    container: {
+      color: color.primary,
+      background: color.secondary,
+      marginBottom: 2 * unit,
+    },
+  }),
+  {
+    extendableStyles: {
+      container: {
+        color: (value, theme) => true, // will allow all values of color
+        background: (value, { color }) => value === color.primary || color.secondary, // will only allow primary or secondary color
+      },
+    },
+  },
+)(MyComponent);
+
+const ExtendedMyComponent = BaseMyComponent.extendStyles(({ color }) => ({
+  container: {
+    color: color.secondary,
+    background: color.primary,
+  },
+}));
+```
+
+You can extend a Component that already extending another Component. All validation will still occur.
+```jsx
+const NestedExtendedMyComponent = ExtendedMyComponent.extendStyles(() => ({
+  container: {
+    color: 'red',
+  },
+}));
+```
+
 
 ## Examples
 ### With React Router's `Link`
