@@ -606,7 +606,18 @@ describe('withStyles()', () => {
         return null;
       }
 
-      const WrappedComponent = withStyles(() => ({}))(MyComponent);
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            color: 'red',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: () => true,
+          },
+        },
+      )(MyComponent);
       const ExtendedComponent = WrappedComponent.extendStyles((theme) => {
         expect(theme).to.equal(defaultTheme);
         done();
