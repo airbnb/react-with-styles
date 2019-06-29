@@ -32,6 +32,7 @@ function resolve(...styles) {
     && typeof performance !== 'undefined'
     && performance.mark !== undefined
   ) {
+    performance.clearMarks('react-with-styles.resolve.start');
     performance.mark('react-with-styles.resolve.start');
   }
 
@@ -42,6 +43,7 @@ function resolve(...styles) {
     && typeof performance !== 'undefined'
     && performance.mark !== undefined
   ) {
+    performance.clearMarks('react-with-styles.resolve.end');
     performance.mark('react-with-styles.resolve.end');
 
     performance.measure(
@@ -49,6 +51,7 @@ function resolve(...styles) {
       'react-with-styles.resolve.start',
       'react-with-styles.resolve.end',
     );
+    performance.clearMarks();
   }
 
   return result;

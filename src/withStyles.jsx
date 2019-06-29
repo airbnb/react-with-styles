@@ -86,6 +86,7 @@ export function withStyles(
       && typeof performance !== 'undefined'
       && performance.mark !== undefined
     ) {
+      performance.clearMarks('react-with-styles.createStyles.start');
       performance.mark('react-with-styles.createStyles.start');
     }
 
@@ -112,6 +113,7 @@ export function withStyles(
       && typeof performance !== 'undefined'
       && performance.mark !== undefined
     ) {
+      performance.clearMarks('react-with-styles.createStyles.end');
       performance.mark('react-with-styles.createStyles.end');
 
       performance.measure(
@@ -119,6 +121,7 @@ export function withStyles(
         'react-with-styles.createStyles.start',
         'react-with-styles.createStyles.end',
       );
+      performance.clearMarks();
     }
 
     return styleDef;
