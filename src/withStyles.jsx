@@ -20,6 +20,9 @@ export const withStylesPropTypes = {
 const EMPTY_STYLES = {};
 const EMPTY_STYLES_FN = () => EMPTY_STYLES;
 
+const START_MARK = 'react-with-styles.createStyles.start';
+const END_MARK = 'react-with-styles.createStyles.end';
+
 function baseClass(pureComponent) {
   if (pureComponent) {
     if (!React.PureComponent) {
@@ -84,10 +87,10 @@ export function withStyles(
     if (
       process.env.NODE_ENV !== 'production'
       && typeof performance !== 'undefined'
-      && performance.mark !== undefined
+      && performance.mark !== undefined && typeof performance.clearMarks === 'function'
     ) {
-      performance.clearMarks('react-with-styles.createStyles.start');
-      performance.mark('react-with-styles.createStyles.start');
+      performance.clearMarks(START_MARK);
+      performance.mark(START_MARK);
     }
 
     const isRTL = direction === DIRECTIONS.RTL;
@@ -111,17 +114,19 @@ export function withStyles(
     if (
       process.env.NODE_ENV !== 'production'
       && typeof performance !== 'undefined'
-      && performance.mark !== undefined
+      && performance.mark !== undefined && typeof performance.clearMarks === 'function'
     ) {
-      performance.clearMarks('react-with-styles.createStyles.end');
-      performance.mark('react-with-styles.createStyles.end');
+      performance.clearMarks(END_MARK);
+      performance.mark(END_MARK);
+
+      const measureName = `\ud83d\udc69\u200d\ud83c\udfa8 withStyles(${wrappedComponentName}) [create styles]`;
 
       performance.measure(
-        `\ud83d\udc69\u200d\ud83c\udfa8 withStyles(${wrappedComponentName}) [create styles]`,
-        'react-with-styles.createStyles.start',
-        'react-with-styles.createStyles.end',
+        measureName,
+        START_MARK,
+        END_MARK,
       );
-      performance.clearMarks();
+      performance.clearMarks(measureName);
     }
 
     return styleDef;

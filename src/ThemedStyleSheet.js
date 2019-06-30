@@ -1,6 +1,10 @@
 let styleInterface;
 let styleTheme;
 
+const START_MARK = 'react-with-styles.resolve.start';
+const END_MARK = 'react-with-styles.resolve.end';
+const MEASURE_MARK = '\ud83d\udc69\u200d\ud83c\udfa8 [resolve]';
+
 function registerTheme(theme) {
   styleTheme = theme;
 }
@@ -30,10 +34,10 @@ function resolve(...styles) {
   if (
     process.env.NODE_ENV !== 'production'
     && typeof performance !== 'undefined'
-    && performance.mark !== undefined
+    && performance.mark !== undefined && typeof performance.clearMarks === 'function'
   ) {
-    performance.clearMarks('react-with-styles.resolve.start');
-    performance.mark('react-with-styles.resolve.start');
+    performance.clearMarks(START_MARK);
+    performance.mark(START_MARK);
   }
 
   const result = styleInterface.resolve(styles);
@@ -41,17 +45,17 @@ function resolve(...styles) {
   if (
     process.env.NODE_ENV !== 'production'
     && typeof performance !== 'undefined'
-    && performance.mark !== undefined
+    && performance.mark !== undefined && typeof performance.clearMarks === 'function'
   ) {
-    performance.clearMarks('react-with-styles.resolve.end');
-    performance.mark('react-with-styles.resolve.end');
+    performance.clearMarks(END_MARK);
+    performance.mark(END_MARK);
 
     performance.measure(
-      '\ud83d\udc69\u200d\ud83c\udfa8 [resolve]',
-      'react-with-styles.resolve.start',
-      'react-with-styles.resolve.end',
+      MEASURE_MARK,
+      START_MARK,
+      END_MARK,
     );
-    performance.clearMarks();
+    performance.clearMarks(MEASURE_MARK);
   }
 
   return result;
