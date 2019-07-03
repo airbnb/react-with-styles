@@ -1,3 +1,6 @@
+## v3.2.3
+- [fix] Add .git to .npmignore
+
 ## v3.2.2
 - [dev] Clear performance marks before setting (@mmarkelov, [#214](https://github.com/airbnb/react-with-styles/pull/214))
 - [deps] Update `prop-types`, `hoist-non-react-statics`
