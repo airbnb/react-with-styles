@@ -1,7 +1,15 @@
+## v3.2.3
+- [fix] Add .git to .npmignore
+
+## v3.2.2
+- [dev] Clear performance marks before setting (@mmarkelov, [#214](https://github.com/airbnb/react-with-styles/pull/214))
+- [deps] Update `prop-types`, `hoist-non-react-statics`
+- [deps] Replace `deepmerge` with `object.assign`
+
 ## v3.2.1
 - [deps] Update `hoist-non-react-statics`, `prop-types`, `react-with-direction`
-- [fix] Move work out of render and into state ([156](https://github.com/airbnb/react-with-styles/pull/156))
-- [fix] Use `this.context` instead of constructor arguments directly ([154](https://github.com/airbnb/react-with-styles/pull/154))
+- [fix] Move work out of render and into state ([#156](https://github.com/airbnb/react-with-styles/pull/156))
+- [fix] Use `this.context` instead of constructor arguments directly ([#154](https://github.com/airbnb/react-with-styles/pull/154))
 
 ## v3.2.0
 - [new] Add `performance.mark()` and `performance.measure()` in development ([#141](https://github.com/airbnb/react-with-styles/pull/141))
