@@ -1,3 +1,5 @@
+import checkPerformance from './utils';
+
 let styleInterface;
 let styleTheme;
 
@@ -31,22 +33,14 @@ function get() {
 }
 
 function resolve(...styles) {
-  if (
-    process.env.NODE_ENV !== 'production'
-    && typeof performance !== 'undefined'
-    && performance.mark !== undefined && typeof performance.clearMarks === 'function'
-  ) {
+  if (checkPerformance()) {
     performance.clearMarks(START_MARK);
     performance.mark(START_MARK);
   }
 
   const result = styleInterface.resolve(styles);
 
-  if (
-    process.env.NODE_ENV !== 'production'
-    && typeof performance !== 'undefined'
-    && performance.mark !== undefined && typeof performance.clearMarks === 'function'
-  ) {
+  if (checkPerformance()) {
     performance.clearMarks(END_MARK);
     performance.mark(END_MARK);
 

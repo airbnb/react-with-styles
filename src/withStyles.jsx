@@ -7,6 +7,7 @@ import hoistNonReactStatics from 'hoist-non-react-statics';
 import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
 import brcastShape from 'react-with-direction/dist/proptypes/brcast';
 
+import checkPerformance from './utils';
 import ThemedStyleSheet from './ThemedStyleSheet';
 
 // Add some named exports to assist in upgrading and for convenience
@@ -84,11 +85,7 @@ export function withStyles(
       return styleDef;
     }
 
-    if (
-      process.env.NODE_ENV !== 'production'
-      && typeof performance !== 'undefined'
-      && performance.mark !== undefined && typeof performance.clearMarks === 'function'
-    ) {
+    if (checkPerformance()) {
       performance.clearMarks(START_MARK);
       performance.mark(START_MARK);
     }
@@ -111,11 +108,7 @@ export function withStyles(
       styleDef = styleDefLTR;
     }
 
-    if (
-      process.env.NODE_ENV !== 'production'
-      && typeof performance !== 'undefined'
-      && performance.mark !== undefined && typeof performance.clearMarks === 'function'
-    ) {
+    if (checkPerformance()) {
       performance.clearMarks(END_MARK);
       performance.mark(END_MARK);
 
