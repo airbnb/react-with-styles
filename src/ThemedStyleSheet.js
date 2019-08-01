@@ -1,5 +1,6 @@
 let styleInterface;
 let styleTheme;
+let styleTransform;
 
 const START_MARK = 'react-with-styles.resolve.start';
 const END_MARK = 'react-with-styles.resolve.end';
@@ -14,7 +15,10 @@ function registerInterface(interfaceToRegister) {
 }
 
 function create(makeFromTheme, createWithDirection) {
-  const styles = createWithDirection(makeFromTheme(styleTheme));
+  const styles = createWithDirection(styleTransform
+    ? styleTransform(styleTheme, makeFromTheme(styleTheme))
+    : makeFromTheme(styleTheme));
+
   return () => styles;
 }
 
@@ -83,6 +87,10 @@ function flush() {
   }
 }
 
+function registerStyleTransform(transform) {
+  styleTransform = transform;
+}
+
 export default {
   registerTheme,
   registerInterface,
@@ -94,4 +102,5 @@ export default {
   resolveLTR,
   resolveRTL,
   flush,
+  registerStyleTransform,
 };

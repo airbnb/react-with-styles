@@ -15,11 +15,13 @@ describe('withStyles()', () => {
     },
   };
 
+  let styleTransform;
   let testInterface;
   let testInterfaceResolveLTRStub;
   let testInterfaceResolveRTLStub;
 
   beforeEach(() => {
+    styleTransform = null;
     testInterface = {
       create() {},
       createLTR() {},
@@ -41,6 +43,7 @@ describe('withStyles()', () => {
     testInterfaceResolveRTLStub = sinon.stub(testInterface, 'resolveRTL')
       .callsFake(fakeResolveMethod);
 
+    ThemedStyleSheet.registerStyleTransform(styleTransform);
     ThemedStyleSheet.registerTheme(defaultTheme);
     ThemedStyleSheet.registerInterface(testInterface);
   });
@@ -240,6 +243,35 @@ describe('withStyles()', () => {
           color: color.red,
         },
       }))(MyComponent);
+      shallow(<Wrapped />).dive();
+    });
+
+    it('transforms component styles', () => {
+      styleTransform = (theme, styles) => ({
+        ...styles,
+        MyComponent: {
+          ...styles.MyComponent,
+          border: '1px dashed',
+        },
+      });
+
+      ThemedStyleSheet.registerStyleTransform(styleTransform);
+
+      function MyComponent({ styles }) {
+        expect(styles).to.eql({ MyComponent: { backgroundColor: '#990000', border: '1px dashed' } });
+        return null;
+      }
+
+      MyComponent.propTypes = {
+        ...withStylesPropTypes,
+      };
+
+      const Wrapped = withStyles(({ color }) => ({
+        MyComponent: {
+          backgroundColor: color.red,
+        },
+      }))(MyComponent);
+
       shallow(<Wrapped />).dive();
     });
 
