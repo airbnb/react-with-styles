@@ -7,6 +7,7 @@ import hoistNonReactStatics from 'hoist-non-react-statics';
 import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
 import brcastShape from 'react-with-direction/dist/proptypes/brcast';
 
+import extendStyles from './extendStyles';
 import ThemedStyleSheet from './ThemedStyleSheet';
 
 // Add some named exports to assist in upgrading and for convenience
@@ -47,6 +48,7 @@ export function withStyles(
     stylesPropName = 'styles',
     themePropName = 'theme',
     cssPropName = 'css',
+    extendableStyles = {},
     flushBefore = false,
     pureComponent = false,
   } = {},
@@ -205,6 +207,7 @@ export function withStyles(
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
     WithStyles.contextTypes = contextTypes;
+
     if (WrappedComponent.propTypes) {
       WithStyles.propTypes = { ...WrappedComponent.propTypes };
       delete WithStyles.propTypes[stylesPropName];
@@ -213,6 +216,20 @@ export function withStyles(
     }
     if (WrappedComponent.defaultProps) {
       WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
+    }
+
+    if (extendableStyles && Object.keys(extendableStyles).length !== 0) {
+      WithStyles.extendStyles = extendStyleFn => withStyles(
+        extendStyles(styleFn, extendStyleFn, extendableStyles),
+        {
+          stylesPropName,
+          themePropName,
+          cssPropName,
+          extendableStyles,
+          flushBefore,
+          pureComponent,
+        },
+      )(WrappedComponent);
     }
 
     return hoistNonReactStatics(WithStyles, WrappedComponent);

@@ -430,6 +430,563 @@ describe('withStyles()', () => {
       expect(testInterfaceResolveRTLStub.callCount).to.equal(1);
     });
   });
+
+  describe('extendStyles', () => {
+    it('extends styles in a non-directional context', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: () => true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green',
+        },
+      }));
+
+      render(
+        <ExtendedComponent />,
+      );
+
+      expect(testInterface.createLTR.callCount).to.equal(1);
+      expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+        container: {
+          background: 'green',
+          color: 'blue',
+        },
+      });
+    });
+
+    it('extends styles in an LTR context', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: () => true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green',
+        },
+      }));
+
+      render(
+        <DirectionProvider direction={DIRECTIONS.LTR}>
+          <ExtendedComponent />
+        </DirectionProvider>,
+      );
+
+      expect(testInterface.createLTR.callCount).to.equal(1);
+      expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+        container: {
+          background: 'green',
+          color: 'blue',
+        },
+      });
+    });
+
+    it('extends styles in an RTL context', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: () => true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green',
+        },
+      }));
+      render(
+        <DirectionProvider direction={DIRECTIONS.RTL}>
+          <ExtendedComponent />
+        </DirectionProvider>,
+      );
+
+      expect(testInterface.createRTL.callCount).to.equal(1);
+      expect(testInterface.createRTL.getCall(0).args[0]).to.eql({
+        container: {
+          background: 'green',
+          color: 'blue',
+        },
+      });
+    });
+
+    it('allows nested extends styles', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+            fontSize: 20,
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: () => true,
+              color: () => true,
+              fontSize: () => true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green',
+          fontSize: 12,
+        },
+      }));
+      const NestedExtendedComponent = ExtendedComponent.extendStyles(() => ({
+        container: {
+          background: 'pink',
+        },
+      }));
+
+      render(
+        <NestedExtendedComponent />,
+      );
+
+      expect(testInterface.createLTR.callCount).to.equal(1);
+      expect(testInterface.createLTR.getCall(0).args[0]).to.eql({
+        container: {
+          background: 'pink',
+          color: 'blue',
+          fontSize: 12,
+        },
+      });
+    });
+
+    it('receives the registered theme in the extend style function', (done) => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            color: 'red',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: () => true,
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles((theme) => {
+        expect(theme).to.equal(defaultTheme);
+        done();
+        return {};
+      });
+      shallow(
+        <ExtendedComponent />,
+      );
+    });
+
+    it('validates that the extending styles are defined in the extendableStyles option', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: () => true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          // color is invalid
+          color: 'green',
+        },
+      }));
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.throw();
+    });
+
+    it('validates that the extended classNames are defined in the extendableStyles option', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: () => true,
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        innerContainer: { // not an extendable className
+          color: 'green',
+        },
+      }));
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.throw();
+    });
+
+
+    it('validates the extending style against the defined predicate (fail)', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: v => (v === 'red'), // predicate
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green', // fails
+        },
+      }));
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.throw();
+    });
+
+    it('validates the extending style against the defined predicate (pass)', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: v => (v === 'red'), // predicate
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'red', // passes
+        },
+      }));
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.not.throw();
+    });
+
+    it('validates the extending style against the defined predicate with a theme (fail)', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: (v, t) => (v === t.color.red), // color = '#990000'
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'green', // fails
+        },
+      }));
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.throw();
+    });
+
+    it('validates the extending style against the defined predicate with a theme (pass)', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: (v, t) => (v === t.color.red), // color = '#990000'
+            },
+          },
+        },
+      )(MyComponent);
+      const ExtendedComponent = WrappedComponent.extendStyles(theme => ({
+        container: {
+          background: theme.color.red, // pass
+        },
+      }));
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.not.throw();
+    });
+
+    it('validates all extending styles against the defined predicates', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: (v, t) => (v === t.color.red),
+              color: v => (v === 'green'),
+              fontSize: v => (v === 12),
+            },
+          },
+        },
+      )(MyComponent);
+      const FailingColorComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'purple', // fails
+          color: 'green',
+          fontSize: 12,
+        },
+      }));
+      const FailingBackgroundComponent = WrappedComponent.extendStyles(theme => ({
+        container: {
+          background: theme.color.red,
+          color: 15, // fails
+          fontSize: 12,
+        },
+      }));
+      const FailingFontSizeComponent = WrappedComponent.extendStyles(theme => ({
+        container: {
+          background: theme.color.red,
+          color: 'green',
+          fontSize: '12', // fails
+        },
+      }));
+      const ExtendedComponent = WrappedComponent.extendStyles(theme => ({
+        container: {
+          background: theme.color.red,
+          color: 'green',
+          fontSize: 12,
+        },
+      }));
+
+      expect(() => render(
+        <FailingColorComponent />,
+      )).to.throw();
+
+      expect(() => render(
+        <FailingBackgroundComponent />,
+      )).to.throw();
+
+      expect(() => render(
+        <FailingFontSizeComponent />,
+      )).to.throw();
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.not.throw();
+    });
+
+    it('validates all extending styles across all classNames against the defined predicates', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+          innerContainer: {
+            fontSize: 12,
+          },
+        }),
+        {
+          extendableStyles: {
+            container: {
+              background: (v, t) => (v === t.color.red),
+              color: v => (v === 'green'),
+            },
+            innerContainer: {
+              fontSize: v => (v === 12),
+            },
+          },
+        },
+      )(MyComponent);
+      const FailingColorComponent = WrappedComponent.extendStyles(() => ({
+        container: {
+          background: 'purple', // fails
+          color: 'green',
+        },
+        innerContainer: {
+          fontSize: 12,
+        },
+      }));
+      const FailingBackgroundComponent = WrappedComponent.extendStyles(theme => ({
+        container: {
+          background: theme.color.red,
+          color: 15, // fails
+        },
+        innerContainer: {
+          fontSize: 12,
+        },
+      }));
+      const FailingFontSizeComponent = WrappedComponent.extendStyles(theme => ({
+        container: {
+          background: theme.color.red,
+          color: 'green',
+          fontSize: '12',
+        },
+        innerContainer: {
+          fontSize: '12', // fails
+        },
+      }));
+      const ExtendedComponent = WrappedComponent.extendStyles(theme => ({
+        container: {
+          background: theme.color.red,
+          color: 'green',
+        },
+        innerContainer: {
+          fontSize: 12,
+        },
+      }));
+
+      expect(() => render(
+        <FailingColorComponent />,
+      )).to.throw();
+
+      expect(() => render(
+        <FailingBackgroundComponent />,
+      )).to.throw();
+
+      expect(() => render(
+        <FailingFontSizeComponent />,
+      )).to.throw();
+
+      expect(() => render(
+        <ExtendedComponent />,
+      )).to.not.throw();
+    });
+
+    it('does not attach an "extendStyles" static property when "extendableStyles" option is not defined', () => {
+      function MyComponent() {
+        return null;
+      }
+
+      const WrappedComponent = withStyles(
+        () => ({
+          container: {
+            background: 'red',
+            color: 'blue',
+          },
+          innerContainer: {
+            fontSize: 12,
+          },
+        }),
+        {}, // extendableStyles is not defined
+      )(MyComponent);
+
+      expect(WrappedComponent.extendStyles).to.equal(undefined);
+    });
+  });
 });
 
 describe('fallbacks', () => {
