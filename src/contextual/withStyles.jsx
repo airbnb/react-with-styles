@@ -1,26 +1,19 @@
 /* eslint-disable react/forbid-foreign-prop-types */
 
-import React, { useMemo, useContext /* memo */ } from 'react';
+import React, { useMemo, useContext, memo } from 'react';
 import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
-import brcastShape from 'react-with-direction/dist/proptypes/brcast';
-import { CHANNEL } from 'react-with-direction/dist/constants';
-import { DIRECTIONS } from 'react-with-direction';
+import withDirection from 'react-with-direction';
 
-import ThemeContext from './StylesThemeContext';
+import StylesThemeContext from './StylesThemeContext';
 import StylesInterfaceContext from './StylesInterfaceContext';
 import useThemedStyleSheet from './useThemedStyleSheet';
-import useBroadcast from './useBroadcast';
 import { perfStart, perfEnd } from './perf';
 
 export const withStylesPropTypes = {
   styles: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
   css: PropTypes.func.isRequired,
-};
-
-const contextTypes = {
-  [CHANNEL]: brcastShape,
 };
 
 const EMPTY_STYLES = {};
@@ -37,7 +30,7 @@ export function withStyles(
     themePropName = 'theme',
     cssPropName = 'css',
     flushBefore = false,
-    // pureComponent = false,
+    pureComponent = false,
   } = {},
 ) {
   // eslint-disable-next-line no-param-reassign
@@ -48,13 +41,11 @@ export function withStyles(
       || WrappedComponent.name
       || 'Component';
 
-    function WithStyles(props, context) {
-      const { [CHANNEL]: directionBrcast } = context;
-
+    function WithStyles(props) {
       // Use global state
-      const direction = useBroadcast(directionBrcast, DIRECTIONS.LTR);
+      const { direction } = props;
       const stylesInterface = useContext(StylesInterfaceContext);
-      const theme = useContext(ThemeContext);
+      const theme = useContext(StylesThemeContext);
 
       // Create and cache the ThemedStyleSheet for this combination of global state values. We are
       // going to be using the functions provided by this interface to inject the withStyles props.
@@ -70,11 +61,13 @@ export function withStyles(
         flush();
       }
 
+      if (process.env.NODE_ENV !== 'production') perfStart(CREATE_START_MARK);
+
       // Calculate and cache the styles definition for this combination of global state values. This
       // value will only be recalculated if the create function changes, which in turn will only
       // change if any of the global state we depend on changes.
-      if (process.env.NODE_ENV !== 'production') perfStart(CREATE_START_MARK);
       const styles = useMemo(() => create(stylesFn), [create]);
+
       if (process.env.NODE_ENV !== 'production') {
         perfEnd(CREATE_START_MARK, CREATE_END_MARK, createMeasureName(wrappedComponentName));
       }
@@ -91,10 +84,17 @@ export function withStyles(
       );
     }
 
+    // Listen to directional updates via props
+    // eslint-disable-next-line no-func-assign
+    WithStyles = withDirection(WithStyles);
+
+    // Make into a pure functional component if requested
+    // eslint-disable-next-line no-func-assign
+    WithStyles = pureComponent ? memo(WithStyles) : WithStyles;
+
     // Set React statics on WithStyles
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
-    WithStyles.contextTypes = contextTypes;
     if (WrappedComponent.propTypes) {
       WithStyles.propTypes = { ...WrappedComponent.propTypes };
       delete WithStyles.propTypes[stylesPropName];
@@ -106,10 +106,10 @@ export function withStyles(
     }
 
     // Copy all non-React static members of WrappedComponent to WithStyles
-    const WithStylesWithHoistedStatics = hoistNonReactStatics(WithStyles, WrappedComponent);
+    // eslint-disable-next-line no-func-assign
+    WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
 
-    // return pureComponent ? memo(WithStylesWithHoistedStatics) : WithStylesWithHoistedStatics;
-    return WithStylesWithHoistedStatics;
+    return WithStyles;
   };
 }
 

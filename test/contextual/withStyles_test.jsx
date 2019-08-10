@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { expect } from 'chai';
-import { render, shallow, mount } from 'enzyme';
+import { mount } from 'enzyme';
 import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
 
@@ -34,7 +34,7 @@ describe('withStyles', () => {
     return firstElement;
   }
 
-  function renderWithProviders(element, providers) {
+  function mountWithProviders(element, providers) {
     return mount(compose(...providers, element));
   }
 
@@ -125,14 +125,14 @@ describe('withStyles', () => {
         const stylesFn = sinon.spy();
         const MockComponent = () => null;
         const StyledComponent = withStyles(stylesFn)(MockComponent);
-        const wrapper = renderWithProviders(<StyledComponent />, providers);
+        mountWithProviders(<StyledComponent />, providers);
         expect(stylesFn.calledWith(testTheme)).to.equal(true);
       });
 
       it('passes the theme to the wrapped component through the `theme` prop', () => {
         const MockComponent = () => null;
         const StyledComponent = withStyles()(MockComponent);
-        const wrapper = renderWithProviders(<StyledComponent />, providers);
+        const wrapper = mountWithProviders(<StyledComponent />, providers);
         expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
       });
 
@@ -140,21 +140,21 @@ describe('withStyles', () => {
         const testStyles = { foo: { color: 'bar' } };
         const MockComponent = () => null;
         const StyledComponent = withStyles(() => testStyles)(MockComponent);
-        const wrapper = renderWithProviders(<StyledComponent />, providers);
+        const wrapper = mountWithProviders(<StyledComponent />, providers);
         expect(wrapper.find(MockComponent).props().styles).to.equal(testStyles);
       });
 
       it('passes an empty styles object if no stylesFn is provided', () => {
         const MockComponent = () => null;
         const StyledComponent = withStyles()(MockComponent);
-        const wrapper = renderWithProviders(<StyledComponent />, providers);
+        const wrapper = mountWithProviders(<StyledComponent />, providers);
         expect(wrapper.find(MockComponent).props().styles).to.eql({});
       });
 
       it('passes a function to the wrapped component through the `css` prop', () => {
         const MockComponent = () => null;
         const StyledComponent = withStyles()(MockComponent);
-        const wrapper = renderWithProviders(<StyledComponent />, providers);
+        const wrapper = mountWithProviders(<StyledComponent />, providers);
         expect(typeof wrapper.find(MockComponent).props().css).to.equal('function');
       });
 
@@ -162,100 +162,8 @@ describe('withStyles', () => {
         const MockComponent = () => null;
         const StyledComponent = withStyles()(MockComponent);
         expect(testInterface.flush.callCount).to.equal(0);
-        renderWithProviders(<StyledComponent />, providers);
+        mountWithProviders(<StyledComponent />, providers);
         expect(testInterface.flush.callCount).to.equal(0);
-      });
-
-      describe('re-rendering', () => {
-        let firstTheme;
-        let secondTheme;
-        let firstInterface;
-        let secondInterface;
-
-        const ThemeAndInterfaceProvider = ({ children, theme, stylesInterface }) => (
-          <StylesInterfaceContext.Provider value={stylesInterface}>
-            <StylesThemeContext.Provider value={theme}>
-              {children}
-            </StylesThemeContext.Provider>
-          </StylesInterfaceContext.Provider>
-        );
-
-        ThemeAndInterfaceProvider.propTypes = {
-          children: PropTypes.node.isRequired,
-          // eslint-disable-next-line react/forbid-prop-types
-          theme: PropTypes.object.isRequired,
-          // eslint-disable-next-line react/forbid-prop-types
-          stylesInterface: PropTypes.object.isRequired,
-        };
-
-        beforeEach(() => {
-          firstTheme = { color: { primary: '#000' } };
-          secondTheme = { color: { primary: '#fff' } };
-
-          firstInterface = {
-            create: sinon.stub().callsFake(fakeCreateMethod),
-            resolve: sinon.stub().callsFake(fakeResolveMethod),
-          };
-          secondInterface = {
-            create: sinon.stub().callsFake(fakeCreateMethod),
-            resolve: sinon.stub().callsFake(fakeResolveMethod),
-          };
-        });
-
-        it.skip('does not re-create styles if neither theme nor interface change', () => {
-          const MockComponent = () => null;
-          const StyledComponent = withStyles()(MockComponent);
-          expect(firstInterface.create.callCount).to.equal(0);
-          const wrapper = mount(
-            <ThemeAndInterfaceProvider theme={firstTheme} stylesInterface={firstInterface}>
-              <StyledComponent />
-            </ThemeAndInterfaceProvider>,
-          );
-          expect(firstInterface.create.callCount).to.equal(1);
-          wrapper.setProps({ theme: firstTheme });
-          expect(firstInterface.create.callCount).to.equal(1);
-          wrapper.setProps({ stylesInterface: firstInterface });
-          expect(firstInterface.create.callCount).to.equal(1);
-        });
-
-        it('re-creates styles when the theme or interface change', () => {
-          const MockComponent = () => null;
-          const StyledComponent = withStyles()(MockComponent);
-          expect(firstInterface.create.callCount).to.equal(0);
-          expect(secondInterface.create.callCount).to.equal(0);
-          const wrapper = mount(
-            <ThemeAndInterfaceProvider theme={firstTheme} stylesInterface={firstInterface}>
-              <StyledComponent />
-            </ThemeAndInterfaceProvider>,
-          );
-          expect(firstInterface.create.callCount).to.equal(1);
-          expect(secondInterface.create.callCount).to.equal(0);
-          wrapper.setProps({ theme: secondTheme });
-          expect(firstInterface.create.callCount).to.equal(2);
-          expect(secondInterface.create.callCount).to.equal(0);
-          wrapper.setProps({ stylesInterface: secondInterface });
-          expect(firstInterface.create.callCount).to.equal(2);
-          expect(secondInterface.create.callCount).to.equal(1);
-          wrapper.setProps({ theme: firstTheme });
-          expect(firstInterface.create.callCount).to.equal(2);
-          expect(secondInterface.create.callCount).to.equal(2);
-        });
-
-        it.skip('does not re-resolve styles if theme changes', () => {
-          const MockComponent = () => null;
-          const StyledComponent = withStyles(null, { pureComponent: true })(MockComponent);
-          expect(firstInterface.resolve.callCount).to.equal(0);
-          const wrapper = mount(
-            <ThemeAndInterfaceProvider theme={firstTheme} stylesInterface={firstInterface}>
-              <StyledComponent />
-            </ThemeAndInterfaceProvider>,
-          );
-          expect(firstInterface.resolve.callCount).to.equal(1);
-          wrapper.setProps({ theme: firstTheme });
-          expect(firstInterface.resolve.callCount).to.equal(1);
-          wrapper.setProps({ stylesInterface: firstInterface });
-          expect(firstInterface.resolve.callCount).to.equal(1);
-        });
       });
     });
 
@@ -266,7 +174,7 @@ describe('withStyles', () => {
           return null;
         };
         const StyledComponent = withStyles(null, { themePropName: 'customTheme' })(MockComponent);
-        renderWithProviders(<StyledComponent />, providers);
+        mountWithProviders(<StyledComponent />, providers);
       });
 
       it('passes the styles to the wrapped component through the specified prop', () => {
@@ -275,8 +183,11 @@ describe('withStyles', () => {
           expect(customStyles).to.equal(testStyles);
           return null;
         };
-        const StyledComponent = withStyles(() => testStyles, { stylesPropName: 'customStyles' })(MockComponent);
-        renderWithProviders(<StyledComponent />, providers);
+        const StyledComponent = withStyles(
+          () => testStyles,
+          { stylesPropName: 'customStyles' },
+        )(MockComponent);
+        mountWithProviders(<StyledComponent />, providers);
       });
 
       it('passes the css function to the wrapped component through the specified prop', () => {
@@ -285,14 +196,14 @@ describe('withStyles', () => {
           return null;
         };
         const StyledComponent = withStyles(null, { cssPropName: 'customCss' })(MockComponent);
-        renderWithProviders(<StyledComponent />, providers);
+        mountWithProviders(<StyledComponent />, providers);
       });
 
       it('calls the flush function before rendering when specified', () => {
         const MockComponent = () => null;
         const StyledComponent = withStyles(null, { flushBefore: true })(MockComponent);
         expect(testInterface.flush.callCount).to.equal(0);
-        renderWithProviders(<StyledComponent />, providers);
+        mountWithProviders(<StyledComponent />, providers);
         expect(testInterface.flush.callCount).to.equal(1);
       });
     });
@@ -304,7 +215,7 @@ describe('withStyles', () => {
         expect(testInterface.create.callCount).to.equal(0);
         expect(testInterface.createLTR.callCount).to.equal(0);
         expect(testInterface.createRTL.callCount).to.equal(0);
-        renderWithProviders(<WrappedComponent />, providers);
+        mountWithProviders(<WrappedComponent />, providers);
         expect(testInterface.create.callCount).to.equal(0);
         expect(testInterface.createLTR.callCount).to.equal(1);
         expect(testInterface.createRTL.callCount).to.equal(0);
@@ -317,7 +228,7 @@ describe('withStyles', () => {
         expect(testInterface.resolve.callCount).to.equal(0);
         expect(testInterface.resolveLTR.callCount).to.equal(0);
         expect(testInterface.resolveRTL.callCount).to.equal(0);
-        renderWithProviders(<StyledComponent />, providers);
+        mountWithProviders(<StyledComponent />, providers);
         expect(testInterface.resolve.callCount).to.equal(0);
         expect(testInterface.resolveLTR.callCount).to.equal(1);
         expect(testInterface.resolveRTL.callCount).to.equal(0);
@@ -325,8 +236,10 @@ describe('withStyles', () => {
     });
 
     describe('in an LTR directional context', () => {
+      let ltrProviders;
+
       beforeEach(() => {
-        providers = [
+        ltrProviders = [
           <DirectionProvider direction={DIRECTIONS.LTR} />,
           <StylesInterfaceContext.Provider value={testInterface} />,
           <StylesThemeContext.Provider value={testTheme} />,
@@ -339,7 +252,7 @@ describe('withStyles', () => {
         expect(testInterface.create.callCount).to.equal(0);
         expect(testInterface.createLTR.callCount).to.equal(0);
         expect(testInterface.createRTL.callCount).to.equal(0);
-        renderWithProviders(<WrappedComponent />, providers);
+        mountWithProviders(<WrappedComponent />, ltrProviders);
         expect(testInterface.create.callCount).to.equal(0);
         expect(testInterface.createLTR.callCount).to.equal(1);
         expect(testInterface.createRTL.callCount).to.equal(0);
@@ -352,7 +265,7 @@ describe('withStyles', () => {
         expect(testInterface.resolve.callCount).to.equal(0);
         expect(testInterface.resolveLTR.callCount).to.equal(0);
         expect(testInterface.resolveRTL.callCount).to.equal(0);
-        renderWithProviders(<StyledComponent />, providers);
+        mountWithProviders(<StyledComponent />, ltrProviders);
         expect(testInterface.resolve.callCount).to.equal(0);
         expect(testInterface.resolveLTR.callCount).to.equal(1);
         expect(testInterface.resolveRTL.callCount).to.equal(0);
@@ -360,8 +273,10 @@ describe('withStyles', () => {
     });
 
     describe('in an RTL directional context', () => {
+      let rtlProviders;
+
       beforeEach(() => {
-        providers = [
+        rtlProviders = [
           <DirectionProvider direction={DIRECTIONS.RTL} />,
           <StylesInterfaceContext.Provider value={testInterface} />,
           <StylesThemeContext.Provider value={testTheme} />,
@@ -374,7 +289,7 @@ describe('withStyles', () => {
         expect(testInterface.create.callCount).to.equal(0);
         expect(testInterface.createLTR.callCount).to.equal(0);
         expect(testInterface.createRTL.callCount).to.equal(0);
-        renderWithProviders(<WrappedComponent />, providers);
+        mountWithProviders(<WrappedComponent />, rtlProviders);
         expect(testInterface.create.callCount).to.equal(0);
         expect(testInterface.createLTR.callCount).to.equal(0);
         expect(testInterface.createRTL.callCount).to.equal(1);
@@ -387,10 +302,242 @@ describe('withStyles', () => {
         expect(testInterface.resolve.callCount).to.equal(0);
         expect(testInterface.resolveLTR.callCount).to.equal(0);
         expect(testInterface.resolveRTL.callCount).to.equal(0);
-        renderWithProviders(<StyledComponent />, providers);
+        mountWithProviders(<StyledComponent />, rtlProviders);
         expect(testInterface.resolve.callCount).to.equal(0);
         expect(testInterface.resolveLTR.callCount).to.equal(0);
         expect(testInterface.resolveRTL.callCount).to.equal(1);
+      });
+
+      it('resolves the styles for RTL, even if using a pure component', () => {
+        const MockComponent = ({ css }) => <div {...css({})} />;
+        MockComponent.propTypes = { ...withStylesPropTypes };
+        const StyledComponent = withStyles(null, { pureComponent: true })(MockComponent);
+        expect(testInterface.resolve.callCount).to.equal(0);
+        expect(testInterface.resolveLTR.callCount).to.equal(0);
+        expect(testInterface.resolveRTL.callCount).to.equal(0);
+        mountWithProviders(<StyledComponent />, rtlProviders);
+        expect(testInterface.resolve.callCount).to.equal(0);
+        expect(testInterface.resolveLTR.callCount).to.equal(0);
+        expect(testInterface.resolveRTL.callCount).to.equal(1);
+      });
+    });
+
+    describe('re-rendering', () => {
+      let firstTheme;
+      let secondTheme;
+      let firstInterface;
+      let secondInterface;
+
+      const TestProvider = ({
+        children, theme, stylesInterface, direction, siblingToPrepend,
+      }) => (
+        <DirectionProvider direction={direction}>
+          <StylesInterfaceContext.Provider value={stylesInterface}>
+            <StylesThemeContext.Provider value={theme}>
+              {siblingToPrepend}
+              {children}
+            </StylesThemeContext.Provider>
+          </StylesInterfaceContext.Provider>
+        </DirectionProvider>
+      );
+
+      TestProvider.propTypes = {
+        children: PropTypes.node.isRequired,
+        // eslint-disable-next-line react/forbid-prop-types
+        theme: PropTypes.object.isRequired,
+        // eslint-disable-next-line react/forbid-prop-types
+        stylesInterface: PropTypes.object.isRequired,
+        direction: PropTypes.oneOf(['ltr', 'rtl']),
+        siblingToPrepend: PropTypes.node,
+      };
+
+      TestProvider.defaultProps = {
+        direction: 'ltr',
+        siblingToPrepend: null,
+      };
+
+      beforeEach(() => {
+        firstTheme = { color: { primary: '#000' } };
+        secondTheme = { color: { primary: '#fff' } };
+        firstInterface = {
+          create: sinon.stub().callsFake(fakeCreateMethod),
+          createLTR: sinon.stub().callsFake(fakeCreateMethod),
+          createRTL: sinon.stub().callsFake(fakeCreateMethod),
+          resolve: sinon.stub().callsFake(fakeResolveMethod),
+          resolveLTR: sinon.stub().callsFake(fakeResolveMethod),
+          resolveRTL: sinon.stub().callsFake(fakeResolveMethod),
+        };
+        secondInterface = {
+          create: sinon.stub().callsFake(fakeCreateMethod),
+          createLTR: sinon.stub().callsFake(fakeCreateMethod),
+          createRTL: sinon.stub().callsFake(fakeCreateMethod),
+          resolve: sinon.stub().callsFake(fakeResolveMethod),
+          resolveLTR: sinon.stub().callsFake(fakeResolveMethod),
+          resolveRTL: sinon.stub().callsFake(fakeResolveMethod),
+        };
+      });
+
+      describe('re-rendering without options (standard behavior)', () => {
+        it('does not re-create styles that have already been created on re-render', () => {
+          const MockComponent = ({ css }) => <div {...css({})} />;
+          MockComponent.propTypes = { ...withStylesPropTypes };
+          const StyledComponent = withStyles()(MockComponent);
+          expect(firstInterface.createLTR.callCount).to.equal(0);
+          const wrapper = mount(
+            <TestProvider theme={firstTheme} stylesInterface={firstInterface} direction="ltr">
+              <StyledComponent />
+            </TestProvider>,
+          );
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          wrapper.setProps({ theme: firstTheme });
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          wrapper.setProps({ stylesInterface: firstInterface });
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          wrapper.setProps({ direction: 'ltr' });
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          wrapper.setProps({ siblingToPrepend: 'hello' });
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+        });
+
+        it('re-creates styles when direction, theme, or interface change', () => {
+          const MockComponent = ({ css }) => <div {...css({})} />;
+          MockComponent.propTypes = { ...withStylesPropTypes };
+          const StyledComponent = withStyles()(MockComponent);
+          expect(firstInterface.createLTR.callCount).to.equal(0);
+          expect(firstInterface.createRTL.callCount).to.equal(0);
+          const wrapper = mount(
+            <TestProvider theme={firstTheme} stylesInterface={firstInterface} direction="ltr">
+              <StyledComponent />
+            </TestProvider>,
+          );
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          expect(firstInterface.createRTL.callCount).to.equal(0);
+          wrapper.setProps({ theme: secondTheme });
+          expect(firstInterface.createLTR.callCount).to.equal(2);
+          expect(firstInterface.createRTL.callCount).to.equal(0);
+          expect(secondInterface.createLTR.callCount).to.equal(0);
+          expect(secondInterface.createRTL.callCount).to.equal(0);
+          wrapper.setProps({ stylesInterface: secondInterface });
+          expect(firstInterface.createLTR.callCount).to.equal(2);
+          expect(firstInterface.createRTL.callCount).to.equal(0);
+          expect(secondInterface.createLTR.callCount).to.equal(1);
+          expect(secondInterface.createRTL.callCount).to.equal(0);
+          wrapper.setProps({ theme: firstTheme });
+          expect(secondInterface.createLTR.callCount).to.equal(2);
+          expect(secondInterface.createRTL.callCount).to.equal(0);
+          wrapper.setProps({ direction: 'rtl' });
+          expect(secondInterface.createLTR.callCount).to.equal(2);
+          expect(secondInterface.createRTL.callCount).to.equal(1);
+        });
+
+        it('re-resolves styles on re-render', () => {
+          const MockComponent = ({ css }) => <div {...css({})} />;
+          MockComponent.propTypes = { ...withStylesPropTypes };
+          const StyledComponent = withStyles()(MockComponent);
+          expect(firstInterface.resolveLTR.callCount).to.equal(0);
+          const wrapper = mount(
+            <TestProvider theme={firstTheme} stylesInterface={firstInterface} direction="ltr">
+              <StyledComponent />
+            </TestProvider>,
+          );
+          expect(firstInterface.resolveLTR.callCount).to.equal(1);
+          wrapper.setProps({ theme: firstTheme });
+          expect(firstInterface.resolveLTR.callCount).to.equal(2);
+          wrapper.setProps({ stylesInterface: firstInterface });
+          expect(firstInterface.resolveLTR.callCount).to.equal(3);
+          wrapper.setProps({ direction: 'ltr' });
+          expect(firstInterface.resolveLTR.callCount).to.equal(4);
+          wrapper.setProps({ direction: 'rtl' });
+          expect(firstInterface.resolveLTR.callCount).to.equal(4);
+          expect(firstInterface.resolveRTL.callCount).to.equal(1);
+          wrapper.setProps({ siblingToPrepend: 'hello' });
+          expect(firstInterface.resolveRTL.callCount).to.equal(2);
+        });
+      });
+
+      describe('re-rendering with pureComponent option (custom behavior)', () => {
+        let pureComponentOptions;
+
+        beforeEach(() => {
+          pureComponentOptions = { pureComponent: true };
+        });
+
+        it('does not re-create styles that have already been created on re-render', () => {
+          const MockComponent = ({ css }) => <div {...css({})} />;
+          MockComponent.propTypes = { ...withStylesPropTypes };
+          const StyledComponent = withStyles(null, pureComponentOptions)(MockComponent);
+          expect(firstInterface.createLTR.callCount).to.equal(0);
+          const wrapper = mount(
+            <TestProvider theme={firstTheme} stylesInterface={firstInterface} direction="ltr">
+              <StyledComponent />
+            </TestProvider>,
+          );
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          wrapper.setProps({ theme: firstTheme });
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          wrapper.setProps({ stylesInterface: firstInterface });
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          wrapper.setProps({ direction: 'ltr' });
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          wrapper.setProps({ siblingToPrepend: 'hello' });
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+        });
+
+        it('re-creates styles when direction, theme, or interface change', () => {
+          const MockComponent = ({ css }) => <div {...css({})} />;
+          MockComponent.propTypes = { ...withStylesPropTypes };
+          const StyledComponent = withStyles(null, pureComponentOptions)(MockComponent);
+          expect(firstInterface.createLTR.callCount).to.equal(0);
+          expect(firstInterface.createRTL.callCount).to.equal(0);
+          const wrapper = mount(
+            <TestProvider theme={firstTheme} stylesInterface={firstInterface} direction="ltr">
+              <StyledComponent />
+            </TestProvider>,
+          );
+          expect(firstInterface.createLTR.callCount).to.equal(1);
+          expect(firstInterface.createRTL.callCount).to.equal(0);
+          wrapper.setProps({ theme: secondTheme });
+          expect(firstInterface.createLTR.callCount).to.equal(2);
+          expect(firstInterface.createRTL.callCount).to.equal(0);
+          expect(secondInterface.createLTR.callCount).to.equal(0);
+          expect(secondInterface.createRTL.callCount).to.equal(0);
+          wrapper.setProps({ stylesInterface: secondInterface });
+          expect(firstInterface.createLTR.callCount).to.equal(2);
+          expect(firstInterface.createRTL.callCount).to.equal(0);
+          expect(secondInterface.createLTR.callCount).to.equal(1);
+          expect(secondInterface.createRTL.callCount).to.equal(0);
+          wrapper.setProps({ theme: firstTheme });
+          expect(secondInterface.createLTR.callCount).to.equal(2);
+          expect(secondInterface.createRTL.callCount).to.equal(0);
+          wrapper.setProps({ direction: 'rtl' });
+          expect(secondInterface.createLTR.callCount).to.equal(2);
+          expect(secondInterface.createRTL.callCount).to.equal(1);
+        });
+
+        it('does not re-resolve styles on re-render', () => {
+          const MockComponent = ({ css }) => <div {...css({})} />;
+          MockComponent.propTypes = { ...withStylesPropTypes };
+          const StyledComponent = withStyles(null, pureComponentOptions)(MockComponent);
+          expect(firstInterface.resolveLTR.callCount).to.equal(0);
+          const wrapper = mount(
+            <TestProvider theme={firstTheme} stylesInterface={firstInterface} direction="ltr">
+              <StyledComponent />
+            </TestProvider>,
+          );
+          expect(firstInterface.resolveLTR.callCount).to.equal(1);
+          wrapper.setProps({ theme: firstTheme });
+          expect(firstInterface.resolveLTR.callCount).to.equal(1);
+          wrapper.setProps({ stylesInterface: firstInterface });
+          expect(firstInterface.resolveLTR.callCount).to.equal(1);
+          wrapper.setProps({ direction: 'ltr' });
+          expect(firstInterface.resolveLTR.callCount).to.equal(1);
+          expect(firstInterface.resolveRTL.callCount).to.equal(0);
+          wrapper.setProps({ direction: 'rtl' });
+          expect(firstInterface.resolveLTR.callCount).to.equal(1);
+          expect(firstInterface.resolveRTL.callCount).to.equal(1);
+          wrapper.setProps({ siblingToPrepend: 'hello' });
+          expect(firstInterface.resolveRTL.callCount).to.equal(1);
+        });
       });
     });
   });
@@ -434,7 +581,7 @@ describe('withStyles', () => {
       const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
       MockComponent.propTypes = { ...withStylesPropTypes };
       const StyledComponent = withStyles(stylesFn)(MockComponent);
-      const wrapper = renderWithProviders(<StyledComponent />, nestedProviders);
+      const wrapper = mountWithProviders(<StyledComponent />, nestedProviders);
       expect(stylesFn.calledWith(innerMostTheme)).to.equal(true);
       expect(wrapper.find(MockComponent).props().theme).to.equal(innerMostTheme);
     });
@@ -447,7 +594,7 @@ describe('withStyles', () => {
       expect(outerMostInterface.resolve.callCount).to.equal(0);
       expect(innerMostInterface.create.callCount).to.equal(0);
       expect(innerMostInterface.resolve.callCount).to.equal(0);
-      renderWithProviders(<StyledComponent />, nestedProviders);
+      mountWithProviders(<StyledComponent />, nestedProviders);
       expect(outerMostInterface.create.callCount).to.equal(0);
       expect(outerMostInterface.resolve.callCount).to.equal(0);
       expect(innerMostInterface.create.callCount).to.equal(1);
