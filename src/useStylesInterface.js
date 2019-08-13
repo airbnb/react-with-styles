@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 
 import StylesInterfaceContext from './StylesInterfaceContext';
-import { _getInterface } from '../ThemedStyleSheet';
+import { _getInterface } from './ThemedStyleSheet';
 
 export default function useStylesInterface() {
   const stylesInterface = useContext(StylesInterfaceContext);

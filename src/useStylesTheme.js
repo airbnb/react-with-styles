@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { DIRECTIONS } from 'react-with-direction';
 
 import StylesThemeContext from './StylesThemeContext';
-import { _getTheme } from '../ThemedStyleSheet';
+import { _getTheme } from './ThemedStyleSheet';
 
 export default function useStylesTheme({ direction }) {
   const stylesTheme = useContext(StylesThemeContext);

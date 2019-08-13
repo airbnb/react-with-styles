@@ -1,48 +1,30 @@
-/* eslint react/forbid-foreign-prop-types: off */
+/* eslint-disable react/forbid-foreign-prop-types */
 
-import React from 'react';
+import React, { useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
+import withDirection from 'react-with-direction';
 
-import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
-import brcastShape from 'react-with-direction/dist/proptypes/brcast';
+import useStylesInterface from './useStylesInterface';
+import useStylesTheme from './useStylesTheme';
+import useThemedStyleSheet from './useThemedStyleSheet';
+import { perfStart, perfEnd } from './perf';
 
-import ThemedStyleSheet from './ThemedStyleSheet';
-
-// Add some named exports to assist in upgrading and for convenience
-export const css = ThemedStyleSheet.resolveLTR;
 export const withStylesPropTypes = {
-  styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  styles: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
   css: PropTypes.func.isRequired,
 };
 
 const EMPTY_STYLES = {};
 const EMPTY_STYLES_FN = () => EMPTY_STYLES;
 
-const START_MARK = 'react-with-styles.createStyles.start';
-const END_MARK = 'react-with-styles.createStyles.end';
-
-function baseClass(pureComponent) {
-  if (pureComponent) {
-    if (!React.PureComponent) {
-      throw new ReferenceError('withStyles() pureComponent option requires React 15.3.0 or later');
-    }
-
-    return React.PureComponent;
-  }
-
-  return React.Component;
-}
-
-const contextTypes = {
-  [CHANNEL]: brcastShape,
-};
-
-const defaultDirection = DIRECTIONS.LTR;
+const CREATE_START_MARK = 'react-with-styles.createStyles.start';
+const CREATE_END_MARK = 'react-with-styles.createStyles.end';
+const createMeasureName = wrappedComponentName => `\ud83d\udc69\u200d\ud83c\udfa8 withStyles(${wrappedComponentName}) [create styles]`;
 
 export function withStyles(
-  styleFn,
+  stylesFn = EMPTY_STYLES_FN,
   {
     stylesPropName = 'styles',
     themePropName = 'theme',
@@ -51,160 +33,68 @@ export function withStyles(
     pureComponent = false,
   } = {},
 ) {
-  let styleDefLTR;
-  let styleDefRTL;
-  let currentThemeLTR;
-  let currentThemeRTL;
-  const BaseClass = baseClass(pureComponent);
-
-  function getResolveMethod(direction) {
-    return direction === DIRECTIONS.LTR
-      ? ThemedStyleSheet.resolveLTR
-      : ThemedStyleSheet.resolveRTL;
-  }
-
-  function getCurrentTheme(direction) {
-    return direction === DIRECTIONS.LTR
-      ? currentThemeLTR
-      : currentThemeRTL;
-  }
-
-  function getStyleDef(direction, wrappedComponentName) {
-    const currentTheme = getCurrentTheme(direction);
-    let styleDef = direction === DIRECTIONS.LTR
-      ? styleDefLTR
-      : styleDefRTL;
-
-    const registeredTheme = ThemedStyleSheet.get();
-
-    // Return the existing styles if they've already been defined
-    // and if the theme used to create them corresponds to the theme
-    // registered with ThemedStyleSheet
-    if (styleDef && currentTheme === registeredTheme) {
-      return styleDef;
-    }
-
-    if (
-      process.env.NODE_ENV !== 'production'
-      && typeof performance !== 'undefined'
-      && performance.mark !== undefined && typeof performance.clearMarks === 'function'
-    ) {
-      performance.clearMarks(START_MARK);
-      performance.mark(START_MARK);
-    }
-
-    const isRTL = direction === DIRECTIONS.RTL;
-
-    if (isRTL) {
-      styleDefRTL = styleFn
-        ? ThemedStyleSheet.createRTL(styleFn)
-        : EMPTY_STYLES_FN;
-
-      currentThemeRTL = registeredTheme;
-      styleDef = styleDefRTL;
-    } else {
-      styleDefLTR = styleFn
-        ? ThemedStyleSheet.createLTR(styleFn)
-        : EMPTY_STYLES_FN;
-
-      currentThemeLTR = registeredTheme;
-      styleDef = styleDefLTR;
-    }
-
-    if (
-      process.env.NODE_ENV !== 'production'
-      && typeof performance !== 'undefined'
-      && performance.mark !== undefined && typeof performance.clearMarks === 'function'
-    ) {
-      performance.clearMarks(END_MARK);
-      performance.mark(END_MARK);
-
-      const measureName = `\ud83d\udc69\u200d\ud83c\udfa8 withStyles(${wrappedComponentName}) [create styles]`;
-
-      performance.measure(
-        measureName,
-        START_MARK,
-        END_MARK,
-      );
-      performance.clearMarks(measureName);
-    }
-
-    return styleDef;
-  }
-
-  function getState(direction, wrappedComponentName) {
-    return {
-      resolveMethod: getResolveMethod(direction),
-      styleDef: getStyleDef(direction, wrappedComponentName),
-    };
-  }
+  // eslint-disable-next-line no-param-reassign
+  stylesFn = stylesFn || EMPTY_STYLES_FN;
 
   return function withStylesHOC(WrappedComponent) {
     const wrappedComponentName = WrappedComponent.displayName
       || WrappedComponent.name
       || 'Component';
 
-    // NOTE: Use a class here so components are ref-able if need be:
-    // eslint-disable-next-line react/prefer-stateless-function
-    class WithStyles extends BaseClass {
-      constructor(props, context) {
-        super(props, context);
+    function WithStyles(props) {
+      // Use global state
+      const { direction } = props;
+      const stylesInterface = useStylesInterface({ direction });
+      const theme = useStylesTheme({ direction });
 
-        const direction = this.context[CHANNEL]
-          ? this.context[CHANNEL].getState()
-          : defaultDirection;
+      // Create and cache the ThemedStyleSheet for this combination of global state values. We are
+      // going to be using the functions provided by this interface to inject the withStyles props.
+      const { create, resolve: css, flush } = useThemedStyleSheet({
+        direction,
+        stylesInterface,
+        theme,
+      });
 
-        this.state = getState(direction, wrappedComponentName);
+      // Flush styles to the style tag if needed. This must happen as early as possible in the
+      // render cycle.
+      if (flushBefore) {
+        flush();
       }
 
-      componentDidMount() {
-        if (this.context[CHANNEL]) {
-          // subscribe to future direction changes
-          this.channelUnsubscribe = this.context[CHANNEL].subscribe((direction) => {
-            this.setState(getState(direction, wrappedComponentName));
-          });
-        }
+      if (process.env.NODE_ENV !== 'production') perfStart(CREATE_START_MARK);
+
+      // Calculate and cache the styles definition for this combination of global state values. This
+      // value will only be recalculated if the create function changes, which in turn will only
+      // change if any of the global state we depend on changes.
+      const styles = useMemo(() => create(stylesFn), [create]);
+
+      if (process.env.NODE_ENV !== 'production') {
+        perfEnd(CREATE_START_MARK, CREATE_END_MARK, createMeasureName(wrappedComponentName));
       }
 
-      componentWillUnmount() {
-        if (this.channelUnsubscribe) {
-          this.channelUnsubscribe();
-        }
-      }
-
-      render() {
-        // As some components will depend on previous styles in
-        // the component tree, we provide the option of flushing the
-        // buffered styles (i.e. to a style tag) **before** the rendering
-        // cycle begins.
-        //
-        // The interfaces provide the optional "flush" method which
-        // is run in turn by ThemedStyleSheet.flush.
-        if (flushBefore) {
-          ThemedStyleSheet.flush();
-        }
-
-        const {
-          resolveMethod,
-          styleDef,
-        } = this.state;
-
-        return (
-          <WrappedComponent
-            {...this.props}
-            {...{
-              [themePropName]: ThemedStyleSheet.get(),
-              [stylesPropName]: styleDef(),
-              [cssPropName]: resolveMethod,
-            }}
-          />
-        );
-      }
+      return (
+        <WrappedComponent
+          {...props}
+          {...{
+            [themePropName]: theme,
+            [stylesPropName]: styles,
+            [cssPropName]: css,
+          }}
+        />
+      );
     }
 
+    // Listen to directional updates via props
+    // eslint-disable-next-line no-func-assign
+    WithStyles = withDirection(WithStyles);
+
+    // Make into a pure functional component if requested
+    // eslint-disable-next-line no-func-assign
+    WithStyles = pureComponent ? memo(WithStyles) : WithStyles;
+
+    // Set React statics on WithStyles
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
-    WithStyles.contextTypes = contextTypes;
     if (WrappedComponent.propTypes) {
       WithStyles.propTypes = { ...WrappedComponent.propTypes };
       delete WithStyles.propTypes[stylesPropName];
@@ -215,6 +105,12 @@ export function withStyles(
       WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
     }
 
-    return hoistNonReactStatics(WithStyles, WrappedComponent);
+    // Copy all non-React static members of WrappedComponent to WithStyles
+    // eslint-disable-next-line no-func-assign
+    WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
+
+    return WithStyles;
   };
 }
+
+export default withStyles;

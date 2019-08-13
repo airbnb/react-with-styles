@@ -1,4 +1,4 @@
---require @babel/register test/contextual/**/*.{js,jsx}
+--require @babel/register test/**/*.{js,jsx}
 --require airbnb-js-shims
 --require ./test/_setup
 --require jsdom-global/register
