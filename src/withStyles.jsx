@@ -18,7 +18,7 @@ export const withStylesPropTypes = {
   ...withDirectionPropTypes,
 };
 
-export const defaultProps = {
+export const withStylesDefaultProps = {
   direction: DIRECTIONS.LTR,
 };
 
@@ -92,9 +92,7 @@ export function withStyles(
     // eslint-disable-next-line no-func-assign
     WithStyles = withDirection(WithStyles);
 
-    // Set React statics on WithStyles
-    WithStyles.WrappedComponent = WrappedComponent;
-    WithStyles.displayName = `withStyles(${wrappedComponentName})`;
+    // Copy React statics on WithStyles
     if (WrappedComponent.propTypes) {
       WithStyles.propTypes = { ...WrappedComponent.propTypes };
       delete WithStyles.propTypes[stylesPropName];
@@ -102,15 +100,33 @@ export function withStyles(
       delete WithStyles.propTypes[cssPropName];
     }
     if (WrappedComponent.defaultProps) {
-      WithStyles.defaultProps = { ...defaultProps, ...WrappedComponent.defaultProps };
+      WithStyles.defaultProps = {
+        ...withStylesDefaultProps,
+        ...WrappedComponent.defaultProps,
+      };
     }
 
-    // Copy all non-React static members of WrappedComponent to WithStyles
+    // We set all of these statics on the inner component as well as on the outer
+    // We have to do this becasue React.memo
+    WithStyles.WrappedComponent = WrappedComponent;
+    WithStyles.displayName = `withStyles(${wrappedComponentName})`;
     // eslint-disable-next-line no-func-assign
     WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
 
     // Make into a pure functional component if requested
-    return pureComponent ? memo(WithStyles) : WithStyles;
+    if (pureComponent) {
+      // eslint-disable-next-line no-func-assign
+      WithStyles = memo(WithStyles);
+
+      // We set statics on the memoized component as well because the React.memo HOC
+      // doesn't copy them over
+      WithStyles.WrappedComponent = WrappedComponent;
+      WithStyles.displayName = `withStyles(${wrappedComponentName})`;
+      // eslint-disable-next-line no-func-assign
+      WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
+    }
+
+    return WithStyles;
   };
 }
 
