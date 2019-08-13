@@ -97,6 +97,9 @@ describe('withStyles', () => {
       const MockComponent = () => null;
       const StyledComponent = withStyles()(MockComponent);
       expect(StyledComponent.displayName).to.equal('withStyles(MockComponent)');
+
+      const PureStyledComponent = withStyles({ pureComponent: true })(MockComponent);
+      expect(PureStyledComponent.displayName).to.equal('withStyles(MockComponent)');
     });
 
     it('hoists the component\'s non-React statics', () => {
@@ -117,8 +120,8 @@ describe('withStyles', () => {
       };
       const StyledComponent = withStyles()(MockComponent);
       // eslint-disable-next-line react/forbid-foreign-prop-types
-      expect(StyledComponent.propTypes).to.eql({ foo: PropTypes.string });
-      expect(StyledComponent.defaultProps).to.eql({ foo: 'bar' });
+      expect(StyledComponent.propTypes).to.have.keys('foo', 'direction');
+      expect(StyledComponent.defaultProps).to.have.keys('foo', 'direction');
     });
 
     describe('rendering without options (standard behavior)', () => {

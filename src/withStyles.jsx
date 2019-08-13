@@ -3,7 +3,7 @@
 import React, { useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
-import withDirection from 'react-with-direction';
+import withDirection, { withDirectionPropTypes, DIRECTIONS } from 'react-with-direction';
 
 import useStylesInterface from './useStylesInterface';
 import useStylesTheme from './useStylesTheme';
@@ -14,6 +14,11 @@ export const withStylesPropTypes = {
   styles: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
   css: PropTypes.func.isRequired,
+  ...withDirectionPropTypes,
+};
+
+export const defaultProps = {
+  direction: DIRECTIONS.LTR,
 };
 
 const EMPTY_STYLES = {};
@@ -88,10 +93,6 @@ export function withStyles(
     // eslint-disable-next-line no-func-assign
     WithStyles = withDirection(WithStyles);
 
-    // Make into a pure functional component if requested
-    // eslint-disable-next-line no-func-assign
-    WithStyles = pureComponent ? memo(WithStyles) : WithStyles;
-
     // Set React statics on WithStyles
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
@@ -102,14 +103,15 @@ export function withStyles(
       delete WithStyles.propTypes[cssPropName];
     }
     if (WrappedComponent.defaultProps) {
-      WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
+      WithStyles.defaultProps = { ...defaultProps, ...WrappedComponent.defaultProps };
     }
 
     // Copy all non-React static members of WrappedComponent to WithStyles
     // eslint-disable-next-line no-func-assign
     WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
 
-    return WithStyles;
+    // Make into a pure functional component if requested
+    return pureComponent ? memo(WithStyles) : WithStyles;
   };
 }
 
