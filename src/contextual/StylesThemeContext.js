@@ -1,5 +1,5 @@
 import { createContext } from 'react';
 
-const StylesThemeContext = createContext({});
+const StylesThemeContext = createContext();
 
 export default StylesThemeContext;

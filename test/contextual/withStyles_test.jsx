@@ -3,13 +3,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { expect } from 'chai';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
 
 import { withStyles, withStylesPropTypes } from '../../src/contextual/withStyles';
 import StylesInterfaceContext from '../../src/contextual/StylesInterfaceContext';
 import StylesThemeContext from '../../src/contextual/StylesThemeContext';
+import ThemedStyleSheet from '../../src/ThemedStyleSheet';
 
 describe('withStyles', () => {
   let testTheme;
@@ -122,7 +123,7 @@ describe('withStyles', () => {
 
     describe('rendering without options (standard behavior)', () => {
       it('passes the theme to the stylesFn', () => {
-        const stylesFn = sinon.spy();
+        const stylesFn = sinon.stub().callsFake(() => ({}));
         const MockComponent = () => null;
         const StyledComponent = withStyles(stylesFn)(MockComponent);
         mountWithProviders(<StyledComponent />, providers);
@@ -542,7 +543,7 @@ describe('withStyles', () => {
     });
   });
 
-  describe('Nested context', () => {
+  describe('Nested themes and interfaces', () => {
     let nestedProviders;
     let innerMostTheme;
     let outerMostTheme;
@@ -599,6 +600,99 @@ describe('withStyles', () => {
       expect(outerMostInterface.resolve.callCount).to.equal(0);
       expect(innerMostInterface.create.callCount).to.equal(1);
       expect(innerMostInterface.resolve.callCount).to.equal(1);
+    });
+  });
+
+  describe('Fallbacks to the singleton API', () => {
+    let stylesFn;
+    let otherTestTheme;
+    let otherTestInterface;
+
+    beforeEach(() => {
+      ThemedStyleSheet.registerInterface(testInterface);
+      ThemedStyleSheet.registerTheme(testTheme);
+
+      stylesFn = sinon.stub().callsFake(({ color }) => ({ primary: { color: color.primary } }));
+      otherTestTheme = { color: { primary: 'purple' } };
+      otherTestInterface = {
+        create: sinon.stub().callsFake(fakeCreateMethod),
+        resolve: sinon.stub().callsFake(fakeResolveMethod),
+      };
+    });
+
+    afterEach(() => {
+      ThemedStyleSheet.registerInterface(undefined);
+      ThemedStyleSheet.registerTheme({});
+    });
+
+    describe('in a non-directional context', () => {
+      it('uses the theme registered with the singleton API', () => {
+        const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
+        MockComponent.propTypes = { ...withStylesPropTypes };
+        const StyledComponent = withStyles(stylesFn)(MockComponent);
+        const wrapper = shallow(<StyledComponent />).dive();
+        expect(stylesFn.calledWith(testTheme)).to.equal(true);
+        expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
+      });
+
+      it('uses the interface registered with the singleton API', () => {
+        const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
+        MockComponent.propTypes = { ...withStylesPropTypes };
+        const StyledComponent = withStyles(stylesFn)(MockComponent);
+        expect(testInterface.createLTR.callCount).to.equal(0);
+        expect(testInterface.resolveLTR.callCount).to.equal(0);
+        mount(<StyledComponent />);
+        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.resolveLTR.callCount).to.equal(1);
+      });
+    });
+
+    describe('in an LTR context', () => {
+      it('uses the theme registered with the singleton API', () => {
+        const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
+        MockComponent.propTypes = { ...withStylesPropTypes };
+        const StyledComponent = withStyles(stylesFn)(MockComponent);
+        const wrapper = mountWithProviders(<StyledComponent />, [
+          <DirectionProvider direction="ltr" />,
+        ]);
+        expect(stylesFn.calledWith(testTheme)).to.equal(true);
+        expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
+      });
+
+      it('uses the interface registered with the singleton API', () => {
+        const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
+        MockComponent.propTypes = { ...withStylesPropTypes };
+        const StyledComponent = withStyles(stylesFn)(MockComponent);
+        expect(testInterface.createLTR.callCount).to.equal(0);
+        expect(testInterface.resolveLTR.callCount).to.equal(0);
+        mountWithProviders(<StyledComponent />, [<DirectionProvider direction="ltr" />]);
+        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.resolveLTR.callCount).to.equal(1);
+      });
+    });
+
+    describe('in an RTL context', () => {
+      it('uses the theme registered with the singleton API', () => {
+        const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
+        MockComponent.propTypes = { ...withStylesPropTypes };
+        const StyledComponent = withStyles(stylesFn)(MockComponent);
+        const wrapper = mountWithProviders(<StyledComponent />, [
+          <DirectionProvider direction="rtl" />,
+        ]);
+        expect(stylesFn.calledWith(testTheme)).to.equal(true);
+        expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
+      });
+
+      it('uses the interface registered with the singleton API', () => {
+        const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
+        MockComponent.propTypes = { ...withStylesPropTypes };
+        const StyledComponent = withStyles(stylesFn)(MockComponent);
+        expect(testInterface.createRTL.callCount).to.equal(0);
+        expect(testInterface.resolveRTL.callCount).to.equal(0);
+        mountWithProviders(<StyledComponent />, [<DirectionProvider direction="rtl" />]);
+        expect(testInterface.createRTL.callCount).to.equal(1);
+        expect(testInterface.resolveRTL.callCount).to.equal(1);
+      });
     });
   });
 });

@@ -1,12 +1,12 @@
 /* eslint-disable react/forbid-foreign-prop-types */
 
-import React, { useMemo, useContext, memo } from 'react';
+import React, { useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import withDirection from 'react-with-direction';
 
-import StylesThemeContext from './StylesThemeContext';
-import StylesInterfaceContext from './StylesInterfaceContext';
+import useStylesInterface from './useStylesInterface';
+import useStylesTheme from './useStylesTheme';
 import useThemedStyleSheet from './useThemedStyleSheet';
 import { perfStart, perfEnd } from './perf';
 
@@ -44,8 +44,8 @@ export function withStyles(
     function WithStyles(props) {
       // Use global state
       const { direction } = props;
-      const stylesInterface = useContext(StylesInterfaceContext);
-      const theme = useContext(StylesThemeContext);
+      const stylesInterface = useStylesInterface({ direction });
+      const theme = useStylesTheme({ direction });
 
       // Create and cache the ThemedStyleSheet for this combination of global state values. We are
       // going to be using the functions provided by this interface to inject the withStyles props.
