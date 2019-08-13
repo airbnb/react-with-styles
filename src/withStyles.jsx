@@ -4,6 +4,7 @@ import React, { useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import withDirection, { withDirectionPropTypes, DIRECTIONS } from 'react-with-direction';
+import getComponentName from 'airbnb-prop-types/build/helpers/getComponentName';
 
 import useStylesInterface from './useStylesInterface';
 import useStylesTheme from './useStylesTheme';
@@ -42,9 +43,7 @@ export function withStyles(
   stylesFn = stylesFn || EMPTY_STYLES_FN;
 
   return function withStylesHOC(WrappedComponent) {
-    const wrappedComponentName = WrappedComponent.displayName
-      || WrappedComponent.name
-      || 'Component';
+    const wrappedComponentName = getComponentName(WrappedComponent);
 
     function WithStyles(props) {
       // Use global state
