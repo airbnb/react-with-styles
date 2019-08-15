@@ -1,21 +1,15 @@
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 
-import StylesInterfaceContext from './StylesInterfaceContext';
+import WithStylesContext from './WithStylesContext';
 import { _getInterface } from './ThemedStyleSheet';
 
 export default function useStylesInterface() {
-  const stylesInterface = useContext(StylesInterfaceContext);
-  const [fallbackInterface, setFallbackInterface] = useState();
+  const { stylesInterface } = useContext(WithStylesContext);
 
   if (stylesInterface) {
     return stylesInterface;
   }
 
-  // Fallback
-  const registeredInterface = _getInterface();
-  if (!fallbackInterface) {
-    setFallbackInterface(registeredInterface);
-    return registeredInterface;
-  }
-  return fallbackInterface;
+  // Fallback to singleton implementation
+  return _getInterface();
 }

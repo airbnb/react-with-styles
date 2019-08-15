@@ -1,26 +1,15 @@
-import { useContext, useState } from 'react';
-import { DIRECTIONS } from 'react-with-direction';
+import { useContext } from 'react';
 
-import StylesThemeContext from './StylesThemeContext';
+import WithStylesContext from './WithStylesContext';
 import { _getTheme } from './ThemedStyleSheet';
 
-export default function useStylesTheme({ direction }) {
-  const stylesTheme = useContext(StylesThemeContext);
-  const [fallbackThemeLTR, setFallbackThemeLTR] = useState();
-  const [fallbackThemeRTL, setFallbackThemeRTL] = useState();
+export default function useStylesTheme() {
+  const { stylesTheme } = useContext(WithStylesContext);
 
   if (stylesTheme) {
     return stylesTheme;
   }
 
-  // Fallback
-  const registeredTheme = _getTheme();
-  if (direction === DIRECTIONS.LTR && !fallbackThemeLTR) {
-    setFallbackThemeLTR(registeredTheme);
-    return registeredTheme;
-  } if (direction === DIRECTIONS.RTL && !fallbackThemeRTL) {
-    setFallbackThemeRTL(registeredTheme);
-    return registeredTheme;
-  }
-  return direction === DIRECTIONS.LTR ? fallbackThemeLTR : fallbackThemeRTL;
+  // Fallback to singleton implementation
+  return _getTheme();
 }

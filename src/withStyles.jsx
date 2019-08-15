@@ -48,15 +48,15 @@ export function withStyles(
     function WithStyles(props) {
       // Use global state
       const { direction } = props;
-      const stylesInterface = useStylesInterface({ direction });
-      const theme = useStylesTheme({ direction });
+      const stylesInterface = useStylesInterface();
+      const stylesTheme = useStylesTheme();
 
       // Create and cache the ThemedStyleSheet for this combination of global state values. We are
       // going to be using the functions provided by this interface to inject the withStyles props.
       const { create, resolve: css, flush } = useThemedStyleSheet({
         direction,
         stylesInterface,
-        theme,
+        stylesTheme,
       });
 
       // Flush styles to the style tag if needed. This must happen as early as possible in the
@@ -80,7 +80,7 @@ export function withStyles(
         <WrappedComponent
           {...props}
           {...{
-            [themePropName]: theme,
+            [themePropName]: stylesTheme,
             [stylesPropName]: styles,
             [cssPropName]: css,
           }}

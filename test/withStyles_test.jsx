@@ -8,8 +8,7 @@ import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
 
 import { withStyles, withStylesPropTypes } from '../src/withStyles';
-import StylesInterfaceContext from '../src/StylesInterfaceContext';
-import StylesThemeContext from '../src/StylesThemeContext';
+import WithStylesContext from '../src/WithStylesContext';
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
 
 describe('withStyles', () => {
@@ -88,8 +87,12 @@ describe('withStyles', () => {
 
     beforeEach(() => {
       providers = [
-        <StylesInterfaceContext.Provider value={testInterface} />,
-        <StylesThemeContext.Provider value={testTheme} />,
+        <WithStylesContext.Provider
+          value={{
+            stylesInterface: testInterface,
+            stylesTheme: testTheme,
+          }}
+        />,
       ];
     });
 
@@ -245,8 +248,12 @@ describe('withStyles', () => {
       beforeEach(() => {
         ltrProviders = [
           <DirectionProvider direction={DIRECTIONS.LTR} />,
-          <StylesInterfaceContext.Provider value={testInterface} />,
-          <StylesThemeContext.Provider value={testTheme} />,
+          <WithStylesContext.Provider
+            value={{
+              stylesInterface: testInterface,
+              stylesTheme: testTheme,
+            }}
+          />,
         ];
       });
 
@@ -282,8 +289,12 @@ describe('withStyles', () => {
       beforeEach(() => {
         rtlProviders = [
           <DirectionProvider direction={DIRECTIONS.RTL} />,
-          <StylesInterfaceContext.Provider value={testInterface} />,
-          <StylesThemeContext.Provider value={testTheme} />,
+          <WithStylesContext.Provider
+            value={{
+              stylesInterface: testInterface,
+              stylesTheme: testTheme,
+            }}
+          />,
         ];
       });
 
@@ -333,22 +344,20 @@ describe('withStyles', () => {
       let secondInterface;
 
       const TestProvider = ({
-        children, theme, stylesInterface, direction, siblingToPrepend,
+        children, stylesTheme, stylesInterface, direction, siblingToPrepend,
       }) => (
         <DirectionProvider direction={direction}>
-          <StylesInterfaceContext.Provider value={stylesInterface}>
-            <StylesThemeContext.Provider value={theme}>
-              {siblingToPrepend}
-              {children}
-            </StylesThemeContext.Provider>
-          </StylesInterfaceContext.Provider>
+          <WithStylesContext.Provider value={{ stylesInterface, stylesTheme }}>
+            {siblingToPrepend}
+            {children}
+          </WithStylesContext.Provider>
         </DirectionProvider>
       );
 
       TestProvider.propTypes = {
         children: PropTypes.node.isRequired,
         // eslint-disable-next-line react/forbid-prop-types
-        theme: PropTypes.object.isRequired,
+        stylesTheme: PropTypes.object.isRequired,
         // eslint-disable-next-line react/forbid-prop-types
         stylesInterface: PropTypes.object.isRequired,
         direction: PropTypes.oneOf(['ltr', 'rtl']),
@@ -574,10 +583,12 @@ describe('withStyles', () => {
       };
 
       nestedProviders = [
-        <StylesInterfaceContext.Provider value={outerMostInterface} />,
-        <StylesInterfaceContext.Provider value={innerMostInterface} />,
-        <StylesThemeContext.Provider value={outerMostTheme} />,
-        <StylesThemeContext.Provider value={innerMostTheme} />,
+        <WithStylesContext.Provider
+          value={{ stylesInterface: outerMostInterface, stylesTheme: outerMostTheme }}
+        />,
+        <WithStylesContext.Provider
+          value={{ stylesInterface: innerMostInterface, stylesTheme: innerMostTheme }}
+        />,
       ];
     });
 
