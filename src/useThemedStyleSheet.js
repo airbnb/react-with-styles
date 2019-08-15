@@ -23,7 +23,10 @@ export default function useThemedStyleSheet({
       if (process.env.NODE_ENV !== 'production') {
         perfStart(CREATE_START_MARK);
       }
-      // Create and cache the styles definition from the stylesFn
+      // Create and cache the styles definition from the stylesFn.
+      // We only need to create the styles object once per direction,
+      // and every time the interface and theme change, because the
+      // stylesFn shouldn't change.
       if (!stylesCache.createdStyles) {
         stylesCache.createdStyles = stylesCache.create(stylesFn(stylesTheme));
       }
@@ -43,16 +46,13 @@ export default function useThemedStyleSheet({
       if (process.env.NODE_ENV !== 'production') {
         perfStart(RESOLVE_START_MARK);
       }
-      // Resolve and cache the style props
-      if (!stylesCache.resolvedStyles) {
-        stylesCache.resolvedStyles = stylesCache.resolve(styles);
-      }
+      // Resolve the style props
+      const resolvedProps = stylesCache.resolve(styles);
       // End and log performance measurement
       if (process.env.NODE_ENV !== 'production') {
         perfEnd(RESOLVE_START_MARK, RESOLVE_END_MARK, RESOLVE_MEASURE_NAME);
       }
-      // Retrieve the styles props from the cache
-      return stylesCache.resolvedStyles;
+      return resolvedProps;
     },
     [stylesCache],
   );
