@@ -344,7 +344,9 @@ describe('withStyles', () => {
       let secondInterface;
 
       function makeTestHelper() {
-        const MockComponent = ({ css, styles, primary }) => <div {...css(primary && styles.primary)} />;
+        const MockComponent = ({ css, styles, primary }) => (
+          <div {...css(primary && styles.primary)} />
+        );
         MockComponent.propTypes = { ...withStylesPropTypes, primary: PropTypes.bool };
         MockComponent.defaultProps = { primary: false };
         const stylesFn = ({ color }) => ({ primary: { color: color.primary } });
