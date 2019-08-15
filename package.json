@@ -75,7 +75,7 @@
     "sinon-sandbox": "^2.0.5"
   },
   "peerDependencies": {
-    "react": ">=0.14",
+    "react": ">=16.8",
     "react-with-direction": "^1.1.0"
   },
   "dependencies": {
