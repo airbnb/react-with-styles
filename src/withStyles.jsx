@@ -1,6 +1,6 @@
 /* eslint-disable react/forbid-foreign-prop-types */
 
-import React, { useMemo, memo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import withDirection, { withDirectionPropTypes, DIRECTIONS } from 'react-with-direction';
@@ -53,6 +53,7 @@ export function withStyles(
 
       // Create and cache the ThemedStyleSheet for this combination of global state values. We are
       // going to be using the functions provided by this interface to inject the withStyles props.
+      // See `useThemedStyleSheet` for more details.
       const { create, resolve: css, flush } = useThemedStyleSheet({
         direction,
         stylesInterface,
@@ -65,12 +66,13 @@ export function withStyles(
         flush();
       }
 
-      if (process.env.NODE_ENV !== 'production') perfStart(CREATE_START_MARK);
+      if (process.env.NODE_ENV !== 'production') {
+        perfStart(CREATE_START_MARK);
+      }
 
-      // Calculate and cache the styles definition for this combination of global state values. This
-      // value will only be recalculated if the create function changes, which in turn will only
-      // change if any of the global state we depend on changes.
-      const styles = useMemo(() => create(stylesFn), [create]);
+      // Create the styles from the stylesFn or retrieved the cached value.
+      // See `useThemedStyleSheet` for more details.
+      const styles = create(stylesFn);
 
       if (process.env.NODE_ENV !== 'production') {
         perfEnd(CREATE_START_MARK, CREATE_END_MARK, createMeasureName(wrappedComponentName));
@@ -106,8 +108,6 @@ export function withStyles(
       };
     }
 
-    // We set all of these statics on the inner component as well as on the outer
-    // We have to do this becasue React.memo
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
     // eslint-disable-next-line no-func-assign
@@ -116,10 +116,10 @@ export function withStyles(
     // Make into a pure functional component if requested
     if (pureComponent) {
       // eslint-disable-next-line no-func-assign
-      WithStyles = memo(WithStyles);
+      WithStyles = React.memo(WithStyles);
 
-      // We set statics on the memoized component as well because the React.memo HOC
-      // doesn't copy them over
+      // We set statics on the memoized component as well because the
+      // React.memo HOC doesn't copy them over
       WithStyles.WrappedComponent = WrappedComponent;
       WithStyles.displayName = `withStyles(${wrappedComponentName})`;
       // eslint-disable-next-line no-func-assign

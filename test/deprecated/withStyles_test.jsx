@@ -132,7 +132,7 @@ describe('withStyles()', () => {
         expect(testInterface.createLTR.callCount).to.equal(4);
       });
 
-      it('does not recreate styles when the same theme is registered', () => {
+      it('does not re-create styles when the same theme is registered', () => {
         function MyComponent() {
           return null;
         }
