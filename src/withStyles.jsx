@@ -1,4 +1,4 @@
-/* eslint-disable react/forbid-foreign-prop-types */
+/* eslint-disable react/forbid-foreign-prop-types, no-param-reassign, no-func-assign */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -32,7 +32,6 @@ export function withStyles(
     pureComponent = false,
   } = {},
 ) {
-  // eslint-disable-next-line no-param-reassign
   stylesFn = stylesFn || EMPTY_STYLES_FN;
 
   return function withStylesHOC(WrappedComponent) {
@@ -60,7 +59,6 @@ export function withStyles(
     }
 
     // Listen to directional updates via props
-    // eslint-disable-next-line no-func-assign
     WithStyles = withDirection(WithStyles);
 
     // Copy React statics on WithStyles
@@ -79,19 +77,16 @@ export function withStyles(
 
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
-    // eslint-disable-next-line no-func-assign
     WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
 
     // Make into a pure functional component if requested
     if (pureComponent) {
-      // eslint-disable-next-line no-func-assign
       WithStyles = React.memo(WithStyles);
 
       // We set statics on the memoized component as well because the
       // React.memo HOC doesn't copy them over
       WithStyles.WrappedComponent = WrappedComponent;
       WithStyles.displayName = `withStyles(${wrappedComponentName})`;
-      // eslint-disable-next-line no-func-assign
       WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
     }
 
