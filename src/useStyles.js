@@ -5,6 +5,14 @@ import withPerf from './perf';
 import useStylesInterface from './useStylesInterface';
 import useStylesTheme from './useStylesTheme';
 
+/**
+ * Hook used to derive the react-with-styles props from the provided react-with-styles
+ * theme, interface, direction, and styles function.
+ *
+ * @export
+ * @param {*} [{ direction, stylesFn, flushBefore }={}]
+ * @returns {*} { css, styles, theme }
+ */
 export default function useStyles({ direction, stylesFn, flushBefore } = {}) {
   // Get the styles interface and styles theme from context
   const stylesInterface = useStylesInterface();
