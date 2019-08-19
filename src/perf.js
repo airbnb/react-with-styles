@@ -22,3 +22,20 @@ export function perfEnd(startMark, endMark, measureName) {
     performance.clearMarks(measureName);
   }
 }
+
+export default function withPerf(methodName) {
+  const startMark = `react-with-styles.${methodName}.start`;
+  const endMark = `react-with-styles.${methodName}.end`;
+  const measureName = `\ud83d\udc69\u200d\ud83c\udfa8 [${methodName}]`;
+
+  return fn => (...args) => {
+    if (process.env.NODE_ENV !== 'production') {
+      perfStart(startMark);
+    }
+    const result = fn(...args);
+    if (process.env.NODE_ENV !== 'production') {
+      perfEnd(startMark, endMark, measureName);
+    }
+    return result;
+  };
+}
