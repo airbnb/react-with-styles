@@ -5,8 +5,8 @@ import PropTypes from 'prop-types';
 import { expect } from 'chai';
 import { mount, shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
-import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
 
+import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
 import { withStyles, withStylesPropTypes } from '../src/withStyles';
 import WithStylesContext from '../src/WithStylesContext';
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
@@ -552,7 +552,7 @@ describe('withStyles', () => {
         const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles(stylesFn)(MockComponent);
-        const wrapper = shallow(<StyledComponent />).dive();
+        const wrapper = shallow(<StyledComponent />);
         expect(stylesFn.calledWith(testTheme)).to.equal(true);
         expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
       });

@@ -3,10 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
-import withDirection, { withDirectionPropTypes, DIRECTIONS } from 'react-with-direction';
 import getComponentName from 'airbnb-prop-types/build/helpers/getComponentName';
+import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
+import brcastShape from 'react-with-direction/dist/proptypes/brcast';
+import { withDirectionPropTypes } from 'react-with-direction';
 
 import useStyles from './useStyles';
+import useBroadcast from './utils/useBroadcast';
 
 export const withStylesPropTypes = {
   styles: PropTypes.object.isRequired,
@@ -17,6 +20,10 @@ export const withStylesPropTypes = {
 
 export const withStylesDefaultProps = {
   direction: DIRECTIONS.LTR,
+};
+
+const contextTypes = {
+  [CHANNEL]: brcastShape,
 };
 
 const EMPTY_STYLES = {};
@@ -46,7 +53,7 @@ const EMPTY_STYLES_FN = () => EMPTY_STYLES;
  * @returns a higher order component that wraps the provided component and injects
  * the react-with-styles css, styles, and theme props.
  */
-export default function withStyles(
+export function withStyles(
   stylesFn = EMPTY_STYLES_FN,
   {
     stylesPropName = 'styles',
@@ -64,9 +71,12 @@ export default function withStyles(
     const wrappedComponentName = getComponentName(WrappedComponent);
 
     // The wrapper component that injects the withStyles props
-    function WithStyles(props) {
-      const { direction } = props;
+    function WithStyles(props, context) {
+      const { [CHANNEL]: directionBroadcast } = context;
+      const direction = useBroadcast(directionBroadcast, DIRECTIONS.LTR);
+
       const { css, styles, theme } = useStyles({ direction, stylesFn, flushBefore });
+
       return (
         <WrappedComponent
           {...props}
@@ -78,9 +88,6 @@ export default function withStyles(
         />
       );
     }
-
-    // Listen to directional updates via props
-    WithStyles = withDirection(WithStyles);
 
     // Copy the wrapped component's prop types and default props on WithStyles
     if (WrappedComponent.propTypes) {
@@ -95,6 +102,7 @@ export default function withStyles(
         ...WrappedComponent.defaultProps,
       };
     }
+    WithStyles.contextTypes = contextTypes;
     // Set statics on the component
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
@@ -113,3 +121,5 @@ export default function withStyles(
     return WithStyles;
   };
 }
+
+export default withStyles;

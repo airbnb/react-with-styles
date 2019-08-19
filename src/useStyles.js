@@ -2,8 +2,8 @@ import { useRef } from 'react';
 import { DIRECTIONS } from 'react-with-direction';
 
 import withPerf from './perf';
-import useStylesInterface from './useStylesInterface';
-import useStylesTheme from './useStylesTheme';
+import useStylesInterface from './utils/useStylesInterface';
+import useStylesTheme from './utils/useStylesTheme';
 
 /**
  * Hook used to derive the react-with-styles props from the provided react-with-styles
