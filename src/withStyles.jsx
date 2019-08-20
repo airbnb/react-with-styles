@@ -6,7 +6,6 @@ import hoistNonReactStatics from 'hoist-non-react-statics';
 import getComponentName from 'airbnb-prop-types/build/helpers/getComponentName';
 import { CHANNEL as DIRECTION_BROADCAST_KEY, DIRECTIONS } from 'react-with-direction/dist/constants';
 import directionBroadcastShape from 'react-with-direction/dist/proptypes/brcast';
-import { withDirectionPropTypes } from 'react-with-direction';
 
 import useStyles from './useStyles';
 import useBroadcast from './utils/useBroadcast';
@@ -15,11 +14,6 @@ export const withStylesPropTypes = {
   styles: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
   css: PropTypes.func.isRequired,
-  ...withDirectionPropTypes,
-};
-
-export const withStylesDefaultProps = {
-  direction: DIRECTIONS.LTR,
 };
 
 const contextTypes = {
@@ -97,10 +91,7 @@ export function withStyles(
       delete WithStyles.propTypes[cssPropName];
     }
     if (WrappedComponent.defaultProps) {
-      WithStyles.defaultProps = {
-        ...withStylesDefaultProps,
-        ...WrappedComponent.defaultProps,
-      };
+      WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
     }
     WithStyles.contextTypes = contextTypes;
     // Set statics on the component

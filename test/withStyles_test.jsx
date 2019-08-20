@@ -122,9 +122,8 @@ describe('withStyles', () => {
         foo: 'bar',
       };
       const StyledComponent = withStyles()(MockComponent);
-      // eslint-disable-next-line react/forbid-foreign-prop-types
-      expect(StyledComponent.propTypes).to.have.keys('foo', 'direction');
-      expect(StyledComponent.defaultProps).to.have.keys('foo', 'direction');
+      expect(StyledComponent.propTypes).to.have.keys('foo');
+      expect(StyledComponent.defaultProps).to.have.keys('foo');
     });
 
     describe('rendering without options (standard behavior)', () => {
