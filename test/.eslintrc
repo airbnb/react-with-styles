@@ -4,6 +4,9 @@
   },
   "extends": "airbnb",
   "rules": {
+    "arrow-parens": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/forbid-foreign-prop-types": "off",
     "import/no-extraneous-dependencies": [2, {
       "devDependencies": true
     }]

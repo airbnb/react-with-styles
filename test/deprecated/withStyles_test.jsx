@@ -1,5 +1,3 @@
-/* eslint-disable react/forbid-foreign-prop-types */
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import { expect } from 'chai';

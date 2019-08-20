@@ -1,13 +1,13 @@
 {
-  "extends": "airbnb",
-
-  "plugins": [
-    "react-hooks",
+  "extends": [
+    "airbnb",
+    "airbnb/hooks"
   ],
 
   "rules": {
-    "react-hooks/exhaustive-deps": "warn",
-    "react-hooks/rules-of-hooks": "error",
+    "react/jsx-props-no-spreading": "off",
+    "react/forbid-foreign-prop-types": "off",
+    "arrow-parens": "off"
   },
 
   "env": {
