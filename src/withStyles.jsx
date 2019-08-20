@@ -1,11 +1,11 @@
-/* eslint-disable react/forbid-foreign-prop-types, no-param-reassign, no-func-assign */
+/* eslint-disable react/forbid-foreign-prop-types, no-param-reassign, no-func-assign, react/destructuring-assignment */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import getComponentName from 'airbnb-prop-types/build/helpers/getComponentName';
-import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
-import brcastShape from 'react-with-direction/dist/proptypes/brcast';
+import { CHANNEL as DIRECTION_BROADCAST_KEY, DIRECTIONS } from 'react-with-direction/dist/constants';
+import directionBroadcastShape from 'react-with-direction/dist/proptypes/brcast';
 import { withDirectionPropTypes } from 'react-with-direction';
 
 import useStyles from './useStyles';
@@ -23,7 +23,7 @@ export const withStylesDefaultProps = {
 };
 
 const contextTypes = {
-  [CHANNEL]: brcastShape,
+  [DIRECTION_BROADCAST_KEY]: directionBroadcastShape,
 };
 
 const EMPTY_STYLES = {};
@@ -72,7 +72,7 @@ export function withStyles(
 
     // The wrapper component that injects the withStyles props
     function WithStyles(props, context) {
-      const { [CHANNEL]: directionBroadcast } = context;
+      const directionBroadcast = context ? context[DIRECTION_BROADCAST_KEY] : null;
       const direction = useBroadcast(directionBroadcast, DIRECTIONS.LTR);
 
       const { css, styles, theme } = useStyles({ direction, stylesFn, flushBefore });
