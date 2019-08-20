@@ -1,4 +1,5 @@
-/* eslint-disable react/forbid-foreign-prop-types, no-param-reassign, no-func-assign, react/destructuring-assignment */
+/* eslint-disable react/forbid-foreign-prop-types, no-param-reassign, no-func-assign,
+   react/destructuring-assignment */
 
 import React from 'react';
 import PropTypes from 'prop-types';
