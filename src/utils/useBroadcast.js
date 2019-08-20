@@ -1,14 +1,14 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function useBroadcast(broadcast, defaultValue) {
   const [value, setValue] = useState(broadcast ? broadcast.getState() : defaultValue);
-  const unsubscribeRef = useRef();
 
   useEffect(() => {
-    if (broadcast && !unsubscribeRef.current) {
-      unsubscribeRef.current = broadcast.subscribe(setValue);
+    if (broadcast) {
+      const unsubscribe = broadcast.subscribe(setValue);
+      return unsubscribe;
     }
-    return unsubscribeRef.current;
+    return undefined;
   }, [broadcast]);
 
   return value;
