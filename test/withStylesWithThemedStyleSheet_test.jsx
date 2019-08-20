@@ -5,10 +5,13 @@ import { render, shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
 
-import ThemedStyleSheet from '../../src/ThemedStyleSheet';
-import { withStyles, withStylesPropTypes } from '../../src/deprecated/withStyles';
+import ThemedStyleSheet from '../src/ThemedStyleSheet';
+import {
+  withStylesWithThemedStyleSheet as withStyles,
+  withStylesPropTypes,
+} from '../src/withStylesWithThemedStyleSheet';
 
-describe('withStyles()', () => {
+describe('withStyles() (react < 16.8)', () => {
   const defaultTheme = {
     color: {
       red: '#990000',

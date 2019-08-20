@@ -7,11 +7,14 @@ import { mount, shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
-import { withStyles, withStylesPropTypes } from '../src/withStyles';
 import WithStylesContext from '../src/WithStylesContext';
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
+import {
+  withStylesWithHooks as withStyles,
+  withStylesPropTypes,
+} from '../src/withStylesWithHooks';
 
-describe('withStyles', () => {
+describe('withStyles (react >= 16.8)', () => {
   let testTheme;
   let testInterface;
 

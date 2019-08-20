@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign, no-func-assign, react/destructuring-assignment */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import getComponentName from 'airbnb-prop-types/build/helpers/getComponentName';
 import { CHANNEL as DIRECTION_BROADCAST_KEY, DIRECTIONS } from 'react-with-direction/dist/constants';
@@ -10,11 +9,7 @@ import directionBroadcastShape from 'react-with-direction/dist/proptypes/brcast'
 import useStyles from './useStyles';
 import useBroadcast from './utils/useBroadcast';
 
-export const withStylesPropTypes = {
-  styles: PropTypes.object.isRequired,
-  theme: PropTypes.object.isRequired,
-  css: PropTypes.func.isRequired,
-};
+export { withStylesPropTypes } from './withStylesPropTypes';
 
 const contextTypes = {
   [DIRECTION_BROADCAST_KEY]: directionBroadcastShape,
@@ -47,7 +42,7 @@ const EMPTY_STYLES_FN = () => EMPTY_STYLES;
  * @returns a higher order component that wraps the provided component and injects
  * the react-with-styles css, styles, and theme props.
  */
-export function withStyles(
+export function withStylesWithHooks(
   stylesFn = EMPTY_STYLES_FN,
   {
     stylesPropName = 'styles',
@@ -113,4 +108,4 @@ export function withStyles(
   };
 }
 
-export default withStyles;
+export default withStylesWithHooks;

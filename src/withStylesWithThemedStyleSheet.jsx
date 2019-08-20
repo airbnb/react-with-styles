@@ -1,19 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 
 import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
 import brcastShape from 'react-with-direction/dist/proptypes/brcast';
 
-import ThemedStyleSheet from '../ThemedStyleSheet';
+import ThemedStyleSheet from './ThemedStyleSheet';
 
-// Add some named exports to assist in upgrading and for convenience
-export const css = ThemedStyleSheet.resolveLTR;
-export const withStylesPropTypes = {
-  styles: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  css: PropTypes.func.isRequired,
+export { withStylesPropTypes } from './withStylesPropTypes';
+
+const contextTypes = {
+  [CHANNEL]: brcastShape,
 };
+
+const defaultDirection = DIRECTIONS.LTR;
 
 const EMPTY_STYLES = {};
 const EMPTY_STYLES_FN = () => EMPTY_STYLES;
@@ -33,13 +32,7 @@ function baseClass(pureComponent) {
   return React.Component;
 }
 
-const contextTypes = {
-  [CHANNEL]: brcastShape,
-};
-
-const defaultDirection = DIRECTIONS.LTR;
-
-export function withStyles(
+export function withStylesWithThemedStyleSheet(
   styleFn,
   {
     stylesPropName = 'styles',

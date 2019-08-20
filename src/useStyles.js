@@ -4,6 +4,7 @@ import { DIRECTIONS } from 'react-with-direction';
 import withPerf from './perf';
 import useStylesInterface from './utils/useStylesInterface';
 import useStylesTheme from './utils/useStylesTheme';
+import detectHooks from './utils/detectHooks';
 
 /**
  * Hook used to derive the react-with-styles props from the provided react-with-styles
@@ -14,6 +15,10 @@ import useStylesTheme from './utils/useStylesTheme';
  * @returns {*} { css, styles, theme }
  */
 export default function useStyles({ direction, stylesFn, flushBefore } = {}) {
+  if (!detectHooks()) {
+    throw new ReferenceError('useStyles() requires React 16.8 or later');
+  }
+
   // Get the styles interface and styles theme from context
   const stylesInterface = useStylesInterface();
   const theme = useStylesTheme();
