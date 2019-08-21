@@ -56,7 +56,7 @@ export default function useStyles({ direction, stylesFn, flushBefore } = {}) {
   if (process.env.NODE_ENV !== 'production') {
     create = withPerf('create')(create);
   }
-  const styles = create(stylesFn(theme));
+  const styles = create(stylesFn ? stylesFn(theme) : {});
 
   // Create the css function from the interface's resolve functions
   let resolve = stylesInterface[`resolve${directionSelector}`] || stylesInterface.resolve;
