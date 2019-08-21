@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { DIRECTIONS } from 'react-with-direction';
 
-import withPerf from './perf';
+import withPerf from './utils/perf';
 import useStylesInterface from './utils/useStylesInterface';
 import useStylesTheme from './utils/useStylesTheme';
 
