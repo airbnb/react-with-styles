@@ -8,6 +8,7 @@ import directionBroadcastShape from 'react-with-direction/dist/proptypes/brcast'
 
 import useStyles from './useStyles';
 import useBroadcast from './utils/useBroadcast';
+import detectHooks from './utils/detectHooks';
 
 export { withStylesPropTypes } from './withStylesPropTypes';
 
@@ -53,6 +54,10 @@ export function withStylesWithHooks(
   } = {},
 ) {
   stylesFn = stylesFn || EMPTY_STYLES_FN;
+
+  if (!detectHooks()) {
+    throw new ReferenceError('withSytlesWithHooks() requires React 16.8 or later');
+  }
 
   // The function that wraps the provided component in a wrapper
   // component that injects the withStyles props
