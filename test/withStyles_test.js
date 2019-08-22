@@ -28,11 +28,11 @@ describe('withStyles()', () => {
     });
 
     it('calls withStylesWithHooks', () => {
-      expect(withStylesWithHooksSpy.callCount).to.equal(0);
-      expect(withStylesWithThemedStyleSheetSpy.callCount).to.equal(0);
+      expect(withStylesWithHooksSpy).to.have.property('callCount', 0);
+      expect(withStylesWithThemedStyleSheetSpy).to.have.property('callCount', 0);
       withStyles();
-      expect(withStylesWithHooksSpy.callCount).to.equal(1);
-      expect(withStylesWithThemedStyleSheetSpy.callCount).to.equal(0);
+      expect(withStylesWithHooksSpy).to.have.property('callCount', 1);
+      expect(withStylesWithThemedStyleSheetSpy).to.have.property('callCount', 0);
     });
   });
 
@@ -42,11 +42,11 @@ describe('withStyles()', () => {
     });
 
     it('calls withStylesWithThemedStyleSheet', () => {
-      expect(withStylesWithHooksSpy.callCount).to.equal(0);
-      expect(withStylesWithThemedStyleSheetSpy.callCount).to.equal(0);
+      expect(withStylesWithHooksSpy).to.have.property('callCount', 0);
+      expect(withStylesWithThemedStyleSheetSpy).to.have.property('callCount', 0);
       withStyles();
-      expect(withStylesWithHooksSpy.callCount).to.equal(0);
-      expect(withStylesWithThemedStyleSheetSpy.callCount).to.equal(1);
+      expect(withStylesWithHooksSpy).to.have.property('callCount', 0);
+      expect(withStylesWithThemedStyleSheetSpy).to.have.property('callCount', 1);
     });
   });
 });
