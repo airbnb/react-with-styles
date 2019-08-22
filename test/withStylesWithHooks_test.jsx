@@ -5,13 +5,16 @@ import PropTypes from 'prop-types';
 import { expect } from 'chai';
 import { mount, shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
-
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
-import { withStyles, withStylesPropTypes } from '../src/withStyles';
+import { describeIfReact } from './ifReactHelpers';
 import WithStylesContext from '../src/WithStylesContext';
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
+import {
+  withStylesWithHooks as withStyles,
+  withStylesPropTypes,
+} from '../src/withStylesWithHooks';
 
-describe('withStyles', () => {
+describeIfReact('>=16.8', 'withStylesWithHooks', () => {
   let testTheme;
   let testInterface;
 
@@ -64,21 +67,21 @@ describe('withStyles', () => {
     });
 
     it('does not call any interface functions', () => {
-      expect(testInterface.create.callCount).to.equal(0);
-      expect(testInterface.createLTR.callCount).to.equal(0);
-      expect(testInterface.createRTL.callCount).to.equal(0);
-      expect(testInterface.resolve.callCount).to.equal(0);
-      expect(testInterface.resolveLTR.callCount).to.equal(0);
-      expect(testInterface.resolveRTL.callCount).to.equal(0);
-      expect(testInterface.flush.callCount).to.equal(0);
+      expect(testInterface.create).to.have.property('callCount', 0);
+      expect(testInterface.createLTR).to.have.property('callCount', 0);
+      expect(testInterface.createRTL).to.have.property('callCount', 0);
+      expect(testInterface.resolve).to.have.property('callCount', 0);
+      expect(testInterface.resolveLTR).to.have.property('callCount', 0);
+      expect(testInterface.resolveRTL).to.have.property('callCount', 0);
+      expect(testInterface.flush).to.have.property('callCount', 0);
       withStyles();
-      expect(testInterface.create.callCount).to.equal(0);
-      expect(testInterface.createLTR.callCount).to.equal(0);
-      expect(testInterface.createRTL.callCount).to.equal(0);
-      expect(testInterface.resolve.callCount).to.equal(0);
-      expect(testInterface.resolveLTR.callCount).to.equal(0);
-      expect(testInterface.resolveRTL.callCount).to.equal(0);
-      expect(testInterface.flush.callCount).to.equal(0);
+      expect(testInterface.create).to.have.property('callCount', 0);
+      expect(testInterface.createLTR).to.have.property('callCount', 0);
+      expect(testInterface.createRTL).to.have.property('callCount', 0);
+      expect(testInterface.resolve).to.have.property('callCount', 0);
+      expect(testInterface.resolveLTR).to.have.property('callCount', 0);
+      expect(testInterface.resolveRTL).to.have.property('callCount', 0);
+      expect(testInterface.flush).to.have.property('callCount', 0);
     });
   });
 
@@ -167,9 +170,9 @@ describe('withStyles', () => {
       it('does not call the flush function before rendering', () => {
         const MockComponent = () => null;
         const StyledComponent = withStyles()(MockComponent);
-        expect(testInterface.flush.callCount).to.equal(0);
+        expect(testInterface.flush).to.have.property('callCount', 0);
         mountWithProviders(<StyledComponent />, providers);
-        expect(testInterface.flush.callCount).to.equal(0);
+        expect(testInterface.flush).to.have.property('callCount', 0);
       });
     });
 
@@ -208,9 +211,9 @@ describe('withStyles', () => {
       it('calls the flush function before rendering when specified', () => {
         const MockComponent = () => null;
         const StyledComponent = withStyles(null, { flushBefore: true })(MockComponent);
-        expect(testInterface.flush.callCount).to.equal(0);
+        expect(testInterface.flush).to.have.property('callCount', 0);
         mountWithProviders(<StyledComponent />, providers);
-        expect(testInterface.flush.callCount).to.equal(1);
+        expect(testInterface.flush).to.have.property('callCount', 1);
       });
     });
 
@@ -218,26 +221,26 @@ describe('withStyles', () => {
       it('creates the styles for LTR', () => {
         const MockComponent = () => null;
         const WrappedComponent = withStyles()(MockComponent);
-        expect(testInterface.create.callCount).to.equal(0);
-        expect(testInterface.createLTR.callCount).to.equal(0);
-        expect(testInterface.createRTL.callCount).to.equal(0);
+        expect(testInterface.create).to.have.property('callCount', 0);
+        expect(testInterface.createLTR).to.have.property('callCount', 0);
+        expect(testInterface.createRTL).to.have.property('callCount', 0);
         mountWithProviders(<WrappedComponent />, providers);
-        expect(testInterface.create.callCount).to.equal(0);
-        expect(testInterface.createLTR.callCount).to.equal(1);
-        expect(testInterface.createRTL.callCount).to.equal(0);
+        expect(testInterface.create).to.have.property('callCount', 0);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
+        expect(testInterface.createRTL).to.have.property('callCount', 0);
       });
 
       it('resolves the styles for LTR', () => {
         const MockComponent = ({ css }) => <div {...css({})} />;
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles()(MockComponent);
-        expect(testInterface.resolve.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(0);
-        expect(testInterface.resolveRTL.callCount).to.equal(0);
+        expect(testInterface.resolve).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 0);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 0);
         mountWithProviders(<StyledComponent />, providers);
-        expect(testInterface.resolve.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(1);
-        expect(testInterface.resolveRTL.callCount).to.equal(0);
+        expect(testInterface.resolve).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 1);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 0);
       });
     });
 
@@ -259,26 +262,26 @@ describe('withStyles', () => {
       it('creates the styles for LTR', () => {
         const MockComponent = () => null;
         const WrappedComponent = withStyles()(MockComponent);
-        expect(testInterface.create.callCount).to.equal(0);
-        expect(testInterface.createLTR.callCount).to.equal(0);
-        expect(testInterface.createRTL.callCount).to.equal(0);
+        expect(testInterface.create).to.have.property('callCount', 0);
+        expect(testInterface.createLTR).to.have.property('callCount', 0);
+        expect(testInterface.createRTL).to.have.property('callCount', 0);
         mountWithProviders(<WrappedComponent />, ltrProviders);
-        expect(testInterface.create.callCount).to.equal(0);
-        expect(testInterface.createLTR.callCount).to.equal(1);
-        expect(testInterface.createRTL.callCount).to.equal(0);
+        expect(testInterface.create).to.have.property('callCount', 0);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
+        expect(testInterface.createRTL).to.have.property('callCount', 0);
       });
 
       it('resolves the styles for LTR', () => {
         const MockComponent = ({ css }) => <div {...css({})} />;
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles()(MockComponent);
-        expect(testInterface.resolve.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(0);
-        expect(testInterface.resolveRTL.callCount).to.equal(0);
+        expect(testInterface.resolve).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 0);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 0);
         mountWithProviders(<StyledComponent />, ltrProviders);
-        expect(testInterface.resolve.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(1);
-        expect(testInterface.resolveRTL.callCount).to.equal(0);
+        expect(testInterface.resolve).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 1);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 0);
       });
     });
 
@@ -300,39 +303,39 @@ describe('withStyles', () => {
       it('creates the styles for RTL', () => {
         const MockComponent = () => null;
         const WrappedComponent = withStyles()(MockComponent);
-        expect(testInterface.create.callCount).to.equal(0);
-        expect(testInterface.createLTR.callCount).to.equal(0);
-        expect(testInterface.createRTL.callCount).to.equal(0);
+        expect(testInterface.create).to.have.property('callCount', 0);
+        expect(testInterface.createLTR).to.have.property('callCount', 0);
+        expect(testInterface.createRTL).to.have.property('callCount', 0);
         mountWithProviders(<WrappedComponent />, rtlProviders);
-        expect(testInterface.create.callCount).to.equal(0);
-        expect(testInterface.createLTR.callCount).to.equal(0);
-        expect(testInterface.createRTL.callCount).to.equal(1);
+        expect(testInterface.create).to.have.property('callCount', 0);
+        expect(testInterface.createLTR).to.have.property('callCount', 0);
+        expect(testInterface.createRTL).to.have.property('callCount', 1);
       });
 
       it('resolves the styles for RTL', () => {
         const MockComponent = ({ css }) => <div {...css({})} />;
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles()(MockComponent);
-        expect(testInterface.resolve.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(0);
-        expect(testInterface.resolveRTL.callCount).to.equal(0);
+        expect(testInterface.resolve).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 0);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 0);
         mountWithProviders(<StyledComponent />, rtlProviders);
-        expect(testInterface.resolve.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(0);
-        expect(testInterface.resolveRTL.callCount).to.equal(1);
+        expect(testInterface.resolve).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 0);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 1);
       });
 
       it('resolves the styles for RTL, even if using a pure component', () => {
         const MockComponent = ({ css }) => <div {...css({})} />;
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles(null, { pureComponent: true })(MockComponent);
-        expect(testInterface.resolve.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(0);
-        expect(testInterface.resolveRTL.callCount).to.equal(0);
+        expect(testInterface.resolve).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 0);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 0);
         mountWithProviders(<StyledComponent />, rtlProviders);
-        expect(testInterface.resolve.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(0);
-        expect(testInterface.resolveRTL.callCount).to.equal(1);
+        expect(testInterface.resolve).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 0);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 1);
       });
     });
 
@@ -399,65 +402,65 @@ describe('withStyles', () => {
 
       it('creates styles once if the direction, theme or interface haven\'t changed', () => {
         const TestHelper = makeTestHelper();
-        expect(firstInterface.createLTR.callCount).to.equal(0);
+        expect(firstInterface.createLTR).to.have.property('callCount', 0);
         const wrapper = mount(<TestHelper />);
-        expect(firstInterface.createLTR.callCount).to.equal(1);
+        expect(firstInterface.createLTR).to.have.property('callCount', 1);
         wrapper.setProps({ stylesTheme: firstTheme });
-        expect(firstInterface.createLTR.callCount).to.equal(1);
+        expect(firstInterface.createLTR).to.have.property('callCount', 1);
         wrapper.setProps({ stylesInterface: firstInterface });
-        expect(firstInterface.createLTR.callCount).to.equal(1);
+        expect(firstInterface.createLTR).to.have.property('callCount', 1);
         wrapper.setProps({ direction: 'ltr' });
-        expect(firstInterface.createLTR.callCount).to.equal(1);
+        expect(firstInterface.createLTR).to.have.property('callCount', 1);
         wrapper.setProps({ primary: true });
-        expect(firstInterface.createLTR.callCount).to.equal(1);
+        expect(firstInterface.createLTR).to.have.property('callCount', 1);
       });
 
       it('creates styles once per direction if the theme or interface haven\'t changed', () => {
         const TestHelper = makeTestHelper();
-        expect(firstInterface.createLTR.callCount).to.equal(0);
-        expect(firstInterface.resolveLTR.callCount).to.equal(0);
+        expect(firstInterface.createLTR).to.have.property('callCount', 0);
+        expect(firstInterface.resolveLTR).to.have.property('callCount', 0);
         const wrapper = mount(<TestHelper />);
         wrapper.setProps({ direction: 'rtl' });
-        expect(firstInterface.createLTR.callCount).to.equal(1);
-        expect(firstInterface.createRTL.callCount).to.equal(1);
+        expect(firstInterface.createLTR).to.have.property('callCount', 1);
+        expect(firstInterface.createRTL).to.have.property('callCount', 1);
         wrapper.setProps({ direction: 'ltr' });
         wrapper.setProps({ primary: true });
         wrapper.setProps({ direction: 'rtl' });
         wrapper.setProps({ primary: false });
-        expect(firstInterface.createLTR.callCount).to.equal(1);
-        expect(firstInterface.createRTL.callCount).to.equal(1);
+        expect(firstInterface.createLTR).to.have.property('callCount', 1);
+        expect(firstInterface.createRTL).to.have.property('callCount', 1);
       });
 
       it('re-creates styles when the theme or interface change', () => {
         const TestHelper = makeTestHelper();
-        expect(firstInterface.createLTR.callCount).to.equal(0);
+        expect(firstInterface.createLTR).to.have.property('callCount', 0);
         const wrapper = mount(<TestHelper />);
-        expect(firstInterface.createLTR.callCount).to.equal(1);
+        expect(firstInterface.createLTR).to.have.property('callCount', 1);
         wrapper.setProps({ stylesTheme: secondTheme });
-        expect(firstInterface.createLTR.callCount).to.equal(2);
-        expect(secondInterface.createLTR.callCount).to.equal(0);
+        expect(firstInterface.createLTR).to.have.property('callCount', 2);
+        expect(secondInterface.createLTR).to.have.property('callCount', 0);
         wrapper.setProps({ stylesInterface: secondInterface });
-        expect(firstInterface.createLTR.callCount).to.equal(2);
-        expect(secondInterface.createLTR.callCount).to.equal(1);
+        expect(firstInterface.createLTR).to.have.property('callCount', 2);
+        expect(secondInterface.createLTR).to.have.property('callCount', 1);
         wrapper.setProps({ stylesTheme: firstTheme });
-        expect(secondInterface.createLTR.callCount).to.equal(2);
+        expect(secondInterface.createLTR).to.have.property('callCount', 2);
       });
 
       it('re-resolves styles when the theme, interface or props change', () => {
         const TestHelper = makeTestHelper();
-        expect(firstInterface.resolveLTR.callCount).to.equal(0);
+        expect(firstInterface.resolveLTR).to.have.property('callCount', 0);
         const wrapper = mount(<TestHelper />);
-        expect(firstInterface.resolveLTR.callCount).to.equal(1);
+        expect(firstInterface.resolveLTR).to.have.property('callCount', 1);
         wrapper.setProps({ stylesTheme: secondTheme });
-        expect(firstInterface.resolveLTR.callCount).to.equal(2);
-        expect(secondInterface.resolveLTR.callCount).to.equal(0);
+        expect(firstInterface.resolveLTR).to.have.property('callCount', 2);
+        expect(secondInterface.resolveLTR).to.have.property('callCount', 0);
         wrapper.setProps({ stylesInterface: secondInterface });
-        expect(firstInterface.resolveLTR.callCount).to.equal(2);
-        expect(secondInterface.resolveLTR.callCount).to.equal(1);
+        expect(firstInterface.resolveLTR).to.have.property('callCount', 2);
+        expect(secondInterface.resolveLTR).to.have.property('callCount', 1);
         wrapper.setProps({ stylesTheme: firstTheme });
-        expect(secondInterface.resolveLTR.callCount).to.equal(2);
+        expect(secondInterface.resolveLTR).to.have.property('callCount', 2);
         wrapper.setProps({ primary: true });
-        expect(secondInterface.resolveLTR.callCount).to.equal(3);
+        expect(secondInterface.resolveLTR).to.have.property('callCount', 3);
       });
     });
   });
@@ -512,15 +515,15 @@ describe('withStyles', () => {
       const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
       MockComponent.propTypes = { ...withStylesPropTypes };
       const StyledComponent = withStyles(stylesFn)(MockComponent);
-      expect(outerMostInterface.create.callCount).to.equal(0);
-      expect(outerMostInterface.resolve.callCount).to.equal(0);
-      expect(innerMostInterface.create.callCount).to.equal(0);
-      expect(innerMostInterface.resolve.callCount).to.equal(0);
+      expect(outerMostInterface.create).to.have.property('callCount', 0);
+      expect(outerMostInterface.resolve).to.have.property('callCount', 0);
+      expect(innerMostInterface.create).to.have.property('callCount', 0);
+      expect(innerMostInterface.resolve).to.have.property('callCount', 0);
       mountWithProviders(<StyledComponent />, nestedProviders);
-      expect(outerMostInterface.create.callCount).to.equal(0);
-      expect(outerMostInterface.resolve.callCount).to.equal(0);
-      expect(innerMostInterface.create.callCount).to.equal(1);
-      expect(innerMostInterface.resolve.callCount).to.equal(1);
+      expect(outerMostInterface.create).to.have.property('callCount', 0);
+      expect(outerMostInterface.resolve).to.have.property('callCount', 0);
+      expect(innerMostInterface.create).to.have.property('callCount', 1);
+      expect(innerMostInterface.resolve).to.have.property('callCount', 1);
     });
   });
 
@@ -560,11 +563,11 @@ describe('withStyles', () => {
         const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles(stylesFn)(MockComponent);
-        expect(testInterface.createLTR.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(0);
+        expect(testInterface.createLTR).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 0);
         mount(<StyledComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(1);
-        expect(testInterface.resolveLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 1);
       });
     });
 
@@ -584,11 +587,11 @@ describe('withStyles', () => {
         const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles(stylesFn)(MockComponent);
-        expect(testInterface.createLTR.callCount).to.equal(0);
-        expect(testInterface.resolveLTR.callCount).to.equal(0);
+        expect(testInterface.createLTR).to.have.property('callCount', 0);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 0);
         mountWithProviders(<StyledComponent />, [<DirectionProvider direction="ltr" />]);
-        expect(testInterface.createLTR.callCount).to.equal(1);
-        expect(testInterface.resolveLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
+        expect(testInterface.resolveLTR).to.have.property('callCount', 1);
       });
     });
 
@@ -608,11 +611,11 @@ describe('withStyles', () => {
         const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles(stylesFn)(MockComponent);
-        expect(testInterface.createRTL.callCount).to.equal(0);
-        expect(testInterface.resolveRTL.callCount).to.equal(0);
+        expect(testInterface.createRTL).to.have.property('callCount', 0);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 0);
         mountWithProviders(<StyledComponent />, [<DirectionProvider direction="rtl" />]);
-        expect(testInterface.createRTL.callCount).to.equal(1);
-        expect(testInterface.resolveRTL.callCount).to.equal(1);
+        expect(testInterface.createRTL).to.have.property('callCount', 1);
+        expect(testInterface.resolveRTL).to.have.property('callCount', 1);
       });
     });
   });

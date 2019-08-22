@@ -1,9 +1,9 @@
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import { DIRECTIONS } from 'react-with-direction';
 
 import withPerf from './utils/perf';
-import useStylesInterface from './utils/useStylesInterface';
-import useStylesTheme from './utils/useStylesTheme';
+import WithStylesContext from './WithStylesContext';
+import { _getInterface, _getTheme } from './ThemedStyleSheet';
 
 /**
  * Hook used to derive the react-with-styles props from the provided react-with-styles
@@ -14,9 +14,16 @@ import useStylesTheme from './utils/useStylesTheme';
  * @returns {*} { css, styles, theme }
  */
 export default function useStyles({ direction, stylesFn, flushBefore } = {}) {
+  if (!useContext || !useRef) {
+    throw new ReferenceError('useStyles() requires React 16.8 or later');
+  }
+
   // Get the styles interface and styles theme from context
-  const stylesInterface = useStylesInterface();
-  const theme = useStylesTheme();
+  let { stylesInterface, stylesTheme: theme } = useContext(WithStylesContext);
+
+  // Fallback to the singleton implementation
+  stylesInterface = stylesInterface || _getInterface();
+  theme = theme || _getTheme();
 
   // Flush if specified
   if (flushBefore && stylesInterface.flush) {
