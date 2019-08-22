@@ -4,14 +4,14 @@ import { expect } from 'chai';
 import { render, shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
-
+import { describeIfReact } from './ifReactHelpers';
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
 import {
   withStylesWithThemedStyleSheet as withStyles,
   withStylesPropTypes,
 } from '../src/withStylesWithThemedStyleSheet';
 
-describe('withStyles() (react < 16.8)', () => {
+describeIfReact('<16.8', 'withStylesWithThemedStyleSheet', () => {
   const defaultTheme = {
     color: {
       red: '#990000',

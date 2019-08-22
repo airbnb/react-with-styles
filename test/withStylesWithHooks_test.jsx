@@ -5,8 +5,8 @@ import PropTypes from 'prop-types';
 import { expect } from 'chai';
 import { mount, shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
-
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
+import { describeIfReact } from './ifReactHelpers';
 import WithStylesContext from '../src/WithStylesContext';
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
 import {
@@ -14,7 +14,7 @@ import {
   withStylesPropTypes,
 } from '../src/withStylesWithHooks';
 
-describe('withStyles (react >= 16.8)', () => {
+describeIfReact('>=16.8', 'withStylesWithHooks', () => {
   let testTheme;
   let testInterface;
 
