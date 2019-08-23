@@ -7,10 +7,10 @@ function detectAndCreateContext(defaultValue) {
 
   return {
     Provider: () => {
-      throw new ReferenceError('WithStylesContext requires React 16.6 or later');
+      throw new ReferenceError('WithStylesContext requires React 16.3 or later');
     },
     Consumer: () => {
-      throw new ReferenceError('WithStylesContext requires React 16.6 or later');
+      throw new ReferenceError('WithStylesContext requires React 16.3 or later');
     },
   };
 }
