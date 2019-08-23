@@ -94,19 +94,22 @@ export function withStylesWithHooks(
       WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
     }
     WithStyles.contextTypes = contextTypes;
-    // Set statics on the component
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
     WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
 
     // Make into a pure functional component if requested
     if (pureComponent) {
-      WithStyles = React.memo(WithStyles);
+      let WithStylesMemo = React.memo(WithStyles);
       // We set statics on the memoized component as well because the
       // React.memo HOC doesn't copy them over
-      WithStyles.WrappedComponent = WrappedComponent;
-      WithStyles.displayName = `withStyles(${wrappedComponentName})`;
-      WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
+      WithStylesMemo.propTypes = WithStyles.propTypes;
+      WithStylesMemo.defaultProps = WithStyles.defaultProps;
+      WithStylesMemo.contextTypes = WithStyles.contextTypes;
+      WithStylesMemo.WrappedComponent = WithStyles.WrappedComponent;
+      WithStylesMemo.displayName = WithStyles.displayName;
+      WithStylesMemo = hoistNonReactStatics(WithStylesMemo, WithStyles);
+      return WithStylesMemo;
     }
 
     return WithStyles;
