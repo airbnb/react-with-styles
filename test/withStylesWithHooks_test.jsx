@@ -24,7 +24,7 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
 
   function fakeResolveMethod(styles) {
     return ({
-      style: styles.reduce((accum, style) => ({ ...accum, ...style }), {}),
+      style: Object.assign({}, ...styles),
     });
   }
 
@@ -105,7 +105,7 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
       expect(StyledComponent.displayName).to.equal('withStyles(MockComponent)');
 
       const PureStyledComponent = withStyles({ pureComponent: true })(MockComponent);
-      expect(PureStyledComponent.displayName).to.equal('withStyles(MockComponent)');
+      expect(PureStyledComponent).to.have.property('displayName', 'withStyles(MockComponent)');
     });
 
     it('hoists the component\'s non-React statics', () => {
