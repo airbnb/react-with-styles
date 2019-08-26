@@ -1,5 +1,14 @@
 {
-  "extends": "airbnb",
+  "extends": [
+    "airbnb",
+    "airbnb/hooks"
+  ],
+
+  "rules": {
+    "react/jsx-props-no-spreading": "off",
+    "react/forbid-foreign-prop-types": "off",
+    "arrow-parens": "off"
+  },
 
   "env": {
     "browser": true,

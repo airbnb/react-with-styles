@@ -4,11 +4,14 @@ import { expect } from 'chai';
 import { render, shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
 import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
-
+import { describeIfReact } from './ifReactHelpers';
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
-import { withStyles, withStylesPropTypes } from '../src/withStyles';
+import {
+  withStylesWithThemedStyleSheet as withStyles,
+  withStylesPropTypes,
+} from '../src/withStylesWithThemedStyleSheet';
 
-describe('withStyles()', () => {
+describeIfReact('<16.8', 'withStylesWithThemedStyleSheet', () => {
   const defaultTheme = {
     color: {
       red: '#990000',
@@ -56,9 +59,9 @@ describe('withStyles()', () => {
 
     it('does not create styles', () => {
       withStyles();
-      expect(testInterface.create.callCount).to.equal(0);
-      expect(testInterface.createLTR.callCount).to.equal(0);
-      expect(testInterface.createRTL.callCount).to.equal(0);
+      expect(testInterface.create).to.have.property('callCount', 0);
+      expect(testInterface.createLTR).to.have.property('callCount', 0);
+      expect(testInterface.createRTL).to.have.property('callCount', 0);
     });
   });
 
@@ -75,7 +78,7 @@ describe('withStyles()', () => {
 
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
         shallow(<WrappedComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
       });
 
       it('creates the styles in an LTR context', () => {
@@ -89,7 +92,7 @@ describe('withStyles()', () => {
             <WrappedComponent />
           </DirectionProvider>
         ));
-        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
       });
 
       it('creates the styles in an RTL context', () => {
@@ -103,7 +106,7 @@ describe('withStyles()', () => {
             <WrappedComponent />
           </DirectionProvider>
         ));
-        expect(testInterface.createRTL.callCount).to.equal(1);
+        expect(testInterface.createRTL).to.have.property('callCount', 1);
       });
     });
 
@@ -115,34 +118,34 @@ describe('withStyles()', () => {
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
         const OtherWrappedComponent = withStyles(() => ({}))(MyComponent);
 
-        expect(testInterface.createLTR.callCount).to.equal(0);
+        expect(testInterface.createLTR).to.have.property('callCount', 0);
         shallow(<WrappedComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
         shallow(<OtherWrappedComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(2);
+        expect(testInterface.createLTR).to.have.property('callCount', 2);
 
         const otherTheme = { unit: 8 };
         ThemedStyleSheet.registerTheme(otherTheme);
         ThemedStyleSheet.registerTheme(otherTheme);
         shallow(<WrappedComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(3);
+        expect(testInterface.createLTR).to.have.property('callCount', 3);
         shallow(<OtherWrappedComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(4);
+        expect(testInterface.createLTR).to.have.property('callCount', 4);
       });
 
-      it('does not recreate styles when the same theme is registered', () => {
+      it('does not re-create styles when the same theme is registered', () => {
         function MyComponent() {
           return null;
         }
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
-        expect(testInterface.createLTR.callCount).to.equal(0);
+        expect(testInterface.createLTR).to.have.property('callCount', 0);
         shallow(<WrappedComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
 
         ThemedStyleSheet.registerTheme(defaultTheme);
         shallow(<WrappedComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
       });
 
       it('recreates all RTL styles when a new theme is registered', () => {
@@ -151,17 +154,17 @@ describe('withStyles()', () => {
         }
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
-        expect(testInterface.createRTL.callCount).to.equal(0);
+        expect(testInterface.createRTL).to.have.property('callCount', 0);
         render((
           <DirectionProvider direction={DIRECTIONS.RTL}>
             <WrappedComponent />
           </DirectionProvider>
         ));
-        expect(testInterface.createRTL.callCount).to.equal(1);
+        expect(testInterface.createRTL).to.have.property('callCount', 1);
 
-        expect(testInterface.createLTR.callCount).to.equal(0);
+        expect(testInterface.createLTR).to.have.property('callCount', 0);
         render(<WrappedComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
 
         const otherTheme = { unit: 8 };
         ThemedStyleSheet.registerTheme(otherTheme);
@@ -170,10 +173,10 @@ describe('withStyles()', () => {
             <WrappedComponent />
           </DirectionProvider>
         ));
-        expect(testInterface.createRTL.callCount).to.equal(2);
-        expect(testInterface.createLTR.callCount).to.equal(1);
+        expect(testInterface.createRTL).to.have.property('callCount', 2);
+        expect(testInterface.createLTR).to.have.property('callCount', 1);
         render(<WrappedComponent />);
-        expect(testInterface.createLTR.callCount).to.equal(2);
+        expect(testInterface.createLTR).to.have.property('callCount', 2);
       });
 
       it('does not recreate RTL styles when the same theme is registered', () => {
@@ -182,13 +185,13 @@ describe('withStyles()', () => {
         }
         const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
-        expect(testInterface.createRTL.callCount).to.equal(0);
+        expect(testInterface.createRTL).to.have.property('callCount', 0);
         render((
           <DirectionProvider direction={DIRECTIONS.RTL}>
             <WrappedComponent />
           </DirectionProvider>
         ));
-        expect(testInterface.createRTL.callCount).to.equal(1);
+        expect(testInterface.createRTL).to.have.property('callCount', 1);
 
         ThemedStyleSheet.registerTheme(defaultTheme);
         render((
@@ -196,7 +199,7 @@ describe('withStyles()', () => {
             <WrappedComponent />
           </DirectionProvider>
         ));
-        expect(testInterface.createRTL.callCount).to.equal(1);
+        expect(testInterface.createRTL).to.have.property('callCount', 1);
       });
     });
 
@@ -274,7 +277,7 @@ describe('withStyles()', () => {
 
       const Wrapped = withStyles(() => ({}))(MyComponent);
       shallow(<Wrapped />);
-      expect(testInterface.flush.callCount).to.equal(0);
+      expect(testInterface.flush).to.have.property('callCount', 0);
     });
 
     it('with the flushBefore option set, flushes styles before rendering', () => {
@@ -284,7 +287,7 @@ describe('withStyles()', () => {
 
       const Wrapped = withStyles(() => ({}), { flushBefore: true })(MyComponent);
       shallow(<Wrapped />);
-      expect(testInterface.flush.callCount).to.equal(1);
+      expect(testInterface.flush).to.have.property('callCount', 1);
     });
 
     it('hoists statics', () => {
@@ -391,7 +394,7 @@ describe('withStyles()', () => {
       const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
       render(<WrappedComponent />);
-      expect(testInterfaceResolveLTRStub.callCount).to.equal(1);
+      expect(testInterfaceResolveLTRStub).to.have.property('callCount', 1);
     });
 
     it('css calls resolveLTR method in LTR context', () => {
@@ -409,7 +412,7 @@ describe('withStyles()', () => {
           <WrappedComponent />
         </DirectionProvider>
       ));
-      expect(testInterfaceResolveLTRStub.callCount).to.equal(1);
+      expect(testInterfaceResolveLTRStub).to.have.property('callCount', 1);
     });
 
     it('css calls resolveRTL method in RTL context', () => {
@@ -427,7 +430,7 @@ describe('withStyles()', () => {
           <WrappedComponent />
         </DirectionProvider>
       ));
-      expect(testInterfaceResolveRTLStub.callCount).to.equal(1);
+      expect(testInterfaceResolveRTLStub).to.have.property('callCount', 1);
     });
   });
 });
@@ -469,7 +472,7 @@ describe('fallbacks', () => {
 
       const WrappedComponent = withStyles(() => ({}))(MyComponent);
       shallow(<WrappedComponent />);
-      expect(testInterface.create.callCount).to.equal(1);
+      expect(testInterface.create).to.have.property('callCount', 1);
     });
 
     it('creates the styles in an LTR context', () => {
@@ -483,7 +486,7 @@ describe('fallbacks', () => {
           <WrappedComponent />
         </DirectionProvider>
       ));
-      expect(testInterface.create.callCount).to.equal(1);
+      expect(testInterface.create).to.have.property('callCount', 1);
     });
 
     it('creates the styles in an RTL context', () => {
@@ -497,7 +500,7 @@ describe('fallbacks', () => {
           <WrappedComponent />
         </DirectionProvider>
       ));
-      expect(testInterface.create.callCount).to.equal(1);
+      expect(testInterface.create).to.have.property('callCount', 1);
     });
   });
 
@@ -513,7 +516,7 @@ describe('fallbacks', () => {
       const WrappedComponent = withStyles(() => ({}))(MyComponent);
 
       render(<WrappedComponent />);
-      expect(resolveStub.callCount).to.equal(1);
+      expect(resolveStub).to.have.property('callCount', 1);
     });
 
     it('css calls resolveLTR method in LTR context', () => {
@@ -531,7 +534,7 @@ describe('fallbacks', () => {
           <WrappedComponent />
         </DirectionProvider>
       ));
-      expect(resolveStub.callCount).to.equal(1);
+      expect(resolveStub).to.have.property('callCount', 1);
     });
 
     it('css calls resolveRTL method in RTL context', () => {
@@ -549,7 +552,7 @@ describe('fallbacks', () => {
           <WrappedComponent />
         </DirectionProvider>
       ));
-      expect(resolveStub.callCount).to.equal(1);
+      expect(resolveStub).to.have.property('callCount', 1);
     });
   });
 });

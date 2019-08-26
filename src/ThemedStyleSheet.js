@@ -83,6 +83,15 @@ function flush() {
   }
 }
 
+// Exported until we deprecate this API completely
+// eslint-disable-next-line no-underscore-dangle
+export function _getInterface() {
+  return styleInterface;
+}
+
+// Exported until we deprecate this API completely
+export { get as _getTheme };
+
 export default {
   registerTheme,
   registerInterface,
