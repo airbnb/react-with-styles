@@ -5,6 +5,7 @@ import { CHANNEL, DIRECTIONS } from 'react-with-direction/dist/constants';
 import brcastShape from 'react-with-direction/dist/proptypes/brcast';
 
 import ThemedStyleSheet from './ThemedStyleSheet';
+import EMPTY_STYLES_FN from './utils/emptyStylesFn';
 
 export { withStylesPropTypes } from './withStylesPropTypes';
 
@@ -13,9 +14,6 @@ const contextTypes = {
 };
 
 const defaultDirection = DIRECTIONS.LTR;
-
-const EMPTY_STYLES = {};
-const EMPTY_STYLES_FN = () => EMPTY_STYLES;
 
 const START_MARK = 'react-with-styles.createStyles.start';
 const END_MARK = 'react-with-styles.createStyles.end';

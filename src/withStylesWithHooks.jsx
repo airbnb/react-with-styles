@@ -3,21 +3,12 @@
 import React from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import getComponentName from 'airbnb-prop-types/build/helpers/getComponentName';
-import { CHANNEL as DIRECTION_BROADCAST_KEY, DIRECTIONS } from 'react-with-direction/dist/constants';
-import directionBroadcastShape from 'react-with-direction/dist/proptypes/brcast';
 
-import useStyles from './useStyles';
-import useBroadcast from './utils/useBroadcast';
+import WithStylesAdapter from './WithStylesAdapter';
 import detectHooks from './utils/detectHooks';
+import EMPTY_STYLES_FN from './utils/emptyStylesFn';
 
 export { withStylesPropTypes } from './withStylesPropTypes';
-
-const contextTypes = {
-  [DIRECTION_BROADCAST_KEY]: directionBroadcastShape,
-};
-
-const EMPTY_STYLES = {};
-const EMPTY_STYLES_FN = () => EMPTY_STYLES;
 
 /**
  * A higher order function that returns a higher order component that injects
@@ -53,34 +44,43 @@ export function withStylesWithHooks(
     pureComponent = false,
   } = {},
 ) {
-  stylesFn = stylesFn || EMPTY_STYLES_FN;
-
   if (!detectHooks()) {
     throw new ReferenceError('withSytlesWithHooks() requires React 16.8 or later');
   }
 
-  // The function that wraps the provided component in a wrapper
-  // component that injects the withStyles props
+  stylesFn = stylesFn || EMPTY_STYLES_FN;
+  const BaseClass = pureComponent ? React.PureComponent : React.Component;
+
   return function withStylesHOC(WrappedComponent) {
     const wrappedComponentName = getComponentName(WrappedComponent);
 
     // The wrapper component that injects the withStyles props
-    function WithStyles(props, context) {
-      const directionBroadcast = context ? context[DIRECTION_BROADCAST_KEY] : null;
-      const direction = useBroadcast(directionBroadcast, DIRECTIONS.LTR);
+    class WithStyles extends BaseClass {
+      constructor(props) {
+        super(props);
+        this.renderWrappedComponent = this.renderWrappedComponent.bind(this);
+      }
 
-      const { css, styles, theme } = useStyles({ direction, stylesFn, flushBefore });
+      renderWrappedComponent({ css, styles, theme }) {
+        return (
+          <WrappedComponent
+            {...this.props}
+            {...{
+              [cssPropName]: css,
+              [stylesPropName]: styles,
+              [themePropName]: theme,
+            }}
+          />
+        );
+      }
 
-      return (
-        <WrappedComponent
-          {...props}
-          {...{
-            [themePropName]: theme,
-            [stylesPropName]: styles,
-            [cssPropName]: css,
-          }}
-        />
-      );
+      render() {
+        return (
+          <WithStylesAdapter stylesFn={stylesFn} flushBefore={flushBefore}>
+            {this.renderWrappedComponent}
+          </WithStylesAdapter>
+        );
+      }
     }
 
     // Copy the wrapped component's prop types and default props on WithStyles
@@ -93,26 +93,10 @@ export function withStylesWithHooks(
     if (WrappedComponent.defaultProps) {
       WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
     }
-    WithStyles.contextTypes = contextTypes;
     WithStyles.WrappedComponent = WrappedComponent;
     WithStyles.displayName = `withStyles(${wrappedComponentName})`;
-    WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
 
-    // Make into a pure functional component if requested
-    if (pureComponent) {
-      let WithStylesMemo = React.memo(WithStyles);
-      // We set statics on the memoized component as well because the
-      // React.memo HOC doesn't copy them over
-      WithStylesMemo.propTypes = WithStyles.propTypes;
-      WithStylesMemo.defaultProps = WithStyles.defaultProps;
-      WithStylesMemo.contextTypes = WithStyles.contextTypes;
-      WithStylesMemo.WrappedComponent = WithStyles.WrappedComponent;
-      WithStylesMemo.displayName = WithStyles.displayName;
-      WithStylesMemo = hoistNonReactStatics(WithStylesMemo, WithStyles);
-      return WithStylesMemo;
-    }
-
-    return WithStyles;
+    return hoistNonReactStatics(WithStyles, WrappedComponent);
   };
 }
 
