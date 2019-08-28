@@ -1,5 +1,7 @@
 import { createContext } from 'react';
 
+export { DIRECTIONS } from 'react-with-direction';
+
 function detectAndCreateContext(defaultValue) {
   if (createContext) {
     return createContext(defaultValue);
@@ -18,6 +20,7 @@ function detectAndCreateContext(defaultValue) {
 const WithStylesContext = detectAndCreateContext({
   stylesInterface: null,
   stylesTheme: null,
+  direction: null,
 });
 
 export default WithStylesContext;
