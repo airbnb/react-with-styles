@@ -7,7 +7,7 @@ import getComponentName from 'airbnb-prop-types/build/helpers/getComponentName';
 import EMPTY_STYLES_FN from './utils/emptyStylesFn';
 import withPerf from './utils/perf';
 import WithStylesContext, { DIRECTIONS } from './WithStylesContext';
-import { _getTheme, _getInterface } from './ThemedStyleSheet';
+import ThemedStyleSheet, { _getTheme, _getInterface } from './ThemedStyleSheet';
 
 export { withStylesPropTypes } from './withStylesPropTypes';
 
@@ -224,3 +224,9 @@ export function withStyles(
 }
 
 export default withStyles;
+
+/**
+* Deprecated: Do not use directly. Please wrap your component in `withStyles` and use the `css`
+* prop injected via props instead.
+*/
+export const css = ThemedStyleSheet.resolveLTR;
