@@ -199,8 +199,8 @@ describeIfReact('>=16.8', 'withStylesFunctional', () => {
           return null;
         };
         const StyledComponent = withStyles(null, { themePropName: 'customTheme' })(MockComponent);
-        mountWithProviders(<StyledComponent />, providers);
-        throw new Error('Incomplete');
+        const wrapper = mountWithProviders(<StyledComponent />, providers);
+        expect(wrapper.find(MockComponent).props()).to.have.property('customTheme', testTheme);
       });
 
       it('passes the styles to the wrapped component through the specified prop', () => {
@@ -209,12 +209,11 @@ describeIfReact('>=16.8', 'withStylesFunctional', () => {
           expect(customStyles).to.equal(testStyles);
           return null;
         };
-        const StyledComponent = withStyles(
-          () => testStyles,
-          { stylesPropName: 'customStyles' },
-        )(MockComponent);
-        mountWithProviders(<StyledComponent />, providers);
-        throw new Error('Incomplete');
+        const StyledComponent = withStyles(() => testStyles, { stylesPropName: 'customStyles' })(
+          MockComponent,
+        );
+        const wrapper = mountWithProviders(<StyledComponent />, providers);
+        expect(wrapper.find(MockComponent).props()).to.have.property('customStyles');
       });
 
       it('passes the css function to the wrapped component through the specified prop', () => {
@@ -223,8 +222,8 @@ describeIfReact('>=16.8', 'withStylesFunctional', () => {
           return null;
         };
         const StyledComponent = withStyles(null, { cssPropName: 'customCss' })(MockComponent);
-        mountWithProviders(<StyledComponent />, providers);
-        throw new Error('Incomplete');
+        const wrapper = mountWithProviders(<StyledComponent />, providers);
+        expect(wrapper.find(MockComponent).props()).to.have.property('customCss');
       });
 
       it('calls the flush function before rendering when specified', () => {
