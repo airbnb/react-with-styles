@@ -3,6 +3,7 @@ import { useContext, useRef } from 'react';
 import withPerf from '../utils/perf';
 import WithStylesContext, { DIRECTIONS } from '../WithStylesContext';
 import { _getInterface, _getTheme } from '../ThemedStyleSheet';
+import detectHooks from './detectHooks';
 
 /**
  * Hook used to derive the react-with-styles props from the provided react-with-styles
@@ -16,7 +17,7 @@ import { _getInterface, _getTheme } from '../ThemedStyleSheet';
  * @returns {Object} { css, styles, theme }
  */
 export default function useStyles({ stylesFn, flushBefore } = {}) {
-  if (!useContext || !useRef) {
+  if (!detectHooks()) {
     throw new ReferenceError('useStyles() requires React 16.8 or later');
   }
 

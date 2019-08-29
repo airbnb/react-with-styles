@@ -1,5 +1,5 @@
-import React from 'react';
+import { useContext, useRef } from 'react';
 
 export default function detectHooks() {
-  return React.useContext && React.useRef && React.useEffect && React.useState;
+  return useContext && useRef;
 }
