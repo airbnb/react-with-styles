@@ -1,6 +1,6 @@
 import { createContext } from 'react';
-
-export { DIRECTIONS } from 'react-with-direction';
+import PropTypes from 'prop-types';
+import { DIRECTIONS } from 'react-with-direction';
 
 function detectAndCreateContext(defaultValue) {
   if (createContext) {
@@ -23,4 +23,11 @@ const WithStylesContext = detectAndCreateContext({
   direction: null,
 });
 
+WithStylesContext.Provider.propTypes = {
+  stylesInterface: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+  stylesTheme: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+  direction: PropTypes.oneOf([DIRECTIONS.LTR, DIRECTIONS.RTL]),
+};
+
 export default WithStylesContext;
+export { DIRECTIONS };
