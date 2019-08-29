@@ -158,7 +158,7 @@ describeIfReact('>=16.8', 'withStylesFunctional', () => {
         const MockComponent = () => null;
         const StyledComponent = withStyles()(MockComponent);
         const wrapper = mountWithProviders(<StyledComponent />, providers);
-        expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
+        expect(wrapper.find(MockComponent).props()).to.have.property('theme', testTheme);
       });
 
       it('passes the styles to the wrapped component through the `styles` prop', () => {
@@ -166,7 +166,7 @@ describeIfReact('>=16.8', 'withStylesFunctional', () => {
         const MockComponent = () => null;
         const StyledComponent = withStyles(() => testStyles)(MockComponent);
         const wrapper = mountWithProviders(<StyledComponent />, providers);
-        expect(wrapper.find(MockComponent).props().styles).to.equal(testStyles);
+        expect(wrapper.find(MockComponent).props()).to.have.property('styles', testStyles);
       });
 
       it('passes an empty styles object if no stylesFn is provided', () => {
@@ -503,7 +503,7 @@ describeIfReact('>=16.8', 'withStylesFunctional', () => {
         const StyledComponent = withStyles(stylesFn)(MockComponent);
         const wrapper = mountWithProviders(<StyledComponent />, nestedProviders);
         expect(stylesFn.calledWith(innerMostTheme)).to.equal(true);
-        expect(wrapper.find(MockComponent).props().theme).to.equal(innerMostTheme);
+        expect(wrapper.find(MockComponent).props()).to.have.property('theme', innerMostTheme);
       });
 
       it('uses the innermost interface', () => {
@@ -545,7 +545,7 @@ describeIfReact('>=16.8', 'withStylesFunctional', () => {
         const StyledComponent = withStyles(stylesFn)(MockComponent);
         const wrapper = shallow(<StyledComponent />);
         expect(stylesFn.calledWith(testTheme)).to.equal(true);
-        expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
+        expect(wrapper.find(MockComponent).props()).to.have.property('theme', testTheme);
       });
 
       it('uses the interface registered with the singleton API', () => {
@@ -569,7 +569,7 @@ describeIfReact('>=16.8', 'withStylesFunctional', () => {
           <WithStylesContext.Provider value={{ direction: DIRECTIONS.LTR }} />,
         ]);
         expect(stylesFn.calledWith(testTheme)).to.equal(true);
-        expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
+        expect(wrapper.find(MockComponent).props()).to.have.property('theme', testTheme);
       });
 
       it('uses the interface registered with the singleton API', () => {
@@ -595,7 +595,7 @@ describeIfReact('>=16.8', 'withStylesFunctional', () => {
           <WithStylesContext.Provider value={{ direction: DIRECTIONS.RTL }} />,
         ]);
         expect(stylesFn.calledWith(testTheme)).to.equal(true);
-        expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
+        expect(wrapper.find(MockComponent).props()).to.have.property('theme', testTheme);
       });
 
       it('uses the interface registered with the singleton API', () => {
