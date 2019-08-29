@@ -1,25 +1,30 @@
 import { useContext, useRef } from 'react';
-import { DIRECTIONS } from 'react-with-direction';
 
-import withPerf from './utils/perf';
-import WithStylesContext from './WithStylesContext';
-import { _getInterface, _getTheme } from './ThemedStyleSheet';
+import withPerf from '../utils/perf';
+import WithStylesContext, { DIRECTIONS } from '../WithStylesContext';
+import { _getInterface, _getTheme } from '../ThemedStyleSheet';
+import detectHooks from './detectHooks';
 
 /**
  * Hook used to derive the react-with-styles props from the provided react-with-styles
  * theme, interface, direction, and styles function.
  *
+ * Note that this implementation does not use caching for stylesFn(theme) results, so only
+ * use this if you are not relying on this performance optimization.
+ *
  * @export
- * @param {*} [{ direction, stylesFn, flushBefore }={}]
- * @returns {*} { css, styles, theme }
+ * @param {Object} [{ stylesFn, flushBefore }={}]
+ * @returns {Object} { css, styles, theme }
  */
-export default function useStyles({ direction, stylesFn, flushBefore } = {}) {
-  if (!useContext || !useRef) {
+export default function useStyles({ stylesFn, flushBefore } = {}) {
+  if (!detectHooks()) {
     throw new ReferenceError('useStyles() requires React 16.8 or later');
   }
 
   // Get the styles interface and styles theme from context
-  let { stylesInterface, stylesTheme: theme } = useContext(WithStylesContext);
+  const context = useContext(WithStylesContext);
+  let { stylesInterface, stylesTheme: theme } = context;
+  const { direction } = context;
 
   // Fallback to the singleton implementation
   stylesInterface = stylesInterface || _getInterface();
