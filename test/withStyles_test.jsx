@@ -359,6 +359,7 @@ describe('withStyles', () => {
       let secondTheme;
       let firstInterface;
       let secondInterface;
+      let stylesFn;
 
       function makeTestHelper() {
         const MockComponent = ({ css, styles, primary }) => (
@@ -366,7 +367,7 @@ describe('withStyles', () => {
         );
         MockComponent.propTypes = { ...withStylesPropTypes, primary: PropTypes.bool };
         MockComponent.defaultProps = { primary: false };
-        const stylesFn = ({ color }) => ({ primary: { color: color.primary } });
+        stylesFn = sinon.spy(({ color }) => ({ primary: { color: color.primary } }));
         const StyledComponent = withStyles(stylesFn)(MockComponent);
 
         const TestHelper = ({
@@ -460,6 +461,35 @@ describe('withStyles', () => {
         expect(secondInterface.resolveLTR).to.have.property('callCount', 2);
         wrapper.setProps({ primary: true });
         expect(secondInterface.resolveLTR).to.have.property('callCount', 3);
+      });
+
+      it('re-calculates stylesFn(theme) at most once per theme', () => {
+        const TestHelper = makeTestHelper();
+        expect(stylesFn).to.have.property('callCount', 0);
+        const wrapper = mount(<TestHelper />);
+        expect(stylesFn).to.have.property('callCount', 1);
+        wrapper.setProps({ stylesTheme: secondTheme });
+        expect(stylesFn).to.have.property('callCount', 2);
+        wrapper.setProps({ stylesTheme: firstTheme });
+        expect(stylesFn).to.have.property('callCount', 2);
+        wrapper.setProps({ stylesTheme: secondTheme });
+        expect(stylesFn).to.have.property('callCount', 2);
+        expect(stylesFn.getCall(0).args[0]).to.equal(firstTheme);
+        expect(stylesFn.getCall(1).args[0]).to.equal(secondTheme);
+      });
+
+      it('re-calculates stylesFn(theme) per component per theme', () => {
+        const TestHelper = makeTestHelper();
+        expect(stylesFn).to.have.property('callCount', 0);
+        const wrapper = mount(
+          <div>
+            <TestHelper />
+            <TestHelper />
+            <TestHelper />
+            <TestHelper />
+          </div>,
+        );
+        expect(stylesFn).to.have.property('callCount', 1);
       });
     });
 
