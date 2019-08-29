@@ -5,16 +5,16 @@ import PropTypes from 'prop-types';
 import { expect } from 'chai';
 import { mount, shallow } from 'enzyme';
 import sinon from 'sinon-sandbox';
-import DirectionProvider, { DIRECTIONS } from 'react-with-direction/dist/DirectionProvider';
+
 import { describeIfReact } from './ifReactHelpers';
-import WithStylesContext from '../src/WithStylesContext';
+import WithStylesContext, { DIRECTIONS } from '../src/WithStylesContext';
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
 import {
-  withStylesWithHooks as withStyles,
+  withStylesFunctional as withStyles,
   withStylesPropTypes,
-} from '../src/withStylesWithHooks';
+} from '../src/withStylesFunctional';
 
-describeIfReact('>=16.8', 'withStylesWithHooks', () => {
+describeIfReact('>=16.8', 'withStylesFunctional', () => {
   let testTheme;
   let testInterface;
 
@@ -41,17 +41,32 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
     return mount(compose(...providers, element));
   }
 
-  beforeEach(() => {
-    testTheme = { color: { primary: 'tomato' } };
-    testInterface = {
+  function mockTheme(primaryColor = 'tomato') {
+    return { color: { primary: primaryColor } };
+  }
+
+  function mockInterface() {
+    return {
       create: sinon.stub().callsFake(fakeCreateMethod),
       createLTR: sinon.stub().callsFake(fakeCreateMethod),
       createRTL: sinon.stub().callsFake(fakeCreateMethod),
       resolve: sinon.stub().callsFake(fakeResolveMethod),
       resolveLTR: sinon.stub().callsFake(fakeResolveMethod),
       resolveRTL: sinon.stub().callsFake(fakeResolveMethod),
-      flush: sinon.spy(),
+      flush: sinon.stub(),
     };
+  }
+
+  function mockNonDirectionalInterface() {
+    return {
+      create: sinon.stub().callsFake(fakeCreateMethod),
+      resolve: sinon.stub().callsFake(fakeResolveMethod),
+    };
+  }
+
+  beforeEach(() => {
+    testTheme = mockTheme();
+    testInterface = mockInterface();
   });
 
   afterEach(() => {
@@ -67,6 +82,7 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
     });
 
     it('does not call any interface functions', () => {
+      ThemedStyleSheet.registerInterface(testInterface);
       expect(testInterface.create).to.have.property('callCount', 0);
       expect(testInterface.createLTR).to.have.property('callCount', 0);
       expect(testInterface.createRTL).to.have.property('callCount', 0);
@@ -184,6 +200,7 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
         };
         const StyledComponent = withStyles(null, { themePropName: 'customTheme' })(MockComponent);
         mountWithProviders(<StyledComponent />, providers);
+        throw new Error('Incomplete');
       });
 
       it('passes the styles to the wrapped component through the specified prop', () => {
@@ -197,6 +214,7 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
           { stylesPropName: 'customStyles' },
         )(MockComponent);
         mountWithProviders(<StyledComponent />, providers);
+        throw new Error('Incomplete');
       });
 
       it('passes the css function to the wrapped component through the specified prop', () => {
@@ -206,6 +224,7 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
         };
         const StyledComponent = withStyles(null, { cssPropName: 'customCss' })(MockComponent);
         mountWithProviders(<StyledComponent />, providers);
+        throw new Error('Incomplete');
       });
 
       it('calls the flush function before rendering when specified', () => {
@@ -249,11 +268,11 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
 
       beforeEach(() => {
         ltrProviders = [
-          <DirectionProvider direction={DIRECTIONS.LTR} />,
           <WithStylesContext.Provider
             value={{
               stylesInterface: testInterface,
               stylesTheme: testTheme,
+              direction: DIRECTIONS.LTR,
             }}
           />,
         ];
@@ -290,11 +309,11 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
 
       beforeEach(() => {
         rtlProviders = [
-          <DirectionProvider direction={DIRECTIONS.RTL} />,
           <WithStylesContext.Provider
             value={{
               stylesInterface: testInterface,
               stylesTheme: testTheme,
+              direction: DIRECTIONS.RTL,
             }}
           />,
         ];
@@ -357,11 +376,9 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
         const TestHelper = ({
           stylesTheme, stylesInterface, direction, primary,
         }) => (
-          <DirectionProvider direction={direction}>
-            <WithStylesContext.Provider value={{ stylesInterface, stylesTheme }}>
-              <StyledComponent primary={primary} />
-            </WithStylesContext.Provider>
-          </DirectionProvider>
+          <WithStylesContext.Provider value={{ stylesInterface, stylesTheme, direction }}>
+            <StyledComponent primary={primary} />
+          </WithStylesContext.Provider>
         );
         TestHelper.propTypes = {
           stylesTheme: PropTypes.object, // eslint-disable-line react/forbid-prop-types
@@ -380,24 +397,10 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
       }
 
       beforeEach(() => {
-        firstTheme = { color: { primary: '#000' } };
-        secondTheme = { color: { primary: '#fff' } };
-        firstInterface = {
-          create: sinon.stub().callsFake(fakeCreateMethod),
-          createLTR: sinon.stub().callsFake(fakeCreateMethod),
-          createRTL: sinon.stub().callsFake(fakeCreateMethod),
-          resolve: sinon.stub().callsFake(fakeResolveMethod),
-          resolveLTR: sinon.stub().callsFake(fakeResolveMethod),
-          resolveRTL: sinon.stub().callsFake(fakeResolveMethod),
-        };
-        secondInterface = {
-          create: sinon.stub().callsFake(fakeCreateMethod),
-          createLTR: sinon.stub().callsFake(fakeCreateMethod),
-          createRTL: sinon.stub().callsFake(fakeCreateMethod),
-          resolve: sinon.stub().callsFake(fakeResolveMethod),
-          resolveLTR: sinon.stub().callsFake(fakeResolveMethod),
-          resolveRTL: sinon.stub().callsFake(fakeResolveMethod),
-        };
+        firstTheme = mockTheme('#000');
+        secondTheme = mockTheme('#fff');
+        firstInterface = mockInterface();
+        secondInterface = mockInterface();
       });
 
       it('creates styles once if the direction, theme or interface haven\'t changed', () => {
@@ -463,90 +466,77 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
         expect(secondInterface.resolveLTR).to.have.property('callCount', 3);
       });
     });
-  });
 
-  describe('Nested themes and interfaces', () => {
-    let nestedProviders;
-    let innerMostTheme;
-    let outerMostTheme;
-    let innerMostInterface;
-    let outerMostInterface;
-    let stylesFn;
+    describe('nested themes and interfaces', () => {
+      let nestedProviders;
+      let innerMostTheme;
+      let outerMostTheme;
+      let innerMostInterface;
+      let outerMostInterface;
+      let stylesFn;
 
-    beforeEach(() => {
-      const fakeStylesFn = ({ color }) => ({
-        primary: { color: color.primary },
-        custom: { color: 'blue' },
+      beforeEach(() => {
+        const fakeStylesFn = ({ color }) => ({
+          primary: { color: color.primary },
+          custom: { color: 'blue' },
+        });
+        stylesFn = sinon.stub().callsFake(fakeStylesFn);
+
+        outerMostTheme = mockTheme('#000');
+        innerMostTheme = mockTheme('#fff');
+
+        outerMostInterface = mockNonDirectionalInterface();
+        innerMostInterface = mockNonDirectionalInterface();
+
+        nestedProviders = [
+          <WithStylesContext.Provider
+            value={{ stylesInterface: outerMostInterface, stylesTheme: outerMostTheme }}
+          />,
+          <WithStylesContext.Provider
+            value={{ stylesInterface: innerMostInterface, stylesTheme: innerMostTheme }}
+          />,
+        ];
       });
-      stylesFn = sinon.stub().callsFake(fakeStylesFn);
 
-      outerMostTheme = { color: { primary: '#000' } };
-      innerMostTheme = { color: { primary: '#fff' } };
+      it('uses the innermost theme', () => {
+        const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
+        MockComponent.propTypes = { ...withStylesPropTypes };
+        const StyledComponent = withStyles(stylesFn)(MockComponent);
+        const wrapper = mountWithProviders(<StyledComponent />, nestedProviders);
+        expect(stylesFn.calledWith(innerMostTheme)).to.equal(true);
+        expect(wrapper.find(MockComponent).props().theme).to.equal(innerMostTheme);
+      });
 
-      outerMostInterface = {
-        create: sinon.stub().callsFake(fakeCreateMethod),
-        resolve: sinon.stub().callsFake(fakeResolveMethod),
-      };
-      innerMostInterface = {
-        create: sinon.stub().callsFake(fakeCreateMethod),
-        resolve: sinon.stub().callsFake(fakeResolveMethod),
-      };
-
-      nestedProviders = [
-        <WithStylesContext.Provider
-          value={{ stylesInterface: outerMostInterface, stylesTheme: outerMostTheme }}
-        />,
-        <WithStylesContext.Provider
-          value={{ stylesInterface: innerMostInterface, stylesTheme: innerMostTheme }}
-        />,
-      ];
-    });
-
-    it('uses the innermost theme', () => {
-      const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
-      MockComponent.propTypes = { ...withStylesPropTypes };
-      const StyledComponent = withStyles(stylesFn)(MockComponent);
-      const wrapper = mountWithProviders(<StyledComponent />, nestedProviders);
-      expect(stylesFn.calledWith(innerMostTheme)).to.equal(true);
-      expect(wrapper.find(MockComponent).props().theme).to.equal(innerMostTheme);
-    });
-
-    it('uses the innermost interface', () => {
-      const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
-      MockComponent.propTypes = { ...withStylesPropTypes };
-      const StyledComponent = withStyles(stylesFn)(MockComponent);
-      expect(outerMostInterface.create).to.have.property('callCount', 0);
-      expect(outerMostInterface.resolve).to.have.property('callCount', 0);
-      expect(innerMostInterface.create).to.have.property('callCount', 0);
-      expect(innerMostInterface.resolve).to.have.property('callCount', 0);
-      mountWithProviders(<StyledComponent />, nestedProviders);
-      expect(outerMostInterface.create).to.have.property('callCount', 0);
-      expect(outerMostInterface.resolve).to.have.property('callCount', 0);
-      expect(innerMostInterface.create).to.have.property('callCount', 1);
-      expect(innerMostInterface.resolve).to.have.property('callCount', 1);
+      it('uses the innermost interface', () => {
+        const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
+        MockComponent.propTypes = { ...withStylesPropTypes };
+        const StyledComponent = withStyles(stylesFn)(MockComponent);
+        expect(outerMostInterface.create).to.have.property('callCount', 0);
+        expect(outerMostInterface.resolve).to.have.property('callCount', 0);
+        expect(innerMostInterface.create).to.have.property('callCount', 0);
+        expect(innerMostInterface.resolve).to.have.property('callCount', 0);
+        mountWithProviders(<StyledComponent />, nestedProviders);
+        expect(outerMostInterface.create).to.have.property('callCount', 0);
+        expect(outerMostInterface.resolve).to.have.property('callCount', 0);
+        expect(innerMostInterface.create).to.have.property('callCount', 1);
+        expect(innerMostInterface.resolve).to.have.property('callCount', 1);
+      });
     });
   });
 
-  describe('Fallbacks to the singleton API', () => {
+  describe('Without providers', () => {
     let stylesFn;
-    let otherTestTheme;
-    let otherTestInterface;
 
     beforeEach(() => {
       ThemedStyleSheet.registerInterface(testInterface);
       ThemedStyleSheet.registerTheme(testTheme);
 
       stylesFn = sinon.stub().callsFake(({ color }) => ({ primary: { color: color.primary } }));
-      otherTestTheme = { color: { primary: 'purple' } };
-      otherTestInterface = {
-        create: sinon.stub().callsFake(fakeCreateMethod),
-        resolve: sinon.stub().callsFake(fakeResolveMethod),
-      };
     });
 
     afterEach(() => {
       ThemedStyleSheet.registerInterface(undefined);
-      ThemedStyleSheet.registerTheme({});
+      ThemedStyleSheet.registerTheme(undefined);
     });
 
     describe('in a non-directional context', () => {
@@ -577,7 +567,7 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles(stylesFn)(MockComponent);
         const wrapper = mountWithProviders(<StyledComponent />, [
-          <DirectionProvider direction="ltr" />,
+          <WithStylesContext.Provider value={{ direction: DIRECTIONS.LTR }} />,
         ]);
         expect(stylesFn.calledWith(testTheme)).to.equal(true);
         expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
@@ -589,7 +579,9 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
         const StyledComponent = withStyles(stylesFn)(MockComponent);
         expect(testInterface.createLTR).to.have.property('callCount', 0);
         expect(testInterface.resolveLTR).to.have.property('callCount', 0);
-        mountWithProviders(<StyledComponent />, [<DirectionProvider direction="ltr" />]);
+        mountWithProviders(<StyledComponent />, [
+          <WithStylesContext.Provider value={{ direction: DIRECTIONS.LTR }} />,
+        ]);
         expect(testInterface.createLTR).to.have.property('callCount', 1);
         expect(testInterface.resolveLTR).to.have.property('callCount', 1);
       });
@@ -601,7 +593,7 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles(stylesFn)(MockComponent);
         const wrapper = mountWithProviders(<StyledComponent />, [
-          <DirectionProvider direction="rtl" />,
+          <WithStylesContext.Provider value={{ direction: DIRECTIONS.RTL }} />,
         ]);
         expect(stylesFn.calledWith(testTheme)).to.equal(true);
         expect(wrapper.find(MockComponent).props().theme).to.equal(testTheme);
@@ -613,7 +605,9 @@ describeIfReact('>=16.8', 'withStylesWithHooks', () => {
         const StyledComponent = withStyles(stylesFn)(MockComponent);
         expect(testInterface.createRTL).to.have.property('callCount', 0);
         expect(testInterface.resolveRTL).to.have.property('callCount', 0);
-        mountWithProviders(<StyledComponent />, [<DirectionProvider direction="rtl" />]);
+        mountWithProviders(<StyledComponent />, [
+          <WithStylesContext.Provider value={{ direction: DIRECTIONS.RTL }} />,
+        ]);
         expect(testInterface.createRTL).to.have.property('callCount', 1);
         expect(testInterface.resolveRTL).to.have.property('callCount', 1);
       });
