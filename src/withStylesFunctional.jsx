@@ -6,16 +6,14 @@ import getComponentName from 'airbnb-prop-types/build/helpers/getComponentName';
 
 import useStyles from './hooks/useStyles';
 import detectHooks from './hooks/detectHooks';
+import EMPTY_STYLES_FN from './utils/emptyStylesFn';
 
 export { withStylesPropTypes } from './withStylesPropTypes';
-
-const EMPTY_STYLES = {};
-const EMPTY_STYLES_FN = () => EMPTY_STYLES;
 
 /**
  * A higher order function that returns a higher order functional component that injects
  * CSS-in-JS props derived from the react-with-styles theme, interface, and
- * direction provided through the WithStylesContext provider.
+ * direction provided through the FunctionalWithStylesContext provider.
  *
  * The function should be used as follows:
  * `withStylesFunctional((theme) => styles, options)(Component)`
@@ -23,6 +21,10 @@ const EMPTY_STYLES_FN = () => EMPTY_STYLES;
  * Options can be used to rename the injected props, memoize the component, and flush
  * the styles to the styles tag (or whatever the interface implements as flush) before
  * rendering.
+ *
+ * Note that this implementation does not use caching for stylesFn(theme) results, so
+ * use this if you are not relying on this performance optimization that currently exists
+ * in the class implementation of withStyles.
  *
  * @export
  * @param {*} [stylesFn=EMPTY_STYLES_FN]
@@ -53,11 +55,11 @@ export function withStylesFunctional(
 
   // The function that wraps the provided component in a wrapper
   // component that injects the withStyles props
-  return function withStylesHOC(WrappedComponent) {
+  return function withStylesFunctionalHOC(WrappedComponent) {
     const wrappedComponentName = getComponentName(WrappedComponent);
 
     // The wrapper component that injects the withStyles props
-    function WithStyles(props) {
+    function FunctionalWithStyles(props) {
       const { css, styles, theme } = useStyles({ stylesFn, flushBefore });
 
       return (
@@ -72,20 +74,19 @@ export function withStylesFunctional(
       );
     }
 
-    // Copy the wrapped component's prop types and default props on WithStyles
+    // Copy the wrapped component's prop types and default props on FunctionalWithStyles
     if (WrappedComponent.propTypes) {
-      WithStyles.propTypes = { ...WrappedComponent.propTypes };
-      delete WithStyles.propTypes[stylesPropName];
-      delete WithStyles.propTypes[themePropName];
-      delete WithStyles.propTypes[cssPropName];
+      FunctionalWithStyles.propTypes = { ...WrappedComponent.propTypes };
+      delete FunctionalWithStyles.propTypes[stylesPropName];
+      delete FunctionalWithStyles.propTypes[themePropName];
+      delete FunctionalWithStyles.propTypes[cssPropName];
     }
     if (WrappedComponent.defaultProps) {
-      WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
+      FunctionalWithStyles.defaultProps = { ...WrappedComponent.defaultProps };
     }
-    WithStyles.WrappedComponent = WrappedComponent;
-    WithStyles.displayName = `withStyles(${wrappedComponentName})`;
-    WithStyles = hoistNonReactStatics(WithStyles, WrappedComponent);
-    return WithStyles;
+    FunctionalWithStyles.WrappedComponent = WrappedComponent;
+    FunctionalWithStyles.displayName = `withStyles(${wrappedComponentName})`;
+    return hoistNonReactStatics(FunctionalWithStyles, WrappedComponent);
   };
 }
 

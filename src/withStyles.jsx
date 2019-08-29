@@ -1,8 +1,4 @@
-/* eslint-disable no-param-reassign,
-  no-func-assign,
-  react/destructuring-assignment,
-  class-methods-use-this
-*/
+/* eslint-disable no-param-reassign, no-func-assign, class-methods-use-this */
 
 import React from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
