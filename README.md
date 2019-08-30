@@ -30,6 +30,8 @@ Use CSS-in-JavaScript for your React components without being tightly coupled to
 
 ## How to use
 
+### Step 1. Define your theme
+
 Create a module that exports an object with shared theme information like colors.
 
 ```js
@@ -41,31 +43,117 @@ export default {
 };
 ```
 
-Register your theme and interface. For example, if your theme is exported by `MyTheme.js`, and you want to use Aphrodite, you can set this up in your own `withStyles.js` file.
+### Step 2. Choose an interface
+
+You will need to choose the `react-with-styles` interface that corresponds to the underlying CSS-in-JS framework that you use in your app. Take a look through the list of [existing interfaces](#interfaces), or write your own!
+
+If you choose to write your own, the interface must implement the following functions:
+
+Function | Description
+--- | ---
+`create` | Function that outputs the `styles` object injected through props.<br />(Optional, but required if `createLTR` is not provided).
+`createLTR` | LTR version of `create`.<br />(Required, unless a `create` function is provided)
+`createRTL` | RTL version of `create`.<br />(Required, unless a `create` function is provided)
+`resolve` | This is the `css` function that is injected through props. It outputs the attributes used to style an HTML element.<br />(Optional, but required if no `resolveLTR` is provided)
+`resolveLTR` | LTR version of `resolve`.<br />(Required, unless the `resolve` function is provided)
+`resolveRTL` | RTL version of `resolve`.<br />(Required, unless the `resolve` function is provided)
+`flush?` | Flush buffered styles before rendering. This can mean anything you need to happen before rendering.<br />(Optional)
+
+### Step 3. Register the chosen theme and interface
+
+#### Option 1: Using React Context (recommended)
+
+☝️ _Requires React 16.6+_
+
+As of version `4.0.0`, registering the theme and interface can be accomplished through [React context](https://reactjs.org/docs/context.html), and is the recommended way of registering the theme, interface, and direction.
+
+For example, if your theme is exported by `MyTheme.js`, and you want to use Aphrodite through the `react-with-styles-interface-aphrodite` insterface, wrap your application with the `WithStylesContext.Provider` to provide `withStyles` with that interface and theme:
+
+```jsx
+import React from 'react';
+import WithStylesContext from 'react-with-styles/lib/WithStylesContext';
+import AphroditeInterface from 'react-with-styles-interface-aphrodite';
+import MyTheme from './MyTheme';
+
+export default function Bootstrap({ direction }) {
+  return (
+    <WithStylesContext.Provider
+      value={{
+        stylesInterface: AphroditeInterface,
+        stylesTheme: MyTheme,
+        direction,
+      }}
+    >
+      <App />
+    </WithStylesContext.Provider>
+  );
+}
+```
+
+To support your users in an RTL context, we recommend using `react-with-styles` along with [`react-with-direction`](https://github.com/airbnb/react-with-direction). You can provide the direction directly if you have a utility that determines it like in the example above, or you can use the provided utility, `WithStylesDirectionAdapter`, to grab the direction that's already been set on the `react-with-direction` context and amend `WithStylesContext` with it.
+
+```jsx
+import React from 'react';
+import WithStylesContext from 'react-with-styles/lib/WithStylesContext';
+import WithStylesDirectionAdapter from 'react-with-styles/lib/providers/WithStylesDirectionAdapter';
+import AphroditeInterface from 'react-with-styles-interface-aphrodite';
+import MyTheme from './MyTheme';
+
+export default function Bootstrap() {
+  return (
+    <WithStylesContext.Provider
+      value={{
+        stylesInterface: AphroditeInterface,
+        stylesTheme: MyTheme,
+      }}
+    >
+      <WithStylesDirectionAdapter>
+        <App />
+      </WithStylesDirectionAdapter>
+    </WithStylesContext.Provider>
+  );
+}
+```
+
+Or simply wrap the `Bootstrap` function above in `withDirection` yourself.
+
+☝️ **Note on performance**: Changing the theme many times will cause components to recalculate their styles. Avoid recalculating styles by providing one theme at the highest possible level of your app.
+
+#### Option 2: Using the ThemedStyleSheet (legacy)
+
+The legacy singleton-based API (using `ThemedStyleSheet`) is still supported, so you can still use it to register the theme and interface. You do not have to do this if you use the `WithStylesContext.Provider`. Keep in mind that this API will be deprecated in the next major version of `react-with-styles`. You can set this up in your own `withStyles.js` file, like so:
 
 ```js
 import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
-import aphroditeInterface from 'react-with-styles-interface-aphrodite';
-import { css, withStyles } from 'react-with-styles';
+import AphroditeInterface from 'react-with-styles-interface-aphrodite';
+import { withStyles } from 'react-with-styles';
 
 import MyTheme from './MyTheme';
 
 ThemedStyleSheet.registerTheme(MyTheme);
-ThemedStyleSheet.registerInterface(aphroditeInterface);
+ThemedStyleSheet.registerInterface(AphroditeInterface);
 
-export { css, withStyles, ThemedStyleSheet };
+export { withStyles, ThemedStyleSheet };
 ```
 
-It is convenient to pass through `css` and `withStyles` from `react-with-styles` here so that everywhere you use them you can be assured that the theme and interface have been registered. You could likely also set this up as an initializer that is added to the top of your bundles and then use `react-with-styles` directly in your components.
+It is convenient to pass through `withStyles` from `react-with-styles` here so that everywhere you use them you can be assured that the theme and interface have been registered. You could likely also set this up as an initializer that is added to the top of your bundles and then use `react-with-styles` directly in your components.
 
-In your component, from our `withStyles.js` file above, use `withStyles()` to define styles and `css()` to consume them.
+✋ Because the `ThemedStyleSheet` implementation stores the theme and interface in variables outside of the React tree, we do not recommended it. This approach does not parallelize, especially if your build systems or apps require rendering with multiple themes.
+
+### Step 4. Styling your components
+
+In your components, use `withStyles()` to define styles. This HOC will inject the right props to consume them through the CSS-in-JS implementation you chose.
 
 ```jsx
 import React from 'react';
 import PropTypes from 'prop-types';
-import { css, withStyles } from './withStyles';
+import { withStyles, withStylesPropTypes } from './withStyles';
 
-function MyComponent({ styles }) {
+const propTypes = {
+  ...withStylesPropTypes,
+};
+
+function MyComponent({ styles, css }) {
   return (
     <div>
       <a
@@ -89,9 +177,7 @@ function MyComponent({ styles }) {
   );
 }
 
-MyComponent.propTypes = {
-  styles: PropTypes.object.isRequired,
-};
+MyComponent.propTypes = propTypes;
 
 export default withStyles(({ color }) => ({
   firstLink: {
@@ -104,52 +190,33 @@ export default withStyles(({ color }) => ({
 }))(MyComponent);
 ```
 
-## `ThemedStyleSheet`
+You can also use [the `useStyles` hook or a decorator](#withstyles-stylesthunk--options--).
 
-Registers themes and interfaces.
+---
 
-### `ThemedStyleSheet.registerTheme(theme)`
+## Documentation
 
-Registers the theme. `theme` is an object with properties that you want to be made available when styling your components.
-
-```js
-import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
-
-ThemedStyleSheet.registerTheme({
-  color: {
-    primary: '#FF5A5F',
-    secondary: '#00A699',
-  },
-});
-```
-
-### `ThemedStyleSheet.registerInterface(interface)`
-
-Instructs react-with-styles how to process your styles.
-
-```js
-import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
-import aphroditeInterface from 'react-with-styles-interface-aphrodite';
-
-ThemedStyleSheet.registerInterface(aphroditeInterface);
-```
-
-
-## `withStyles([ stylesThunk [, options ] ])`
+### `withStyles([ stylesThunk [, options ] ])`
 
 This is a higher-order function that returns a higher-order component used to wrap React components to add styles using the theme. We use this to make themed styles easier to work with.
 
 `stylesThunk` will receive the theme as an argument, and it should return an object containing the styles for the component.
 
-The wrapped component will receive a `styles` prop containing the processed styles for this component and a `theme` prop with the theme object. Most of the time you will only need the `styles` prop. Reliance on the `theme` prop should be minimized.
+The wrapped component will receive the following props:
 
-### Example usage
+1. `styles` - Object containing the processed styles for this component. It corresponds to evaluating `stylesInterface.create(stylesThunk(theme))` (or their directional counterparts).
+2. `css` - Function to produce props to set the styles with on an element. It corresponds to `stylesInterface.resolve` (or their directional counterparts).
+3. `theme` - This is the theme object that was registered. You can use it during render as needed, say for inline styles.
+
+#### Example usage
+
+You can use `withStyles()` as an HOC:
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { withStyles } from './withStyles';
 
-function MyComponent({ styles }) {
+function MyComponent({ css, styles }) {
   return (
     <div {...css(styles.container)}>
       Try to be a rainbow in someone's cloud.
@@ -165,11 +232,11 @@ export default withStyles(({ color, unit }) => ({
 }))(MyComponent);
 ```
 
-Or, as a decorator:
+As a decorator:
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { withStyles } from './withStyles';
 
 @withStyles(({ color, unit }) => ({
   container: {
@@ -177,7 +244,7 @@ import { css, withStyles } from './withStyles';
     marginBottom: 2 * unit,
   },
 }))
-export default function MyComponent({ styles }) {
+export default function MyComponent({ styles, css }) {
   return (
     <div {...css(styles.container)}>
       Try to be a rainbow in someone's cloud.
@@ -186,11 +253,38 @@ export default function MyComponent({ styles }) {
 }
 ```
 
-### Options
+You can also use the experimental hook:
 
-#### `pureComponent` (default: `false`, React 15.3.0+)
+```jsx
+import React from 'react';
+import useStyles from 'react-with-styles/lib/hooks/useStyles';
 
-By default `withStyles()` will create a component that extends `React.Component`. If you want to apply the `shouldComponentUpdate()` optimization offered by `React.PureComponent`, you can set the `pureComponent` option to `true`. Note that [`React.PureComponent` was introduced in React 15.3.0](https://github.com/facebook/react/blob/master/CHANGELOG.md#1530-july-29-2016), so this will only work if you are using that version or later.
+function stylesFn({ color, unit }) {
+  return ({
+    container: {
+      color: color.primary,
+      marginBottom: 2 * unit,
+    },
+  });
+}
+
+export default function MyComponent() {
+  const { css, styles } = useStyles({ stylesFn });
+  return (
+    <div {...css(styles.container)}>
+      Try to be a rainbow in someone's cloud.
+    </div>
+  );
+}
+```
+
+#### Options
+
+##### `pureComponent` (default: `false`)
+
+By default `withStyles()` will create a functional component. If you want to apply the rendering optimizations offered by `React.memo`, you can set the `pureComponent` option to `true` to create a pure functional component instead.
+
+If using the `withStyles` utility that is found in `lib/deprecated/withStyles`, it will instead use a `React.PureComponent` rather than a `React.Component`. Note that this has a React version requirement of 15.3.0+.
 
 #### `stylesPropName` (default: `'styles'`)
 
@@ -198,15 +292,19 @@ By default, `withStyles()` will pass down the styles to the wrapped component in
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { withStyles, withStylesPropTypes } from './withStyles';
 
-function MyComponent({ withStylesStyles }) {
+function MyComponent({ withStylesStyles, css }) {
   return (
     <div {...css(withStylesStyles.container)}>
       Try to be a rainbow in someone's cloud.
     </div>
   );
 }
+
+MyComponent.propTypes = {
+  ...withStylesPropTypes,
+};
 
 export default withStyles(({ color, unit }) => ({
   container: {
@@ -216,15 +314,43 @@ export default withStyles(({ color, unit }) => ({
 }), { stylesPropName: 'withStylesStyles' })(MyComponent);
 ```
 
-#### `themePropName` (default `'theme'`)
+##### `cssPropName` (default `'css'`)
 
-Likewise, the theme prop name can also be customized by setting the `themePropName` option.
+The css prop name can also be customized by setting the `cssPropName` option.
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { withStyles, withStylesPropTypes } from './withStyles';
 
-function MyComponent({ styles, withStylesTheme }) {
+function MyComponent({ withStylesCss, styles }) {
+  return (
+    <div {...withStylesCss(styles.container)}>
+      Try to be a rainbow in someone's cloud.
+    </div>
+  );
+}
+
+MyComponent.propTypes = {
+  ...withStylesPropTypes,
+};
+
+export default withStyles(({ color, unit }) => ({
+  container: {
+    color: color.primary,
+    marginBottom: 2 * unit,
+  },
+}), { cssPropName: 'withStylesCss' })(MyComponent);
+```
+
+##### `themePropName` (default `'theme'`)
+
+The theme prop name can also be customized by setting the `themePropName` option.
+
+```jsx
+import React from 'react';
+import { withStyles, withStylesPropTypes } from './withStyles';
+
+function MyComponent({ css, styles, withStylesTheme }) {
   return (
     <div {...css(styles.container)}>
       <Background color={withStylesTheme.color.primary}>
@@ -234,6 +360,10 @@ function MyComponent({ styles, withStylesTheme }) {
   );
 }
 
+MyComponent.propTypes = {
+  ...withStylesPropTypes,
+};
+
 export default withStyles(({ color, unit }) => ({
   container: {
     color: color.primary,
@@ -242,20 +372,23 @@ export default withStyles(({ color, unit }) => ({
 }), { themePropName: 'withStylesTheme' })(MyComponent);
 ```
 
-#### `flushBefore` (default: `false`)
+##### `flushBefore` (default: `false`)
 
 Some components depend on previous styles to be ready in the component tree when mounting (e.g. dimension calculations). Some interfaces add styles to the page asynchronously, which is an obstacle for this. So, we provide the option of flushing the buffered styles before the rendering cycle begins. It is up to the interface to define what this means.
 
+### `css(...styles)`
 
-## `css(...styles)`
-
-This function takes styles that were processed by `withStyles()`, plain objects, or arrays of these things. It returns an object with an opaque structure that must be spread into a JSX element.
+This function takes styles that were processed by `withStyles()`, plain objects, or arrays of these things. It returns an object with attributes that must be spread into a JSX element. We recommend not inspecting the results and spreading them directly onto the element. In other words `className` and `style` props must not be used on the same elements as `css()`.
 
 ```jsx
 import React from 'react';
-import { css, withStyles } from './withStyles';
+import { withStyles, withStylesPropTypes } from './withStyles';
 
-function MyComponent({ bold, padding, styles }) {
+const propTypes = {
+  ...withStylesPropTypes,
+};
+
+function MyComponent({ css, styles, bold, padding, }) {
   return (
     <div {...css(styles.container, { padding })}>
       Try to be a rainbow in{' '}
@@ -268,6 +401,8 @@ function MyComponent({ bold, padding, styles }) {
     </div>
   );
 }
+
+MyComponent.propTypes = propTypes;
 
 export default withStyles(({ color, unit }) => ({
   container: {
@@ -285,10 +420,44 @@ export default withStyles(({ color, unit }) => ({
 }))(MyComponent);
 ```
 
-`className` and `style` props must not be used on the same elements as `css()`.
+### `ThemedStyleSheet` (legacy)
 
-## Examples
+Registers themes and interfaces.
+
+**⚠️ Deprecation Warning**: `ThemedStyleSheet` is going to be deprecated in the next major version. Please migrate your applications to use `WithStylesContext` to provide the theme and interface to use along with `withStyles` or `useStyles`. In the meantime, you should be able to use both inside your app for a smooth migration. If this is not the case, please file an issue so we can help.
+
+#### `ThemedStyleSheet.registerTheme(theme)` (legacy)
+
+Registers the theme. `theme` is an object with properties that you want to be made available when styling your components.
+
+```js
+import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
+
+ThemedStyleSheet.registerTheme({
+  color: {
+    primary: '#FF5A5F',
+    secondary: '#00A699',
+  },
+});
+```
+
+#### `ThemedStyleSheet.registerInterface(interface)` (legacy)
+
+Instructs react-with-styles how to process your styles.
+
+```js
+import ThemedStyleSheet from 'react-with-styles/lib/ThemedStyleSheet';
+import AphroditeInterface from 'react-with-styles-interface-aphrodite';
+
+ThemedStyleSheet.registerInterface(AphroditeInterface);
+```
+
+---
+
+## Other Examples
+
 ### With React Router's `Link`
+
 [React Router][react-router]'s [`<Link/>`][react-router-link] and [`<IndexLink/>`][react-router-index-link] components accept `activeClassName='...'` and `activeStyle={{...}}` as props. As previously stated, `css(...styles)` must spread to JSX, so simply passing `styles.thing` or even `css(styles.thing)` directly will not work. In order to mimic `activeClassName`/`activeStyles` you can use React Router's [`withRouter()`][react-router-with-router] Higher Order Component to pass `router` as prop to your component and toggle styles based on [`router.isActive(pathOrLoc, indexOnly)`](react-router-is-active). This works because `<Link />` passes down the generated `className` from `css(..styles)` down through to the final leaf.
 
 ```jsx
@@ -330,6 +499,8 @@ export default withRouter(withStyles(({ color, unit }) => ({
   }
 }))(Nav));
 ```
+
+---
 
 ## In the wild
 
