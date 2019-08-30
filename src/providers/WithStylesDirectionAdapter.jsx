@@ -38,12 +38,4 @@ WithStylesDirectionAdapter.propTypes = propTypes;
 WithStylesDirectionAdapter.defaultProps = defaultProps;
 WithStylesDirectionAdapter.contextType = WithStylesContext;
 
-// eslint-disable-next-line no-underscore-dangle
-const _WithStylesDirectionAdapter = withDirection(WithStylesDirectionAdapter);
-
-// Have to remove the contextType the withDirection component hoists because
-// it's using an old version of hoist-non-react-statics that copies it over
-// TODO: remove this once withDirection updates hoist-non-react-statics
-delete _WithStylesDirectionAdapter.contextType;
-
-export default _WithStylesDirectionAdapter;
+export default withDirection(WithStylesDirectionAdapter);
