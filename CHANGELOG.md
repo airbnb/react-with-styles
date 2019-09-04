@@ -1,3 +1,9 @@
+## v4.0.0
+- [breaking] Add @babel/runtime as a peer dependency (because of our dependency on babel-preset-airbnb) (@noratarano, [#229](https://github.com/airbnb/react-with-styles/pull/229))
+- [new] Introduce the `useStyles` hook, which is still experimental. Use if you do not require performance optimizations for themed styles per component. (@noratarano, [#225](https://github.com/airbnb/react-with-styles/pull/225), [#221](https://github.com/airbnb/react-with-styles/pull/221))
+- [new] Refactor `withStyles` to use a context-based implementation, rather than singletons in the `ThemedStyleSheet`. Works in a backward compatible way with the `ThemedStyleSheet` implementation. Note that this may break existing usages of the HOC if a wrapping component  of a component using `withStyles` uses `contextTypes` and hoists `contextType` (usually accidentally). (@noratarano, [#225](https://github.com/airbnb/react-with-styles/pull/225/files), [#221](https://github.com/airbnb/react-with-styles/pull/221))
+- [breaking] Drop support for node 6 (@noratarano, [#219](https://github.com/airbnb/react-with-styles/pull/219))
+
 ## v3.2.3
 - [fix] Add .git to .npmignore
 
