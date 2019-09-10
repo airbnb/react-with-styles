@@ -49,7 +49,7 @@ export function withStyles(
   const BaseClass = pureComponent ? React.PureComponent : React.Component;
 
   /** Cache for storing the result of stylesFn(theme) for all themes. */
-  const stylesFnResultCacheMap = new Map();
+  const stylesFnResultCacheMap = new WeakMap();
 
   // The function that wraps the provided component in a wrapper
   // component that injects the withStyles props
