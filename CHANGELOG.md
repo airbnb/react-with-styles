@@ -1,3 +1,6 @@
+## v4.0.1
+- [fix] Use a WeakMap cache instead of a Map cache to prevent high memory usage (with fallback to Map) (@noratarano, [#230](https:    //github.com/airbnb/react-with-styles/pull/230))
+
 ## v4.0.0
 - [breaking] Add @babel/runtime as a peer dependency (because of our dependency on babel-preset-airbnb) (@noratarano, [#229](https://github.com/airbnb/react-with-styles/pull/229))
 - [new] Introduce the `useStyles` hook, which is still experimental. Use if you do not require performance optimizations for themed styles per component. (@noratarano, [#225](https://github.com/airbnb/react-with-styles/pull/225), [#221](https://github.com/airbnb/react-with-styles/pull/221))
