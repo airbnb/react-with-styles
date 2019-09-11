@@ -109,9 +109,13 @@ export function withStyles(
         // Get and store the result in the stylesFnResultsCache for the component
         // -- not the instance -- so we only apply the theme to the stylesFn
         // once per theme for this component.
-        const cachedResultForTheme = stylesFnResultCacheMap.get(theme);
+        const isClient = typeof window !== 'undefined';
+        const cachedResultForTheme = isClient ? stylesFnResultCacheMap.get(theme) : null;
         const stylesFnResult = cachedResultForTheme || stylesFn(theme) || {};
-        stylesFnResultCacheMap.set(theme, stylesFnResult); // cache the result of stylesFn(theme)
+        if (isClient) {
+          // cache the result of stylesFn(theme)
+          stylesFnResultCacheMap.set(theme, stylesFnResult);
+        }
         return stylesFnResult;
       }
 

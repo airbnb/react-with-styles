@@ -11,6 +11,9 @@ import { describeIfReact } from './ifReactHelpers';
 import WithStylesContext, { DIRECTIONS } from '../src/WithStylesContext';
 import ThemedStyleSheet from '../src/ThemedStyleSheet';
 
+const describeIfClient = typeof window === 'undefined' ? describe.skip : describe;
+const describeIfServer = typeof window === 'undefined' ? describe : describe.skip;
+
 describe('withStyles', () => {
   let testTheme;
   let testInterface;
@@ -463,33 +466,68 @@ describe('withStyles', () => {
         expect(secondInterface.resolveLTR).to.have.property('callCount', 3);
       });
 
-      it('re-calculates stylesFn(theme) at most once per theme', () => {
-        const TestHelper = makeTestHelper();
-        expect(stylesFn).to.have.property('callCount', 0);
-        const wrapper = mount(<TestHelper />);
-        expect(stylesFn).to.have.property('callCount', 1);
-        wrapper.setProps({ stylesTheme: secondTheme });
-        expect(stylesFn).to.have.property('callCount', 2);
-        wrapper.setProps({ stylesTheme: firstTheme });
-        expect(stylesFn).to.have.property('callCount', 2);
-        wrapper.setProps({ stylesTheme: secondTheme });
-        expect(stylesFn).to.have.property('callCount', 2);
-        expect(stylesFn.getCall(0).args[0]).to.equal(firstTheme);
-        expect(stylesFn.getCall(1).args[0]).to.equal(secondTheme);
+      describeIfClient('on the client', () => {
+        it('re-calculates stylesFn(theme) at most once per theme', () => {
+          const TestHelper = makeTestHelper();
+          expect(stylesFn).to.have.property('callCount', 0);
+          const wrapper = mount(<TestHelper />);
+          expect(stylesFn).to.have.property('callCount', 1);
+          wrapper.setProps({ stylesTheme: secondTheme });
+          expect(stylesFn).to.have.property('callCount', 2);
+          wrapper.setProps({ stylesTheme: firstTheme });
+          expect(stylesFn).to.have.property('callCount', 2);
+          wrapper.setProps({ stylesTheme: secondTheme });
+          expect(stylesFn).to.have.property('callCount', 2);
+          expect(stylesFn.getCall(0).args[0]).to.equal(firstTheme);
+          expect(stylesFn.getCall(1).args[0]).to.equal(secondTheme);
+        });
+
+        it('re-calculates stylesFn(theme) per component per theme', () => {
+          const TestHelper = makeTestHelper();
+          expect(stylesFn).to.have.property('callCount', 0);
+          const wrapper = mount(
+            <div>
+              <TestHelper />
+              <TestHelper />
+              <TestHelper />
+              <TestHelper />
+            </div>,
+          );
+          expect(stylesFn).to.have.property('callCount', 1);
+        });
       });
 
-      it('re-calculates stylesFn(theme) per component per theme', () => {
-        const TestHelper = makeTestHelper();
-        expect(stylesFn).to.have.property('callCount', 0);
-        const wrapper = mount(
-          <div>
-            <TestHelper />
-            <TestHelper />
-            <TestHelper />
-            <TestHelper />
-          </div>,
-        );
-        expect(stylesFn).to.have.property('callCount', 1);
+      describeIfServer('on the server', () => {
+        it('re-calculates stylesFn(theme) on every render', () => {
+          const TestHelper = makeTestHelper();
+          expect(stylesFn).to.have.property('callCount', 0);
+          const wrapper = mount(<TestHelper />);
+          expect(stylesFn).to.have.property('callCount', 1);
+          wrapper.setProps({ stylesTheme: secondTheme });
+          expect(stylesFn).to.have.property('callCount', 2);
+          wrapper.setProps({ stylesTheme: firstTheme });
+          expect(stylesFn).to.have.property('callCount', 3);
+          wrapper.setProps({ stylesTheme: secondTheme });
+          expect(stylesFn).to.have.property('callCount', 4);
+          expect(stylesFn.getCall(0).args[0]).to.equal(firstTheme);
+          expect(stylesFn.getCall(1).args[0]).to.equal(secondTheme);
+          expect(stylesFn.getCall(3).args[0]).to.equal(firstTheme);
+          expect(stylesFn.getCall(4).args[0]).to.equal(secondTheme);
+        });
+
+        it('re-calculates stylesFn(theme) per component', () => {
+          const TestHelper = makeTestHelper();
+          expect(stylesFn).to.have.property('callCount', 0);
+          const wrapper = mount(
+            <div>
+              <TestHelper />
+              <TestHelper />
+              <TestHelper />
+              <TestHelper />
+            </div>,
+          );
+          expect(stylesFn).to.have.property('callCount', 4);
+        });
       });
     });
 
