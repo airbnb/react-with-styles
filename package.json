@@ -65,7 +65,7 @@
     "eslint-plugin-react": "^7.14.3",
     "eslint-plugin-react-hooks": "^1.7.0",
     "in-publish": "^2.0.0",
-    "jsdom": "^14.1.0",
+    "jsdom": "^15.2.0",
     "jsdom-global": "3.0.2",
     "mocha": "^5.2.0",
     "react": "^16.8.6",
