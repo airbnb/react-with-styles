@@ -51,6 +51,40 @@ export function withStyles(
   /** Cache for storing the result of stylesFn(theme) for all themes. */
   const stylesFnResultCacheMap = typeof WeakMap === 'undefined' ? new Map() : new WeakMap();
 
+  /** Cache for storing the results of computations, theme -> WithStyles -> direction -> results */
+  const withStylesCache = new Map();
+
+  function getComponentCache(theme, component) {
+    const themeCache = withStylesCache.get(theme);
+    if (!themeCache) {
+      return null;
+    }
+    const componentCache = themeCache.get(component);
+    if (!componentCache) {
+      return null;
+    }
+    return componentCache;
+  }
+
+  function getOrCreateComponentCache(theme, component) {
+    let themeCache = withStylesCache.get(theme);
+    if (!themeCache) {
+      themeCache = new Map();
+      withStylesCache.set(theme, themeCache);
+    }
+    let componentCache = themeCache.get(component);
+    if (!componentCache) {
+      componentCache = { rtl: {}, ltr: {} };
+      themeCache.set(component, componentCache);
+    }
+    return componentCache;
+  }
+
+  function updateComponentCache(theme, component, direction, results) {
+    const componentCache = getOrCreateComponentCache(theme, component);
+    componentCache[direction] = results;
+  }
+
   // The function that wraps the provided component in a wrapper
   // component that injects the withStyles props
   return function withStylesHOC(WrappedComponent) {
@@ -58,21 +92,6 @@ export function withStyles(
 
     // The wrapper component that injects the withStyles props
     class WithStyles extends BaseClass {
-      constructor(props, context) {
-        super(props, context);
-
-        /** Cache for storing the current props and objects used to derive them */
-        this.cache = { rtl: {}, ltr: {} };
-      }
-
-      getCache(direction) {
-        return this.cache[direction];
-      }
-
-      updateCache(direction, results) {
-        this.cache[direction] = results;
-      }
-
       getCurrentInterface() {
         // Fallback to the singleton implementation
         return (this.context && this.context.stylesInterface) || _getInterface();
@@ -126,17 +145,19 @@ export function withStyles(
         // styles or any other interface derivations. They are effectively only calculated
         // once per direction, until the theme or interface change.
         // Assume: always an object.
-        const cache = this.getCache(direction);
+        const componentCache = getComponentCache(theme, WithStyles);
+        const directionCache = componentCache ? componentCache[direction] : null;
 
         // Determine what's changed
-        const interfaceChanged = !cache.stylesInterface
-          || (stylesInterface && cache.stylesInterface !== stylesInterface);
-        const themeChanged = cache.theme !== theme;
+        const interfaceChanged = !directionCache
+          || !directionCache.stylesInterface
+          || (stylesInterface && directionCache.stylesInterface !== stylesInterface);
+        const themeChanged = !directionCache || directionCache.theme !== theme;
 
         // If the interface and theme haven't changed for this direction,
         // we return the cached props immediately.
         if (!interfaceChanged && !themeChanged) {
-          return cache.props;
+          return directionCache.props;
         }
 
         // If the theme or the interface changed, then there are some values
@@ -144,25 +165,24 @@ export function withStyles(
         // calculated in the past if the objects they're derived from have not
         // changed.
         const create = (interfaceChanged && this.makeCreate(direction, stylesInterface))
-          || cache.create;
+          || directionCache.create;
         const resolve = (interfaceChanged && this.makeResolve(direction, stylesInterface))
-          || cache.resolve;
+          || directionCache.resolve;
         // Derive the css function prop
-        const css = (interfaceChanged && ((...args) => resolve(args))) || cache.props.css;
+        const css = (interfaceChanged && ((...args) => resolve(args))) || directionCache.props.css;
         // Get or calculate the themed styles from the stylesFn:
         // Uses a separate cache at the component level, not at the instance level,
         // to only apply the theme to the stylesFn once per component class per theme.
         const stylesFnResult = this.stylesFnResult(theme);
         // Derive the styles prop: recalculate it if create changed, or stylesFnResult changed
-        const styles = (
-          ((interfaceChanged || stylesFnResult !== cache.stylesFnResult) && create(stylesFnResult))
-            || cache.props.styles
-        );
+        const styles = ((interfaceChanged || stylesFnResult !== directionCache.stylesFnResult)
+            && create(stylesFnResult))
+          || directionCache.props.styles;
         // Put the new props together
         const props = { css, styles, theme };
 
         // Update the cache with all the new values
-        this.updateCache(direction, {
+        updateComponentCache(theme, WithStyles, direction, {
           stylesInterface,
           theme,
           create,
@@ -226,7 +246,7 @@ export function withStyles(
 export default withStyles;
 
 /**
-* Deprecated: Do not use directly. Please wrap your component in `withStyles` and use the `css`
-* prop injected via props instead.
-*/
+ * Deprecated: Do not use directly. Please wrap your component in `withStyles` and use the `css`
+ * prop injected via props instead.
+ */
 export const css = ThemedStyleSheet.resolveLTR;
