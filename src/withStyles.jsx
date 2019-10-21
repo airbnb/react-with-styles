@@ -124,9 +124,7 @@ export function withStyles(
     class WithStyles extends BaseClass {
       getCurrentInterface() {
         // Fallback to the singleton implementation
-        return (
-          (this.context && this.context.stylesInterface) || _getInterface()
-        );
+        return (this.context && this.context.stylesInterface) || _getInterface();
       }
 
       getCurrentTheme() {
