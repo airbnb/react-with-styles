@@ -1,3 +1,6 @@
+## v4.1.0
+- [new][performance] Cache by the resulting `WithStyles` HOC (@noratarano, [#234](https://github.com/airbnb/react-with-styles/pull/234))
+
 ## v4.0.1
 - [fix] Use a WeakMap cache instead of a Map cache to prevent high memory usage (with fallback to Map) (@noratarano, [#230](https:    //github.com/airbnb/react-with-styles/pull/230))
 
