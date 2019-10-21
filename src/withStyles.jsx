@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign, no-func-assign, class-methods-use-this */
+/* eslint-disable no-param-reassign */
 
 import React from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
@@ -51,6 +51,70 @@ export function withStyles(
   /** Cache for storing the result of stylesFn(theme) for all themes. */
   const stylesFnResultCacheMap = typeof WeakMap === 'undefined' ? new Map() : new WeakMap();
 
+  function getOrCreateStylesFnResultCache(theme) {
+    // Get and store the result in the stylesFnResultsCache for the component
+    // -- not the instance -- so we only apply the theme to the stylesFn
+    // once per theme for this component.
+    const cachedResultForTheme = stylesFnResultCacheMap.get(theme);
+    const stylesFnResult = cachedResultForTheme || stylesFn(theme) || {};
+    stylesFnResultCacheMap.set(theme, stylesFnResult); // cache the result of stylesFn(theme)
+    return stylesFnResult;
+  }
+
+  /**
+   * Cache for storing the results of computations:
+   * `WeakMap<Theme, WeakMap<typeof WithStyles, { ltr: {}, rtl: {} }>>`
+   * Falling back to `Map` whenever `WeakMap` is not supported
+   */
+  const withStylesCache = typeof WeakMap === 'undefined' ? new Map() : new WeakMap();
+
+  function getComponentCache(theme, component, direction) {
+    const themeCache = withStylesCache.get(theme);
+    if (!themeCache) {
+      return null;
+    }
+    const componentCache = themeCache.get(component);
+    if (!componentCache) {
+      return null;
+    }
+    return componentCache[direction];
+  }
+
+  function updateComponentCache(theme, component, direction, results) {
+    let themeCache = withStylesCache.get(theme);
+    if (!themeCache) {
+      themeCache = typeof WeakMap === 'undefined' ? new Map() : new WeakMap();
+      withStylesCache.set(theme, themeCache);
+    }
+    let componentCache = themeCache.get(component);
+    if (!componentCache) {
+      componentCache = { ltr: {}, rtl: {} };
+      themeCache.set(component, componentCache);
+    }
+
+    componentCache[direction] = results;
+  }
+
+  /** Derive the create function from the interface and direction */
+  function makeCreateFn(direction, stylesInterface) {
+    const directionSelector = direction === DIRECTIONS.RTL ? 'RTL' : 'LTR';
+    let create = stylesInterface[`create${directionSelector}`] || stylesInterface.create;
+    if (process.env.NODE_ENV !== 'production') {
+      create = withPerf('create')(create);
+    }
+    return create;
+  }
+
+  /** Derive the resolve function from the interface and direction */
+  function makeResolveFn(direction, stylesInterface) {
+    const directionSelector = direction === DIRECTIONS.RTL ? 'RTL' : 'LTR';
+    let resolve = stylesInterface[`resolve${directionSelector}`] || stylesInterface.resolve;
+    if (process.env.NODE_ENV !== 'production') {
+      resolve = withPerf('resolve')(resolve);
+    }
+    return resolve;
+  }
+
   // The function that wraps the provided component in a wrapper
   // component that injects the withStyles props
   return function withStylesHOC(WrappedComponent) {
@@ -58,21 +122,6 @@ export function withStyles(
 
     // The wrapper component that injects the withStyles props
     class WithStyles extends BaseClass {
-      constructor(props, context) {
-        super(props, context);
-
-        /** Cache for storing the current props and objects used to derive them */
-        this.cache = { rtl: {}, ltr: {} };
-      }
-
-      getCache(direction) {
-        return this.cache[direction];
-      }
-
-      updateCache(direction, results) {
-        this.cache[direction] = results;
-      }
-
       getCurrentInterface() {
         // Fallback to the singleton implementation
         return (this.context && this.context.stylesInterface) || _getInterface();
@@ -87,34 +136,6 @@ export function withStyles(
         return (this.context && this.context.direction) || DIRECTIONS.LTR;
       }
 
-      makeCreate(direction, stylesInterface) {
-        const directionSelector = direction === DIRECTIONS.RTL ? 'RTL' : 'LTR';
-        let create = stylesInterface[`create${directionSelector}`] || stylesInterface.create;
-        if (process.env.NODE_ENV !== 'production') {
-          create = withPerf('create')(create);
-        }
-        return create;
-      }
-
-      makeResolve(direction, stylesInterface) {
-        const directionSelector = direction === DIRECTIONS.RTL ? 'RTL' : 'LTR';
-        let resolve = stylesInterface[`resolve${directionSelector}`] || stylesInterface.resolve;
-        if (process.env.NODE_ENV !== 'production') {
-          resolve = withPerf('resolve')(resolve);
-        }
-        return resolve;
-      }
-
-      stylesFnResult(theme) {
-        // Get and store the result in the stylesFnResultsCache for the component
-        // -- not the instance -- so we only apply the theme to the stylesFn
-        // once per theme for this component.
-        const cachedResultForTheme = stylesFnResultCacheMap.get(theme);
-        const stylesFnResult = cachedResultForTheme || stylesFn(theme) || {};
-        stylesFnResultCacheMap.set(theme, stylesFnResult); // cache the result of stylesFn(theme)
-        return stylesFnResult;
-      }
-
       getProps() {
         // Get the styles interface, theme, and direction from context
         const stylesInterface = this.getCurrentInterface();
@@ -126,43 +147,44 @@ export function withStyles(
         // styles or any other interface derivations. They are effectively only calculated
         // once per direction, until the theme or interface change.
         // Assume: always an object.
-        const cache = this.getCache(direction);
+        const componentCache = getComponentCache(theme, WithStyles, direction);
 
         // Determine what's changed
-        const interfaceChanged = !cache.stylesInterface
-          || (stylesInterface && cache.stylesInterface !== stylesInterface);
-        const themeChanged = cache.theme !== theme;
+        const interfaceChanged = !componentCache
+          || !componentCache.stylesInterface
+          || (stylesInterface && componentCache.stylesInterface !== stylesInterface);
+        const themeChanged = !componentCache || componentCache.theme !== theme;
 
         // If the interface and theme haven't changed for this direction,
         // we return the cached props immediately.
         if (!interfaceChanged && !themeChanged) {
-          return cache.props;
+          return componentCache.props;
         }
 
         // If the theme or the interface changed, then there are some values
         // we need to recalculate. We avoid recalculating the ones we already
         // calculated in the past if the objects they're derived from have not
         // changed.
-        const create = (interfaceChanged && this.makeCreate(direction, stylesInterface))
-          || cache.create;
-        const resolve = (interfaceChanged && this.makeResolve(direction, stylesInterface))
-          || cache.resolve;
+        const create = (interfaceChanged && makeCreateFn(direction, stylesInterface))
+          || componentCache.create;
+        const resolve = (interfaceChanged && makeResolveFn(direction, stylesInterface))
+          || componentCache.resolve;
         // Derive the css function prop
-        const css = (interfaceChanged && ((...args) => resolve(args))) || cache.props.css;
+        const css = (interfaceChanged && ((...args) => resolve(args)))
+          || componentCache.props.css;
         // Get or calculate the themed styles from the stylesFn:
         // Uses a separate cache at the component level, not at the instance level,
         // to only apply the theme to the stylesFn once per component class per theme.
-        const stylesFnResult = this.stylesFnResult(theme);
+        const stylesFnResult = getOrCreateStylesFnResultCache(theme);
         // Derive the styles prop: recalculate it if create changed, or stylesFnResult changed
-        const styles = (
-          ((interfaceChanged || stylesFnResult !== cache.stylesFnResult) && create(stylesFnResult))
-            || cache.props.styles
-        );
+        const styles = ((interfaceChanged || stylesFnResult !== componentCache.stylesFnResult)
+          && create(stylesFnResult))
+          || componentCache.props.styles;
         // Put the new props together
         const props = { css, styles, theme };
 
         // Update the cache with all the new values
-        this.updateCache(direction, {
+        updateComponentCache(theme, WithStyles, direction, {
           stylesInterface,
           theme,
           create,
@@ -226,7 +248,7 @@ export function withStyles(
 export default withStyles;
 
 /**
-* Deprecated: Do not use directly. Please wrap your component in `withStyles` and use the `css`
-* prop injected via props instead.
-*/
+ * Deprecated: Do not use directly. Please wrap your component in `withStyles` and use the `css`
+ * prop injected via props instead.
+ */
 export const css = ThemedStyleSheet.resolveLTR;
