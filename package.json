@@ -50,7 +50,7 @@
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.0",
     "@babel/register": "^7.7.0",
-    "@babel/runtime": "^7.0.0",
+    "@babel/runtime": "^7.7.1",
     "airbnb-js-shims": "^2.2.0",
     "babel-plugin-transform-replace-object-assign": "^2.0.0",
     "babel-preset-airbnb": "^4.0.1",
