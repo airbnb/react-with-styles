@@ -142,6 +142,18 @@ describe('withStyles', () => {
       expect(StyledComponent.defaultProps).to.have.keys('foo');
     });
 
+    it('forwards refs through to the wrapped component', () => {
+      const stylesFn = sinon.stub().callsFake(() => ({}));
+      const MockComponent = React.forwardRef((props, forwardedRef) => (
+        <div ref={forwardedRef} />
+      ));
+      const StyledComponent = withStyles(stylesFn)(MockComponent);
+      const ref = React.createRef();
+      const wrapper = mountWithProviders(<StyledComponent ref={ref} />, providers);
+      const div = wrapper.find('div').first().getDOMNode();
+      expect(div).to.equal(ref.current);
+    });
+
     describe('rendering without options (standard behavior)', () => {
       it('passes the theme to the stylesFn', () => {
         const stylesFn = sinon.stub().callsFake(() => ({}));
@@ -627,7 +639,8 @@ describe('withStyles', () => {
         const MockComponent = ({ styles, css }) => <div {...css(styles.primary)} />;
         MockComponent.propTypes = { ...withStylesPropTypes };
         const StyledComponent = withStyles(stylesFn)(MockComponent);
-        const wrapper = shallow(<StyledComponent />);
+        // dive() needed here to access the component wrapped by React.forwardRef
+        const wrapper = shallow(<StyledComponent />).dive();
         expect(stylesFn.calledWith(testTheme)).to.equal(true);
         expect(wrapper.find(MockComponent).props()).to.have.property('theme', testTheme);
       });

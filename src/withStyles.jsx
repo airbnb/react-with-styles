@@ -228,9 +228,12 @@ export function withStyles(
           this.flush();
         }
 
+        const { forwardedRef, ...rest } = this.props;
+
         return (
           <WrappedComponent
-            {...this.props}
+            ref={forwardedRef}
+            {...rest}
             {...{
               [themePropName]: theme,
               [stylesPropName]: styles,
@@ -241,20 +244,25 @@ export function withStyles(
       }
     }
 
+    const ForwardedWithStyles = React.forwardRef((props, ref) => (
+      <WithStyles {...props} forwardedRef={ref} />
+    ));
+
     // Copy the wrapped component's prop types and default props on WithStyles
     if (WrappedComponent.propTypes) {
-      WithStyles.propTypes = { ...WrappedComponent.propTypes };
-      delete WithStyles.propTypes[stylesPropName];
-      delete WithStyles.propTypes[themePropName];
-      delete WithStyles.propTypes[cssPropName];
+      ForwardedWithStyles.propTypes = { ...WrappedComponent.propTypes };
+      delete ForwardedWithStyles.propTypes[stylesPropName];
+      delete ForwardedWithStyles.propTypes[themePropName];
+      delete ForwardedWithStyles.propTypes[cssPropName];
     }
     if (WrappedComponent.defaultProps) {
-      WithStyles.defaultProps = { ...WrappedComponent.defaultProps };
+      ForwardedWithStyles.defaultProps = { ...WrappedComponent.defaultProps };
     }
     WithStyles.contextType = WithStylesContext;
-    WithStyles.WrappedComponent = WrappedComponent;
-    WithStyles.displayName = `withStyles(${wrappedComponentName})`;
-    return hoistNonReactStatics(WithStyles, WrappedComponent);
+    ForwardedWithStyles.WrappedComponent = WrappedComponent;
+    ForwardedWithStyles.displayName = `withStyles(${wrappedComponentName})`;
+
+    return hoistNonReactStatics(ForwardedWithStyles, WrappedComponent);
   };
 }
 
