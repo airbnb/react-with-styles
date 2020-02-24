@@ -3,6 +3,7 @@
 import React from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import getComponentName from 'airbnb-prop-types/build/helpers/getComponentName';
+import ref from 'airbnb-prop-types/build/ref';
 
 import EMPTY_STYLES_FN from './utils/emptyStylesFn';
 import withPerf from './utils/perf';
@@ -232,8 +233,10 @@ export function withStyles(
 
         return (
           <WrappedComponent
-            ref={forwardedRef}
-            {...rest}
+            // TODO: remove conditional once breaking change to only support React 16.3+
+            // ref: https://github.com/airbnb/react-with-styles/pull/240#discussion_r533497857
+            ref={typeof React.forwardRef === 'undefined' ? undefined : forwardedRef}
+            {...(typeof React.forwardRef === 'undefined' ? this.props : rest)}
             {...{
               [themePropName]: theme,
               [stylesPropName]: styles,
@@ -244,9 +247,21 @@ export function withStyles(
       }
     }
 
-    const ForwardedWithStyles = React.forwardRef((props, ref) => (
-      <WithStyles {...props} forwardedRef={ref} />
-    ));
+    // TODO: remove conditional once breaking change to only support React 16.3+
+    // ref: https://github.com/airbnb/react-with-styles/pull/240#discussion_r533497857
+    if (typeof React.forwardRef !== 'undefined') {
+      WithStyles.propTypes = {
+        forwardedRef: ref(),
+      };
+    }
+
+    // TODO: remove conditional once breaking change to only support React 16.3+
+    // ref: https://github.com/airbnb/react-with-styles/pull/240#discussion_r533497857
+    const ForwardedWithStyles = typeof React.forwardRef === 'undefined'
+      ? WithStyles
+      : React.forwardRef((props, forwardedRef) => (
+        <WithStyles {...props} forwardedRef={forwardedRef} />
+      ));
 
     // Copy the wrapped component's prop types and default props on WithStyles
     if (WrappedComponent.propTypes) {
