@@ -103,8 +103,7 @@ export function withStyles(
     if (process.env.NODE_ENV !== 'production') {
       create = withPerf('create')(create);
     }
-    create.original = original;
-    return create;
+    return { create, original };
   }
 
   /** Derive the resolve function from the interface and direction */
@@ -115,8 +114,7 @@ export function withStyles(
     if (process.env.NODE_ENV !== 'production') {
       resolve = withPerf('resolve')(resolve);
     }
-    resolve.original = original;
-    return resolve;
+    return { resolve, original };
   }
 
   // The function that wraps the provided component in a wrapper
@@ -169,17 +167,20 @@ export function withStyles(
         // we need to recalculate. We avoid recalculating the ones we already
         // calculated in the past if the objects they're derived from have not
         // changed.
-        const create = (interfaceChanged && makeCreateFn(direction, stylesInterface))
+        const createFn = (interfaceChanged && makeCreateFn(direction, stylesInterface))
           || componentCache.create;
-        const resolve = (interfaceChanged && makeResolveFn(direction, stylesInterface))
+        const resolveFn = (interfaceChanged && makeResolveFn(direction, stylesInterface))
           || componentCache.resolve;
+
+        const { create } = createFn;
+        const { resolve } = resolveFn;
 
         // Determine if create or resolve functions have changed, which will then
         // determine if we need to create new styles or css props
         const createChanged = !componentCache || !componentCache.create
-          || create.original !== componentCache.create.original;
+          || createFn.original !== componentCache.create.original;
         const resolveChanged = !componentCache || !componentCache.resolve
-          || resolve.original !== componentCache.resolve.original;
+          || resolveFn.original !== componentCache.resolve.original;
 
         // Derive the css function prop: recalculate it if resolve changed
         const css = (resolveChanged && ((...args) => resolve(args)))
@@ -199,8 +200,8 @@ export function withStyles(
         updateComponentCache(theme, WithStyles, direction, {
           stylesInterface,
           theme,
-          create,
-          resolve,
+          create: createFn,
+          resolve: resolveFn,
           stylesFnResult,
           props,
         });
