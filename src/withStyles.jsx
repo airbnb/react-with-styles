@@ -99,9 +99,11 @@ export function withStyles(
   function makeCreateFn(direction, stylesInterface) {
     const directionSelector = direction === DIRECTIONS.RTL ? 'RTL' : 'LTR';
     let create = stylesInterface[`create${directionSelector}`] || stylesInterface.create;
+    const original = create;
     if (process.env.NODE_ENV !== 'production') {
       create = withPerf('create')(create);
     }
+    create.original = original;
     return create;
   }
 
@@ -109,9 +111,11 @@ export function withStyles(
   function makeResolveFn(direction, stylesInterface) {
     const directionSelector = direction === DIRECTIONS.RTL ? 'RTL' : 'LTR';
     let resolve = stylesInterface[`resolve${directionSelector}`] || stylesInterface.resolve;
+    const original = resolve;
     if (process.env.NODE_ENV !== 'production') {
       resolve = withPerf('resolve')(resolve);
     }
+    resolve.original = original;
     return resolve;
   }
 
@@ -169,15 +173,23 @@ export function withStyles(
           || componentCache.create;
         const resolve = (interfaceChanged && makeResolveFn(direction, stylesInterface))
           || componentCache.resolve;
-        // Derive the css function prop
-        const css = (interfaceChanged && ((...args) => resolve(args)))
+
+        // Determine if create or resolve functions have changed, which will then
+        // determine if we need to create new styles or css props
+        const createChanged = !componentCache || !componentCache.create
+          || create.original !== componentCache.create.original;
+        const resolveChanged = !componentCache || !componentCache.resolve
+          || resolve.original !== componentCache.resolve.original;
+
+        // Derive the css function prop: recalculate it if resolve changed
+        const css = (resolveChanged && ((...args) => resolve(args)))
           || componentCache.props.css;
         // Get or calculate the themed styles from the stylesFn:
         // Uses a separate cache at the component level, not at the instance level,
         // to only apply the theme to the stylesFn once per component class per theme.
         const stylesFnResult = getOrCreateStylesFnResultCache(theme);
         // Derive the styles prop: recalculate it if create changed, or stylesFnResult changed
-        const styles = ((interfaceChanged || stylesFnResult !== componentCache.stylesFnResult)
+        const styles = ((createChanged || stylesFnResult !== componentCache.stylesFnResult)
           && create(stylesFnResult))
           || componentCache.props.styles;
         // Put the new props together

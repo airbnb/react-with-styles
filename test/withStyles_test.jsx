@@ -390,6 +390,7 @@ describe('withStyles', () => {
           primary: false,
         };
 
+        TestHelper.MockComponent = MockComponent;
         return TestHelper;
       }
 
@@ -490,6 +491,62 @@ describe('withStyles', () => {
           </div>,
         );
         expect(stylesFn).to.have.property('callCount', 1);
+      });
+
+      describe('create/resolve change detection', () => {
+        let thirdInterface;
+
+        beforeEach(() => {
+          const {
+            resolve, resolveRTL, resolveLTR, create, createRTL, createLTR,
+          } = mockInterface();
+          secondInterface = {
+            ...firstInterface,
+            // non-identical resolve functions
+            resolve,
+            resolveRTL,
+            resolveLTR,
+          };
+          thirdInterface = {
+            ...firstInterface,
+            // non-identical create functions
+            create,
+            createRTL,
+            createLTR,
+          };
+        });
+
+        it('does not create a new css prop if interface changes but the resolve functions dont\'t', () => {
+          const TestHelper = makeTestHelper();
+          const wrapper = mount(<TestHelper />);
+
+          const css = wrapper.find(TestHelper.MockComponent).prop('css');
+
+          // css prop should remain the same
+          wrapper.setProps({ stylesInterface: thirdInterface });
+          expect(wrapper.find(TestHelper.MockComponent).prop('css')).to.equal(css);
+
+          // css prop should now be different
+          wrapper.setProps({ stylesInterface: secondInterface });
+          expect(wrapper.find(TestHelper.MockComponent).prop('css')).not.to.equal(css);
+        });
+
+        it('does not create re-create stylesheets if interface changes but the create functions don\'t', () => {
+          const TestHelper = makeTestHelper();
+          const wrapper = mount(<TestHelper direction="ltr" />);
+
+          expect(secondInterface.createLTR).to.have.property('callCount', 1);
+          secondInterface.createLTR.resetHistory(); // reset spy count
+          expect(secondInterface.createLTR).to.have.property('callCount', 0);
+
+          // create is the same, so it shouldn't be called
+          wrapper.setProps({ stylesInterface: secondInterface });
+          expect(secondInterface.createLTR).to.have.property('callCount', 0);
+
+          // create is different, so it should be called
+          wrapper.setProps({ stylesInterface: thirdInterface });
+          expect(thirdInterface.createLTR).to.have.property('callCount', 1);
+        });
       });
     });
 
