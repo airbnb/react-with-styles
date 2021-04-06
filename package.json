@@ -3,6 +3,15 @@
   "version": "4.2.0",
   "description": "",
   "main": "lib/withStyles.js",
+  "exports": {
+    ".": [
+      {
+        "default": "./lib/withStyles.js"
+      },
+      "./lib/withStyles.js"
+    ],
+    "./package.json": "./package.json"
+  },
   "directories": {
     "test": "test"
   },
