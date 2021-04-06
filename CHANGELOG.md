@@ -1,3 +1,6 @@
+## v5.0.0
+- [breaking] [deps] Update peer deps to React 16.3+. (@indiesquidge, [#246](https://github.com/airbnb/react-with-styles/pull/246))
+
 ## v4.2.0
 - [new] update `withStyles` to forward ref to inner component (@indiesquidge, [#240](https://github.com/airbnb/react-with-styles/pull/240))
 
