@@ -1,3 +1,6 @@
+## v4.2.0
+- [new] update `withStyles` to forward ref to inner component (@indiesquidge, [#240](https://github.com/airbnb/react-with-styles/pull/240))
+
 ## v4.1.0
 - [new][performance] Cache by the resulting `WithStyles` HOC (@noratarano, [#234](https://github.com/airbnb/react-with-styles/pull/234))
 
