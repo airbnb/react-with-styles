@@ -420,6 +420,41 @@ export default withStyles(({ color, unit }) => ({
 }))(MyComponent);
 ```
 
+### Accessing your wrapped component with a ref
+
+React 16.3 introduced the ability to pass along refs with the [`React.forwardRef`][react-forward-ref]
+helper, allowing you to write code like this.
+
+```jsx
+const MyComponent = React.forwardRef(
+  function MyComponent({ css, styles }, forwardedRef) {
+    return (
+      <div {...css(styles.container)} ref={forwardedRef}>
+        Hello, World
+      </div>
+    );
+  }
+);
+```
+
+Refs will not get passed through HOCs by default because `ref` is not a prop. If
+you add a ref to an HOC, the ref will refer to the outermost container component,
+which is usually not desired. `withStyles` is set up to pass along your ref to
+the wrapped component.
+
+```jsx
+const MyComponentWithStyles = withStyles(({ color, unit }) => ({
+  container: {
+    color: color.primary,
+    marginBottom: 2 * unit,
+  },
+}))(MyComponent);
+
+// the ref will be passed down to MyComponent, which is then attached to the div
+const ref = React.createRef()
+<MyComponentWithStyles ref={ref} />
+```
+
 ### `ThemedStyleSheet` (legacy)
 
 Registers themes and interfaces.
@@ -522,6 +557,7 @@ export default withRouter(withStyles(({ color, unit }) => ({
 
 [aphrodite]: https://github.com/khan/aphrodite
 [radium]: https://formidable.com/open-source/radium/
+[react-forward-ref]: https://reactjs.org/docs/forwarding-refs.html
 [react-native]: https://facebook.github.io/react-native/
 [react-router]: https://github.com/reactjs/react-router
 [react-router-link]: https://github.com/reactjs/react-router/blob/master/docs/API.md#link
