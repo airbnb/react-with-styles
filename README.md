@@ -45,7 +45,7 @@ export default {
 
 ### Step 2. Choose an interface
 
-You will need to choose the `react-with-styles` interface that corresponds to the underlying CSS-in-JS framework that you use in your app. Take a look through the list of [existing interfaces](#interfaces), or write your own!
+You will need to choose the `react-with-styles` interface that corresponds to the underlying CSS-in-JS framework that you use in your app. Look through the list of [existing interfaces](#interfaces), or write your own!
 
 If you choose to write your own, the interface must implement the following functions:
 
@@ -90,7 +90,7 @@ export default function Bootstrap({ direction }) {
 }
 ```
 
-To support your users in an RTL context, we recommend using `react-with-styles` along with [`react-with-direction`](https://github.com/airbnb/react-with-direction). You can provide the direction directly if you have a utility that determines it like in the example above, or you can use the provided utility, `WithStylesDirectionAdapter`, to grab the direction that's already been set on the `react-with-direction` context and amend `WithStylesContext` with it.
+To support people using a right-to-left (RTL) context, we recommend using `react-with-styles` along with [`react-with-direction`](https://github.com/airbnb/react-with-direction). You can provide the direction directly if you have a utility that determines it like in the example above, or you can use the provided utility, `WithStylesDirectionAdapter`, to grab the direction that's already been set on the `react-with-direction` context and amend `WithStylesContext` with it.
 
 ```jsx
 import React from 'react';
@@ -205,8 +205,8 @@ This is a higher-order function that returns a higher-order component used to wr
 The wrapped component will receive the following props:
 
 1. `styles` - Object containing the processed styles for this component. It corresponds to evaluating `stylesInterface.create(stylesThunk(theme))` (or their directional counterparts).
-2. `css` - Function to produce props to set the styles with on an element. It corresponds to `stylesInterface.resolve` (or their directional counterparts).
-3. `theme` - This is the theme object that was registered. You can use it during render as needed, say for inline styles.
+1. `css` - Function to produce props to set the styles with on an element. It corresponds to `stylesInterface.resolve` (or their directional counterparts).
+1. `theme` - This is the theme object that was registered. You can use it during render as needed, say for inline styles.
 
 #### Example usage
 
