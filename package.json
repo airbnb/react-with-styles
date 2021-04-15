@@ -29,7 +29,7 @@
     "preversion": "npm run test && npm run check-changelog && npm run check-only-changelog-changed",
     "tag": "git tag v$npm_package_version",
     "test": "npm run tests-only",
-    "tests-only": "npm run mocha --silent test",
+    "tests-only": "nyc npm run mocha --silent test",
     "version:major": "npm --no-git-tag-version version major",
     "version:minor": "npm --no-git-tag-version version minor",
     "version:patch": "npm --no-git-tag-version version patch"
@@ -77,6 +77,7 @@
     "jsdom": "^14.1.0",
     "jsdom-global": "3.0.2",
     "mocha": "^5.2.0",
+    "nyc": "^14.1.1",
     "react": "^16.8.6",
     "react-dom": "^16.14.0",
     "react-test-renderer": "^16.14.0",
