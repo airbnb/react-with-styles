@@ -1,7 +1,9 @@
+**Maintenance Mode:** This project is currently in maintenance mode and will eventually be archived. [More info](https://medium.com/airbnb-engineering/airbnbs-trip-to-linaria-dc169230bd12)
+
+---
+
 # react-with-styles <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
 
-[![dependency status][deps-svg]][deps-url]
-[![dev dependency status][dev-deps-svg]][dev-deps-url]
 [![License][license-image]][license-url]
 [![Downloads][downloads-image]][downloads-url]
 
@@ -542,10 +544,6 @@ export default withRouter(withStyles(({ color, unit }) => ({
 
 [package-url]: https://npmjs.org/package/react-with-styles
 [npm-version-svg]: http://versionbadg.es/airbnb/react-with-styles.svg
-[deps-svg]: https://david-dm.org/airbnb/react-with-styles.svg
-[deps-url]: https://david-dm.org/airbnb/react-with-styles
-[dev-deps-svg]: https://david-dm.org/airbnb/react-with-styles/dev-status.svg
-[dev-deps-url]: https://david-dm.org/airbnb/react-with-styles#info=devDependencies
 [npm-badge-png]: https://nodei.co/npm/react-with-styles.png?downloads=true&stars=true
 [license-image]: http://img.shields.io/npm/l/react-with-styles.svg
 [license-url]: LICENSE
