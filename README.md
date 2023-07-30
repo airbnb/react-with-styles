@@ -68,7 +68,7 @@ Function | Description
 
 As of version `4.0.0`, registering the theme and interface can be accomplished through [React context](https://reactjs.org/docs/context.html), and is the recommended way of registering the theme, interface, and direction.
 
-For example, if your theme is exported by `MyTheme.js`, and you want to use Aphrodite through the `react-with-styles-interface-aphrodite` insterface, wrap your application with the `WithStylesContext.Provider` to provide `withStyles` with that interface and theme:
+For example, if your theme is exported by `MyTheme.js`, and you want to use Aphrodite through the `react-with-styles-interface-aphrodite` interface, wrap your application with the `WithStylesContext.Provider` to provide `withStyles` with that interface and theme:
 
 ```jsx
 import React from 'react';
