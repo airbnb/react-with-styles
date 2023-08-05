@@ -1,17 +1,40 @@
 {
   "extends": [
     "airbnb",
-    "airbnb/hooks"
+    "airbnb/hooks",
   ],
 
   "rules": {
-    "react/jsx-props-no-spreading": "off",
+    "arrow-parens": "off",
     "react/forbid-foreign-prop-types": "off",
-    "arrow-parens": "off"
+    "react/jsx-no-constructed-context-values": "off",
+    "react/jsx-props-no-spreading": "off",
   },
 
   "env": {
     "browser": true,
-    "node": true
-  }
+    "node": true,
+  },
+
+  "overrides": [
+    {
+      "extends": "airbnb",
+      "files": "test/**/*",
+      "env": {
+        "mocha": true
+      },
+      "rules": {
+        "arrow-parens": "off",
+        "import/no-extraneous-dependencies": [2, {
+          "devDependencies": true,
+        }],
+        "react/forbid-foreign-prop-types": "off",
+        "react/function-component-definition": "off",
+        "react/jsx-no-constructed-context-values": "off",
+        "react/jsx-props-no-spreading": "off",
+        "react/no-unused-prop-types": "warn",
+        "react/prop-types": "warn",
+      }
+    },
+  ],
 }
