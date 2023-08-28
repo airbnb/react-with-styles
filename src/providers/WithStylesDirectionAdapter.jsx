@@ -22,12 +22,27 @@ const defaultProps = {
 // We need this to be a component to use `Component.contextType`
 // eslint-disable-next-line react/prefer-stateless-function
 class WithStylesDirectionAdapter extends React.Component {
+  constructor(props) {
+    super(props);
+    this.cachedContext = undefined;
+  }
+  
   render() {
     const { direction, children } = this.props;
     const { stylesInterface, stylesTheme } = this.context;
-
+    let contextValue = { stylesInterface, stylesTheme, direction };
+    if (this.cachedContext) {
+      const { cachedStylesInterface, cachedStylesTheme, cachedDirection } = this.cachedContext;
+      if (cachedStylesInterface === stylesInterface &&
+          cachedStylesTheme === stylesTheme &&
+          cachedDirection === direction) {
+        contextValue = this.cachedContext;
+      }
+    }
+    this.cachedContext = contextValue;
+        
     return (
-      <WithStylesContext.Provider value={{ stylesInterface, stylesTheme, direction }}>
+      <WithStylesContext.Provider value={contextValue}>
         {children}
       </WithStylesContext.Provider>
     );
