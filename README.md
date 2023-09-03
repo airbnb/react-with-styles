@@ -538,6 +538,35 @@ export default withRouter(withStyles(({ color, unit }) => ({
 
 ---
 
+### Using the value of a prop / high cardinality
+
+To include styles that use the value of a prop (or any other styles that have a high cardinality and shouldn't be in a themed stylesheet), you can use inline styles in conjunction with `withstyles()`. 
+
+```jsx
+function MyComponent({ bold, padding, styles }) {
+  const {
+    backgroundImageUrl,
+  } = this.props;
+  
+  return (
+    <div 
+      {...css(
+        styles.container, 
+        { backgroundImage: `url(${backgroundImageUrl})` }
+      )}
+    >
+      Try to be a rainbow in{' '}
+      <a
+        href="/somewhere"
+        {...css(styles.link, bold && styles.link_bold)}
+      >
+        someone's cloud
+      </a>
+    </div>
+  );
+}
+```
+
 ## In the wild
 
 [Organizations and projects using `react-with-styles`](INTHEWILD.md).
